@@ -1,0 +1,1 @@
+import n from"./C4DmZ2ME.js";function i(){i.warned||(i.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/swift" instead of "highlight.js/lib/languages/swift.js"'))}i();export{n as default};

@@ -1,0 +1,1 @@
+import n from"./C7Z183xh.js";function e(){e.warned||(e.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/1c" instead of "highlight.js/lib/languages/1c.js"'))}e();export{n as default};

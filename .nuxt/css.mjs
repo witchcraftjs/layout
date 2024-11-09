@@ -1,0 +1,1 @@
+import "/home/alan/code/nuxtapps/node_modules/.pnpm/tailwindcss@3.4.14_ts-node@10.9.2_@swc+core@1.7.42_@swc+helpers@0.5.13__@types+node@22.8.7_typescript@5.5.4_/node_modules/tailwindcss/tailwind.css";

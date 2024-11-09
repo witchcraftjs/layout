@@ -1,0 +1,9 @@
+import{d as x,r as m,a7 as v,e as A,t,v as g,z as c,A as f,a9 as k,aa as E,S as i,U as M,V as T,af as q,R as N,ag as w,x as u,ah as b,Q as _,Z as z,ai as I,aj as B,ak as R}from"./Cr7bJNLf.js";import{_ as C,N as S}from"./B1l52TQG.js";import"./C8y7k1hF.js";const U=["id"],G=x({name:"lib-notifications",inheritAttrs:!1,__name:"LibNotifications",props:{id:{},handler:{}},setup(L){const s=L,l=m(null),o=m(!1),r=v([]),a=v([]),V=()=>{o.value||R(()=>{l.value.showModal(),o.value=!0})},$=()=>{o.value&&a.length===0&&(l.value.close(),o.value=!1)},p=e=>{e.resolution===void 0&&(e.requiresAction?(a.push(e),V(),e.promise.then(()=>{B(a,e),$()})):(r.splice(0,0,e),e.promise.then(()=>{B(r,e)})))},h=(e,n)=>{n==="added"&&p(e)};s.handler.addNotificationListener(h);for(const e of s.handler.queue)p(e);return A(()=>{s.handler.removeNotificationListener(h)}),(e,n)=>(t(),g(k,null,[c(q,M({name:"list",tag:"div",class:i(T)(`notifications
+			fixed
+			z-50
+			inset-y-0 right-0
+			w-1/3
+			min-w-[300px]
+			pointer-events-none
+			overflow-hidden
+		`,e.$attrs.class)},{...e.$attrs,class:void 0}),{default:f(()=>[(t(!0),g(k,null,E(i(r),d=>(t(),_(C,{class:"pointer-events-auto",handler:e.handler,tabindex:"0",notification:d,key:d.id},null,8,["handler","notification"]))),128))]),_:1},16,["class"]),c(b,null,{default:f(()=>[N(u("div",null,null,512),[[w,i(a).length>0]])]),_:1}),c(b,null,{default:f(()=>[N(u("dialog",{id:e.id,class:"modal bg-transparent p-0 backdrop:bg-black/50 backdrop:p-5",ref_key:"dialogEl",ref:l,onClick:n[0]||(n[0]=I(d=>i(S).dismiss(i(a)[0]),["self","prevent"]))},[u("form",null,[i(a).length>0?(t(),_(C,{key:0,handler:e.handler,class:"top-notification",notification:i(a)[0],ref:"topNotificationComp"},null,8,["handler","notification"])):z("",!0)])],8,U),[[w,i(a).length>0]])]),_:1})],64))}});export{G as default};

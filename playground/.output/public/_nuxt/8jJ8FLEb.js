@@ -1,0 +1,1 @@
+import n from"./cM2r36SR.js";function i(){i.warned||(i.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/isbl" instead of "highlight.js/lib/languages/isbl.js"'))}i();export{n as default};

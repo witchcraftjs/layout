@@ -1,0 +1,1 @@
+import i from"./BxzW-F5E.js";function s(){s.warned||(s.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/scss" instead of "highlight.js/lib/languages/scss.js"'))}s();export{i as default};

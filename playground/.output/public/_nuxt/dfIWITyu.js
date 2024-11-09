@@ -1,0 +1,1 @@
+import n from"./BiL0olPs.js";function i(){i.warned||(i.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/lisp" instead of "highlight.js/lib/languages/lisp.js"'))}i();export{n as default};

@@ -1,0 +1,155 @@
+{
+	"name": "@witchcraft/layout",
+	"description": "Headless layout manager.",
+	"version": "0.0.0",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./dist/runtime/index.d.ts",
+			"import": "./dist/runtime/index.js"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"import": "./dist/*"
+		},
+		"./components": {
+			"types": "./dist/runtime/components/index.d.ts",
+			"import": "./dist/runtime/components/index.js"
+		},
+		"./components/*": {
+			"types": "./dist/runtime/components/*/*.vue.d.ts",
+			"import": "./dist/runtime/components/*/*.vue"
+		},
+		"./composables/*": {
+			"types": "./dist/runtime/composables/*",
+			"import": "./dist/runtime/composables/*"
+		},
+		"./composables": {
+			"types": "./dist/runtime/composables/index.d.ts",
+			"import": "./dist/runtime/composables/index.js"
+		},
+		"./nuxt": {
+			"import": "./dist/module.mjs",
+			"require": "./dist/module.cjs"
+		}
+	},
+	"scripts": {
+		"//prepare": "echo Needed so that if we pull the package from git it will get built and installed properly.",
+		"prepare": "husky && pnpm build",
+		"build": "nuxt-module-build prepare && nuxt-module-build build && nuxi build playground",
+		"dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
+		"dev:playground": "nuxi dev playground",
+		"//dev:vite": "check everything is working when using vite",
+		"dev:vite": "vite --mode development --config vite.dev.config.ts",
+		"//dev": "The module needs to be build, not stubbed, for vite's dev to work.",
+		"dev": "concurrently \"pnpm build:watch\" \"pnpm dev:vite\"",
+		"lint:eslint": "eslint \"{src,tests,bin}/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=0 --report-unused-disable-directives",
+		"lint:commits": "commitlint --from $(git rev-list --max-parents=0 HEAD) --to HEAD --verbose",
+		"lint:imports": "madge --circular --extensions ts ./src",
+		"lint": "pnpm lint:imports && pnpm lint:eslint",
+		"coverage": "vitest --coverage",
+		"coverage:dev": "vitest --watch --coverage",
+		"test": "pnpm test:types && vitest",
+		"test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
+		"test:watch": "vitest --watch",
+		"doc": "typedoc --options typedoc.config.cjs",
+		"doc:watch": "onchange -i \"src/**/*.ts\" \"typedoc.config.cjs\" -- pnpm doc",
+		"doc:serve": "http-server docs --port=5001",
+		"doc:dev": "concurrently \"pnpm doc:watch\" \"pnpm doc:serve\"",
+		"doc:check-invalid": "typedoc --options typedoc.config.cjs --listInvalidSymbolLinks",
+		"actions:debug": "act -r -v -j release",
+		"gen:exports": "indexit update --ignore **/*.d.ts **.vue src/assets/** -o '${path}.js'"
+	},
+	"dependencies": {
+		"@alanscodelog/utils": "^4.1.0"
+	},
+	"peerDependencies": {
+		"@witchcraft/ui": "^0.0.0",
+		"@witchcraft/nuxt-utils": "^0.0.0",
+		"@nuxtjs/tailwindcss": "^6.12.1"
+	},
+	"peerDependenciesMeta": {
+		"@witchcraft/ui": {
+			"optional": true
+		},
+		"@witchcraft/nuxt-utils": {
+			"optional": true
+		},
+		"@nuxtjs/tailwindcss": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@witchcraft/ui": "^0.0.0",
+		"@witchcraft/nuxt-utils": "^0.0.0",
+		"@nuxt/kit": "^3.11.2",
+		"@nuxt/schema": "^3.11.2",
+		"@nuxt/types": "^2.17.3",
+		"@alanscodelog/commitlint-config": "^3.0.1",
+		"@alanscodelog/eslint-config": "^5.0.0",
+		"@alanscodelog/semantic-release-config": "^4.1.2",
+		"@alanscodelog/tsconfigs": "^5.0.0",
+		"@alanscodelog/vite-config": "^0.0.5",
+		"@commitlint/cli": "^19.3.0",
+		"@types/node": "^20.12.12",
+		"@vitest/coverage-c8": "^0.33.0",
+		"concurrently": "^8.2.2",
+		"cross-env": "^7.0.3",
+		"fast-glob": "^3.3.2",
+		"http-server": "^14.1.1",
+		"husky": "^9.0.11",
+		"indexit": "2.1.0-beta.3",
+		"@vitejs/plugin-vue": "^5.0.4",
+		"madge": "^7.0.0",
+		"onchange": "^7.1.0",
+		"semantic-release": "^23.1.1",
+		"typedoc": "0.26.0-beta.1",
+		"typescript": "^5.4.5",
+		"vite": "^5.2.12",
+		"vue": "^3.4.27",
+		"zod": "^3.23.8",
+		"uuid": "^10.0.0"
+	},
+	"author": "Alan <alanscodelog@gmail.com>",
+	"repository": "https://github.com/alanscodelog/TOREPONAME",
+	"license": "MIT",
+	"files": [
+		"src",
+		"dist"
+	],
+	"release": {
+		"extends": [
+			"@alanscodelog/semantic-release-config"
+		]
+	},
+	"commitlint": {
+		"extends": [
+			"@alanscodelog"
+		]
+	},
+	"madge": {
+		"detectiveOptions": {
+			"ts": {
+			"skipTypeImports": true
+			}
+		}
+	},
+	"browserslist": "defaults and supports es6-module,maintained node versions",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"@comments": {
+		"scripts": {
+			"test:inspect-errors": "For use with my inspect_error utility function from @alanscodelog/utils",
+			"prepare": "Needed so that if we pull the package from git it will get built and installed properly.",
+			"actions:debug": "For debugging github build action locally with nektos/act. Requires act and docker. Note: Cache will never work locally because of https://github.com/nektos/act/issues/285"
+		}
+	},
+	"TOCONFIGURE (for scoped packages) publishConfig": {
+		"access": "public"
+	},
+	"private": true
+}

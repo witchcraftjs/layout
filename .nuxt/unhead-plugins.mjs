@@ -1,0 +1,2 @@
+import { CapoPlugin } from "/home/alan/code/nuxtapps/node_modules/.pnpm/@unhead+vue@1.11.10_vue@3.5.12_typescript@5.5.4_/node_modules/@unhead/vue/dist/index.mjs";
+export default import.meta.server ? [CapoPlugin({ track: true })] : [];

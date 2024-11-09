@@ -1,0 +1,1 @@
+import{d as e,t,v as o,y as s,_ as n}from"./Cr7bJNLf.js";const r={tabindex:"0"},_=e({name:"aria",__name:"Aria",props:{value:{}},setup(c){return(a,p)=>(t(),o("div",r,s(a.value),1))}}),d=n(_,[["__scopeId","data-v-96b978dc"]]);export{d as default};

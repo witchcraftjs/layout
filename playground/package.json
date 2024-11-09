@@ -1,0 +1,16 @@
+{
+	"private": true,
+	"name": "@witchcraft/ui-playground",
+	"type": "module",
+	"scripts": {
+		"dev": "nuxi dev",
+		"build": "nuxi build",
+		"generate": "nuxi generate"
+	},
+	"dependencies": {
+		"@witchcraft/ui": "^0.0.0",
+		"@witchcraft/layout": "^0.0.0",
+		"@nuxtjs/tailwindcss": "^6.12.0",
+		"nuxt": "^3.13.2"
+	}
+}

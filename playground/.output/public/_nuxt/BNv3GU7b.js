@@ -1,0 +1,1 @@
+import n from"./C2Kz6oUw.js";function e(){e.warned||(e.warned=!0,console.log('Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/php-template" instead of "highlight.js/lib/languages/php-template.js"'))}e();export{n as default};

@@ -1,0 +1,39 @@
+import{d as _,ar as B,N as C,r as c,F as S,t as n,Q as O,A as d,v as f,x as i,z as b,W as m,ah as p,U as H,S as h,V as T,Z as u,at as W,y as v}from"./Cr7bJNLf.js";const V=["id","data-value","title"],$={class:"label-wrapper relative flex-1"},x=["for"],z={class:"truncate"},N={key:0,class:"contrast-label pointer-events-none absolute inset-0 flex justify-center transition-all duration-500 [clip-path:inset(0_0_0_var(--progress))] dark:hidden"},D={class:"truncate"},M=_({name:"lib-progress-bar",inheritAttrs:!1,__name:"LibProgressBar",props:B({id:{},disabled:{type:Boolean},readonly:{type:Boolean},border:{type:Boolean},unstyle:{type:Boolean},label:{},progress:{},autohideOnComplete:{},keepSpaceWhenHidden:{type:Boolean},clamp:{}},{autohideOnComplete:-1,keepSpaceWhenHidden:!1,clamp:()=>[0,100],...W}),setup(g){const y=(e,l,w)=>Math.min(Math.max(e,l),w),k=C(),a=g,s=c(!1),t=c(!1);let o,r;return a.autohideOnComplete>-1&&(a.progress>=100||a.progress<0)&&(a.keepSpaceWhenHidden?(s.value=!1,t.value=!0):(s.value=!0,t.value=!1)),S([()=>a.progress,()=>a.keepSpaceWhenHidden,()=>a.autohideOnComplete],()=>{if(a.autohideOnComplete>-1&&(a.progress>=100||a.progress<0))if(a.keepSpaceWhenHidden){if(r===1)return;clearTimeout(o),r=1,o=setTimeout(()=>{r=0,s.value=!1,t.value=!0},a.autohideOnComplete)}else{if(r===2)return;clearTimeout(o),r=2,o=setTimeout(()=>{r=0,s.value=!0,t.value=!1},a.autohideOnComplete)}else clearTimeout(o),s.value=!1,t.value=!1},{immediate:!1}),(e,l)=>(n(),O(p,null,{default:d(()=>[s.value?u("",!0):(n(),f("div",H({key:0,id:e.id??h(k),class:h(T)(`
+			w-[200px]
+			whitespace-nowrap
+			overflow-x-scroll
+			scrollbar-hidden
+			rounded
+			flex
+			text-fg
+			relative
+			before:content-['']
+			text-sm
+			min-w-[50px]
+			after:shadow-inner
+			after:shadow-black/50
+			after:content-['']
+			after:absolute
+			after:inset-0
+			after:pointer-events-none
+			after:z-2
+			after:transition-all
+			before:shadow-inner
+			before:shadow-black/50
+			before:rounded
+			before:bg-bars-gradient
+			before:bars-bg-accent-700
+			before:bars-fg-accent-800
+			before:bars-angle-[-45deg]
+			before:animate-[slide_10s_linear_infinite]
+			before:[background-size:15px_15px]
+			before:absolute
+			before:w-[var(--progress)]
+			before:top-0 before:bottom-0 before:left-0
+			before:transition-all
+			before:z-1
+			before:duration-500
+		`,t.value&&`
+			after:opacity-0
+			before:opacity-0
+		`,e.$attrs.class),"data-value":e.progress,title:e.label},{...e.$attrs,class:void 0},{style:`--progress: ${y(e.progress,e.clamp[0]??0,e.clamp[1]??100)}%;`}),[i("div",$,[l[0]||(l[0]=i("span",{class:"before:content-vertical-holder"},null,-1)),b(p,null,{default:d(()=>[m(e.$slots,"default",{},()=>[t.value?u("",!0):(n(),f("label",{key:0,for:e.id,class:"text-bg absolute inset-0 flex justify-center"},[i("div",z,v(e.label??""),1)],8,x))])]),_:3}),b(p,null,{default:d(()=>[m(e.$slots,"default",{},()=>[t.value?u("",!0):(n(),f("label",N,[i("div",D,v(e.label??""),1)]))])]),_:3})])],16,V))]),_:3}))}});export{M as default};
