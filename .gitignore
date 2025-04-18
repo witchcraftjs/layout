@@ -1,0 +1,25 @@
+.vscode
+node_modules
+playground/node_modules
+*.log*
+
+dist
+.nuxt
+.output
+.data
+.build-*
+docs
+
+.env
+
+# Testing
+reports
+coverage
+*.lcov
+.nyc_output
+
+worktree*/**/*
+
+todo.md
+
+components.d.ts

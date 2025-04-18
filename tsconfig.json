@@ -1,0 +1,27 @@
+// https://www.typescriptlang.org/tsconfig/
+{
+	// ./node_modules/@alanscodelog/tsconfigs/tsconfig.json
+	// https://github.com/AlansCodeLog/tsconfigs
+	"extends": "@alanscodelog/tsconfigs",
+	"compilerOptions": {
+		"outDir": "dist",
+		// "types": [
+		/* "node" */
+		// ],
+		"lib": [
+			"dom",
+			"esnext"
+		]
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.js",
+		"src/**/*.vue",
+		"demo/**/*.ts",
+		"demo/**/*.vue",
+		"tests/**/*.ts",
+	],
+	"exclude": [
+		"src/runtime/demo/main.ts"
+	]
+}

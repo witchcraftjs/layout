@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+echo "Running pre-push hook"
+
+npm run build && npm run lint && npm run test
+npm run lint:commits

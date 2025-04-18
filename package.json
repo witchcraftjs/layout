@@ -1,0 +1,153 @@
+{
+	"name": "@witchcraft/layout",
+	"description": "Headless layout manager.",
+	"version": "0.0.0-private.0",
+	"main": "./dist/runtime/index.js",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./dist/runtime/index.d.ts",
+			"import": "./dist/runtime/index.js"
+		},
+		"./components/*": {
+			"types": "./dist/runtime/components/*.vue.d.ts",
+			"import": "./dist/runtime/components/*.vue"
+		},
+		"./types": {
+			"types": "./dist/runtime/types/index.d.ts",
+			"import": "./dist/runtime/types/index.js"
+		},
+		"./*": {
+			"types": "./dist/runtime/*.d.ts",
+			"import": "./dist/runtime/*.js"
+		},
+		"./nuxt": {
+			"types": "./dist/types.d.mts",
+			"import": "./dist/module.mjs"
+		}
+	},
+	"scripts": {
+		"//prepare": "echo Needed so that if we pull the package from git it will get built and installed properly.",
+		"prepare": "husky && cd playground && pnpm i",
+		"build": "nuxt-module-build prepare && nuxt-module-build build && nuxi generate playground",
+		"build:only": "nuxt-module-build build",
+		"dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
+		"dev:playground": "nuxi dev playground",
+		"//dev:vite": "check everything is working when using vite",
+		"dev:vite": "vite --mode development --config vite.dev.config.ts",
+		"//dev": "The module needs to be build, not stubbed, for vite's dev to work.",
+		"dev": "pnpm dev:vite",
+		"lint:eslint": "eslint \"{src,tests,bin}/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=3 --report-unused-disable-directives",
+		"lint:commits": "commitlint --from-last-tag --to HEAD --verbose",
+		"lint:imports": "echo disabled madge --circular --extensions ts ./src",
+		"lint": "pnpm lint:imports && pnpm lint:eslint && pnpm lint:types",
+		"lint:types": "vue-tsc --noEmit",
+		"coverage": "vitest --coverage",
+		"coverage:dev": "vitest --watch --coverage",
+		"test": "echo no tests yet",
+		"test:watch": "vitest --watch",
+		"doc": "typedoc --options typedoc.config.js",
+		"doc:watch": "onchange -i \"src/**/*.ts\" \"typedoc.config.cjs\" -- pnpm doc",
+		"doc:serve": "http-server docs --port=5001",
+		"doc:dev": "concurrently \"pnpm doc:watch\" \"pnpm doc:serve\"",
+		"doc:check-invalid": "typedoc --options typedoc.config.cjs --listInvalidSymbolLinks",
+		"actions:debug": "act -r -v -j release",
+		"gen:exports": "indexit update --ignore **/*.d.ts **.vue src/assets/** -o '${path}.js'"
+	},
+	"dependencies": {
+		"@alanscodelog/utils": "^6.0.1",
+		"@iconify/json": "^2.2.383",
+		"es-toolkit": "^1.39.10"
+	},
+	"peerDependencies": {
+		"@witchcraft/nuxt-utils": "^0.2.1",
+		"@witchcraft/ui": "^0.2.1"
+	},
+	"peerDependenciesMeta": {
+		"@witchcraft/ui": {
+			"optional": true
+		},
+		"@witchcraft/nuxt-utils": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@alanscodelog/commitlint-config": "^3.1.2",
+		"@alanscodelog/eslint-config": "^6.3.0",
+		"@alanscodelog/semantic-release-config": "^5.0.4",
+		"@alanscodelog/tsconfigs": "^6.2.0",
+		"@alanscodelog/vite-config": "^0.0.6",
+		"@commitlint/cli": "^19.8.1",
+		"@nuxt/eslint-config": "^1.9.0",
+		"@nuxt/kit": "^4.1.2",
+		"@nuxt/module-builder": "^1.0.2",
+		"@nuxt/schema": "^4.1.2",
+		"@nuxt/types": "^2.18.1",
+		"@tailwindcss/vite": "^4.1.12",
+		"@types/node": "^24.3.3",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"@vitest/coverage-c8": "^0.33.0",
+		"@witchcraft/nuxt-utils": "^0.3.2",
+		"@witchcraft/ui": "^0.2.1",
+		"concurrently": "^9.2.1",
+		"cross-env": "^10.0.0",
+		"fast-glob": "^3.3.3",
+		"http-server": "^14.1.1",
+		"husky": "^9.1.7",
+		"indexit": "2.1.0-beta.3",
+		"madge": "^8.0.0",
+		"nuxt": "^4.1.2",
+		"onchange": "^7.1.0",
+		"semantic-release": "^24.2.8",
+		"tailwindcss": "^4.1.12",
+		"typedoc": "0.28.12",
+		"typescript": "^5.8.3",
+		"unplugin-icons": "^22.3.0",
+		"unplugin-vue-components": "^29.0.0",
+		"uuid": "^13.0.0",
+		"vite": "^7.1.5",
+		"vitest": "^3.2.4",
+		"vue": "^3.5.20",
+		"vue-tsc": "^2.2.12",
+		"zod": "^4.1.8"
+	},
+	"author": "Alan <alanscodelog@gmail.com>",
+	"repository": "https://github.com/witchcraftjs/layout",
+	"license": "MIT",
+	"files": [
+		"src",
+		"dist"
+	],
+	"release": {
+		"extends": [
+			"@alanscodelog/semantic-release-config"
+		]
+	},
+	"commitlint": {
+		"extends": [
+			"@alanscodelog"
+		]
+	},
+	"madge": {
+		"detectiveOptions": {
+			"ts": {
+				"skipTypeImports": true
+			}
+		}
+	},
+	"browserslist": "defaults and supports es6-module,maintained node versions",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"@comments": {
+		"scripts": {
+			"test:inspect-errors": "For use with my inspect_error utility function from @alanscodelog/utils",
+			"prepare": "Needed so that if we pull the package from git it will get built and installed properly.",
+			"actions:debug": "For debugging github build action locally with nektos/act. Requires act and docker. Note: Cache will never work locally because of https://github.com/nektos/act/issues/285"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
