@@ -1,0 +1,1 @@
+import{t as r}from"./CudCRF6p.js";import{I as a,v as o,x as n,P as c,O as l,N as s}from"./9MspHWnN.js";const u=Object.assign({name:"Icon",inheritAttrs:!1},{__name:"WIcon",props:{},setup(i){const e=a();return(t,p)=>(n(),o("div",l({class:s(r)("icon inline-block",s(e)?.class)},{...s(e),class:void 0}),[c(t.$slots,"default")],16))}});export{u as default};

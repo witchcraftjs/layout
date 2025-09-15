@@ -1,0 +1,1 @@
+import{r as c,a4 as t}from"./9MspHWnN.js";const i=Symbol("witchcraftUiLanguageLocale"),u=Symbol("witchcraftUiTimeLocale");function L(){const e=c("en"),a=c("en-GB");function n(o){e.value=o}function l(o){a.value=o}return t(i,e),t(u,a),{languageLocale:e,timeLocale:a,setLanguageLocale:n,setTimeLocale:l}}export{i as l,u as t,L as u};
