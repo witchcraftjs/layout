@@ -47,11 +47,11 @@
 		"coverage:dev": "vitest --watch --coverage",
 		"test": "echo no tests yet",
 		"test:watch": "vitest --watch",
-		"doc": "typedoc --options typedoc.config.js",
-		"doc:watch": "onchange -i \"src/**/*.ts\" \"typedoc.config.cjs\" -- pnpm doc",
+		"doc": "typedoc",
+		"doc:watch": "onchange -i \"src/**/*.ts\" \"typedoc.config.js\" -- pnpm doc",
 		"doc:serve": "http-server docs --port=5001",
 		"doc:dev": "concurrently \"pnpm doc:watch\" \"pnpm doc:serve\"",
-		"doc:check-invalid": "typedoc --options typedoc.config.cjs --listInvalidSymbolLinks",
+		"doc:check-invalid": "typedoc --listInvalidSymbolLinks",
 		"actions:debug": "act -r -v -j release",
 		"gen:exports": "indexit update --ignore **/*.d.ts **.vue src/assets/** -o '${path}.js'"
 	},
@@ -62,7 +62,7 @@
 	},
 	"peerDependencies": {
 		"@witchcraft/nuxt-utils": "^0.2.1",
-		"@witchcraft/ui": "^0.2.1"
+		"@witchcraft/ui": "^0.3.0"
 	},
 	"peerDependenciesMeta": {
 		"@witchcraft/ui": {
@@ -89,7 +89,7 @@
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vitest/coverage-c8": "^0.33.0",
 		"@witchcraft/nuxt-utils": "^0.3.2",
-		"@witchcraft/ui": "^0.2.1",
+		"@witchcraft/ui": "^0.3.0",
 		"concurrently": "^9.2.1",
 		"cross-env": "^10.0.0",
 		"fast-glob": "^3.3.3",
