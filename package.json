@@ -41,7 +41,7 @@
 		"lint:eslint": "eslint \"{src,tests,bin}/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=3 --report-unused-disable-directives",
 		"lint:commits": "commitlint --from-last-tag --to HEAD --verbose",
 		"lint:imports": "echo disabled madge --circular --extensions ts ./src",
-		"lint": "pnpm lint:imports && pnpm lint:eslint && pnpm lint:types",
+		"lint": "pnpm lint:eslint && pnpm lint:types && pnpm lint:commits && pnpm lint:imports",
 		"lint:types": "vue-tsc --noEmit",
 		"coverage": "vitest --coverage",
 		"coverage:dev": "vitest --watch --coverage",
