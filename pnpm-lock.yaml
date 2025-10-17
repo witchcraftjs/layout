@@ -58,11 +58,11 @@ catalogs:
       specifier: ^0.33.0
       version: 0.33.0
     '@witchcraft/nuxt-utils':
-      specifier: ^0.3.2
-      version: 0.3.2
+      specifier: ^0.3.6
+      version: 0.3.6
     '@witchcraft/ui':
-      specifier: ^0.3.2
-      version: 0.3.2
+      specifier: ^0.3.7
+      version: 0.3.7
     concurrently:
       specifier: ^9.2.1
       version: 9.2.1
@@ -196,10 +196,10 @@ importers:
         version: 0.33.0(vitest@3.2.4(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))
       '@witchcraft/nuxt-utils':
         specifier: 'catalog:'
-        version: 0.3.2(magicast@0.3.5)
+        version: 0.3.6(magicast@0.3.5)
       '@witchcraft/ui':
         specifier: 'catalog:'
-        version: 0.3.2(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))
+        version: 0.3.7(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))
       concurrently:
         specifier: 'catalog:'
         version: 9.2.1
@@ -274,7 +274,7 @@ importers:
         version: link:..
       '@witchcraft/ui':
         specifier: 'catalog:'
-        version: 0.3.2(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))
+        version: 0.3.7(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))
       nuxt:
         specifier: 'catalog:'
         version: 4.1.2(@parcel/watcher@2.5.1)(@types/node@24.3.3)(@vue/compiler-sfc@3.5.21)(db0@0.3.2)(eslint@9.35.0(jiti@2.5.1))(ioredis@5.7.0)(lightningcss@1.30.1)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.50.1)(terser@5.44.0)(typescript@5.9.2)(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue-tsc@2.2.12(typescript@5.9.2))(yaml@2.8.1)
@@ -2303,21 +2303,17 @@ packages:
   '@vueuse/shared@12.8.2':
     resolution: {integrity: sha512-dznP38YzxZoNloI0qpEfpkms8knDtaoQ6Y/sfS0L7Yki4zh40LFHEhur0odJC6xTHG5dxWVPiUWBXn+wCG2s5w==}
 
-  '@witchcraft/nuxt-utils@0.2.1':
-    resolution: {integrity: sha512-+brq+kH9WVNVRKJ4tMyAmXTpTI4m1eGuRCp1fxlb2ATF5D+1vwO9BXkO/b1QGCiuBrgmva0tnqEdxCTPP3l0jA==}
+  '@witchcraft/nuxt-utils@0.3.6':
+    resolution: {integrity: sha512-+TrBV1r7/4XSjihwVy6NzLS8PBNTxkQhMDLGP5Y2NXq7bU6PW4crSHD2k/2sqU64EKtEwNGCmO1oN9DIQLLn7A==}
     engines: {node: '>=20.0.0'}
 
-  '@witchcraft/nuxt-utils@0.3.2':
-    resolution: {integrity: sha512-aBFT2GiUKyAiytVYeXbOllrZJJ2fUvbD5lGVBP2SYyL0LK9sFJj0H3m80UyBGXOLA4m5g51vsvfrDWWt2F3vtQ==}
-    engines: {node: '>=20.0.0'}
-
-  '@witchcraft/ui@0.3.2':
-    resolution: {integrity: sha512-FwELto8fAiw222+nDQuSobZhraCv1/gPPzkO01PYGAjzdF5GWOXWJsXeiprpNfydoutnDAjZNgCJrIIV/V+qPQ==}
+  '@witchcraft/ui@0.3.7':
+    resolution: {integrity: sha512-3/okQbxIwD1F9nal7vpPsWqPXW+ZkJI5C2dAudbvDcH4N+OkFkWKphJk6qrgqZcDY/GYZVqvh8voYVwq6eGkdA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       tailwindcss: ^4.1.12
-      unplugin-icons: ^22.1.0
-      vue: ^3.2.47
+      unplugin-icons: ^22.2.0
+      vue: ^3.5.20
     peerDependenciesMeta:
       tailwindcss:
         optional: true
@@ -9219,7 +9215,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@witchcraft/nuxt-utils@0.2.1(magicast@0.3.5)':
+  '@witchcraft/nuxt-utils@0.3.6(magicast@0.3.5)':
     dependencies:
       '@alanscodelog/utils': 6.0.1
       '@nuxt/kit': 4.1.2(magicast@0.3.5)
@@ -9229,17 +9225,7 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@witchcraft/nuxt-utils@0.3.2(magicast@0.3.5)':
-    dependencies:
-      '@alanscodelog/utils': 6.0.1
-      '@nuxt/kit': 4.1.2(magicast@0.3.5)
-      change-case: 5.4.4
-      defu: 6.1.4
-      fast-glob: 3.3.3
-    transitivePeerDependencies:
-      - magicast
-
-  '@witchcraft/ui@0.3.2(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))':
+  '@witchcraft/ui@0.3.7(@babel/parser@7.28.4)(magicast@0.3.5)(tailwindcss@4.1.13)(typescript@5.9.2)(unplugin-icons@22.3.0(@vue/compiler-sfc@3.5.21))(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(vue@3.5.21(typescript@5.9.2))':
     dependencies:
       '@alanscodelog/utils': 6.0.1
       '@iconify/json': 2.2.383
@@ -9247,7 +9233,7 @@ snapshots:
       '@nuxt/schema': 4.1.2
       '@nuxt/types': 2.18.1
       '@tailwindcss/vite': 4.1.13(vite@7.1.5(@types/node@24.3.3)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))
-      '@witchcraft/nuxt-utils': 0.2.1(magicast@0.3.5)
+      '@witchcraft/nuxt-utils': 0.3.6(magicast@0.3.5)
       colord: 2.9.3
       colorjs.io: 0.6.0-alpha.1
       defu: 6.1.4
