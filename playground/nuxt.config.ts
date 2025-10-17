@@ -14,7 +14,5 @@ export default defineNuxtConfig({
 	modules: [
 		"@witchcraft/ui/nuxt",
 		"../src/module"
-		// the below also works, just remember to run the update-dep script and uncomment ../src/module above before attempting to use the file: linked module
-		// "@witchcraft/layout/nuxt",
 	],
 })
