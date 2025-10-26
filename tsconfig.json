@@ -2,9 +2,11 @@
 {
 	// ./node_modules/@alanscodelog/tsconfigs/tsconfig.json
 	// https://github.com/AlansCodeLog/tsconfigs
-	"extends": "@alanscodelog/tsconfigs",
+	"extends": [
+		"@alanscodelog/tsconfigs",
+		"./.nuxt/tsconfig.json"
+	],
 	"compilerOptions": {
-		"outDir": "dist",
 		// "types": [
 		/* "node" */
 		// ],
@@ -25,3 +27,4 @@
 		"src/runtime/demo/main.ts"
 	]
 }
+
