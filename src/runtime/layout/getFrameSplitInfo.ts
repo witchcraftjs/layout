@@ -18,7 +18,10 @@ export function getFrameSplitInfo(
 	dragPointOrPosition: Point | number | "midpoint" = "midpoint",
 	minSize: Size = getMarginSize(),
 	snapAmount: Point = getSnapPoint()
-) {
+): {
+	splitFrame: LayoutFrame
+	newFrame: LayoutFrame
+} | KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_FRAME_TOO_SMALL> {
 	frame = cloneFrame(frame)
 	let newFrame = { ...frame }
 	const isHorz = dir === "left" || dir === "right"
