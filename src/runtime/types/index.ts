@@ -113,7 +113,7 @@ export const zLayoutFrame = z.looseObject({
 	id: z.uuid()
 }).extend(zBaseSquare.shape)
 
-export const zLayoutFramePassthrough = zLayoutFrame.passthrough()
+export const zLayoutFrameLoose = zLayoutFrame.loose()
 
 export interface Register {
 }
@@ -135,8 +135,8 @@ const baseLayoutWindow = z.object({
 }).extend(zPxSize.shape)
 	.extend(zPxPos.shape)
 
-export const zLayoutWindow = baseLayoutWindow.strict()
-export const zLayoutWindowPassthrough = baseLayoutWindow
+export const zLayoutWindow = baseLayoutWindow
+export const zLayoutWindowLoose = baseLayoutWindow.loose()
 // types are re-declared so that if they are extended, the types are still correct
 
 export type BaseLayoutWindow = {
@@ -153,16 +153,16 @@ export type LayoutWindows = Record<string, LayoutWindow>
 
 const baseWorkspace = zLayoutWindow.pick({ activeFrame: true, frames: true })
 export const zWorkspace = baseWorkspace.strict()
-export const zWorkspacePassthrough = zWorkspace.passthrough()
+export const zWorkspaceLoose = zWorkspace.loose()
 
 export type Workspace = Pick<LayoutWindow, "activeFrame" | "frames"> & ExtendedWorkspace
 
-const baseLayout = z.looseObject({
+const baseLayout = z.object({
 	activeWindow: z.string().optional(),
 	windows: z.record(z.string(), zLayoutWindow)
 })
 
-export const zLayout = baseLayout.strict()
+export const zLayout = baseLayout
 
 export const zInitializedLayout = zLayout.required({
 	activeWindow: true
@@ -275,11 +275,11 @@ type AllErrorsInfo = {
 // todo rename to toOpposite
 export type HasOpposite = Direction | EdgeSide | ExtendedDirection | ExtendedEdgeSide | keyof Point | keyof Size
 
-export const zWindowCreate = zLayoutWindowPassthrough
+export const zWindowCreate = zLayoutWindowLoose
 	.partial({ id: true, pxWidth: true, pxHeight: true, pxX: true, pxY: true })
 	.extend({ frames: zLayoutWindow.shape.frames.optional() })
 
-export const zLayoutCreate = baseLayout
+export const zLayoutCreate = baseLayout.loose()
 	.extend({
 		windows: zLayout.shape.windows.optional()
 	})

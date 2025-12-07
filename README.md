@@ -42,22 +42,22 @@ export {}
 
 ```
 
-Or if using zod, you can do something like this. Note that you will need to create/extend `zLayoutWindow/Frame` or use `zLayoutWindow/FramePassthrough` to allow for extra properties. All zod types have been made `strict` where possible as it's easy to accidentally use the wrong type and loose properties silently otherwise. 
+Or if using zod, you can do something like this. Note that you will need to create/extend `zLayoutWindow/Frame` or use `zLayoutWindow/FrameLoose` to allow for extra properties. All zod types have been made `strict` where possible as it's easy to accidentally use the wrong type and loose properties silently otherwise. 
 
 ```ts
-import { zLayoutFramePassthrough, layoutCreate } from "@witchcraft/layout"
+import { zLayoutFrameLoose, layoutCreate } from "@witchcraft/layout"
 import { z } from "zod"
 
 // we remove the id to set the discriminated union, then add it back,
 // otherwise this doesn't work
 export const zAppFrame = z.discriminatedUnion("type", [
-	zLayoutFramePassthrough.extend({
+	zLayoutFrameLoose.extend({
 		type: z.literal("contentA"),
 		content: z.object({
 			id: z.optional(z.uuid()),
 		}),
 	}),
-	zLayoutFramePassthrough.extend({
+	zLayoutFrameLoose.extend({
 		type: z.literal("contentB"),
 		content: z.object({
 			someOtherKey: z.optional(z.uuid()),
