@@ -1,7 +1,7 @@
 {
 	"name": "@witchcraft/layout",
 	"description": "Headless layout manager.",
-	"version": "0.0.7",
+	"version": "0.1.0",
 	"main": "./dist/runtime/index.js",
 	"type": "module",
 	"sideEffects": false,
