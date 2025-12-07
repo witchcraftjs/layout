@@ -1,0 +1,4 @@
+import{t as s}from"./DeCVlzJk.js";import{g as r}from"./BpX0FRyY.js";import{I as i,v as o,x as n,Q as f,P as u,O as a}from"./DVXjeaI0.js";const c=["id","data-disabled","data-invalid","for"],g=Object.assign({name:"LibLabel"},{__name:"WLabel",props:{id:{type:String,required:!1,default:""},label:{type:String,required:!1},disabled:{type:Boolean,required:!1,default:!1},readonly:{type:Boolean,required:!1,default:!1},border:{type:Boolean,required:!1,default:!0},unstyle:{type:Boolean,required:!1,default:!1},unstyled:{type:Boolean,required:!1},valid:{type:Boolean,required:!1,default:!0}},setup(e){const t=r(),l=i();return(d,b)=>(n(),o("label",u({id:`label-${e.id??a(t)}`,class:!a(l).unstyle&&a(s)(`
+			pr-0
+			text-sm
+		`,!e.valid&&"text-danger-700",a(l)?.class),"data-disabled":e.disabled,"data-invalid":!e.valid,for:e.id},{...a(l),class:void 0}),[f(d.$slots,"default")],16,c))}});export{g as default};

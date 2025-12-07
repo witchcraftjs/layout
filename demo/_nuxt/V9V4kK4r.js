@@ -1,0 +1,1 @@
+import{s as o}from"./Bk2TiR2_.js";import{I as a,F as r,r as n,j as c}from"./DVXjeaI0.js";const i={__name:"WDevOnly",props:{show:{type:Boolean,required:!1,default:!1}},setup(e){a();const s=e,t=r(o,n(!1));return c(()=>s.show||t.value),(l,p)=>null}};export{i as default};

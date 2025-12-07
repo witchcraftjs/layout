@@ -1,0 +1,1 @@
+import{j as o,r as t,o as i}from"./DVXjeaI0.js";const b=(l,u)=>{const e=o(()=>l.id??u),a=t(!1),r=o(()=>({"aria-label":a.value?void 0:l.label,"aria-labelledby":a.value?`label-${e.value}`:void 0}));return i(()=>{e.value&&document.querySelector(`#label-${e.value}`)&&(a.value=!0)}),r};export{b as u};
