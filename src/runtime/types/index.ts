@@ -234,11 +234,9 @@ export const LAYOUT_ERROR = enumFromArray([
 
 export type LayoutError = EnumLike<typeof LAYOUT_ERROR>
 
-export type AllErrors = LayoutError
+export type LayoutErrorInfo<T extends LayoutError> = LayoutErrorsInfo[T] extends undefined ? never : LayoutErrorsInfo[T]
 
-export type ErrorInfo<T extends AllErrors> = AllErrorsInfo[T] extends undefined ? never : AllErrorsInfo[T]
-
-type AllErrorsInfo = {
+export type LayoutErrorsInfo = {
 	[LAYOUT_ERROR.INVALID_ID]: {
 		id: string | undefined
 	}
