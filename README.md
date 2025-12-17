@@ -42,8 +42,7 @@ export {}
 
 ```
 
-Or if using zod, you can do something like this. Note that you will need to create/extend `zLayoutWindow/Frame` or use `zLayoutWindow/FrameLoose` to allow for extra properties. All zod types have been made `strict` where possible as it's easy to accidentally use the wrong type and loose properties silently otherwise. 
-
+Or if using zod, you can do something like this. Note that you will need to create/extend `zLayoutWindow/Frame` or use `zLayoutWindow/FrameLoose` to allow for extra properties. They also use a basic `z.uuid()`, if you need something more specific you'll have to extend the type.
 ```ts
 import { zLayoutFrameLoose, layoutCreate } from "@witchcraft/layout"
 import { z } from "zod"
@@ -64,16 +63,18 @@ export const zAppFrame = z.discriminatedUnion("type", [
 		}),
 	}),
 ]).and(z.object({
-	id: z.uuid(),
+	id: z.uuidv4(), // here we can specify a specific uuid type
 }))
+
 
 declare module "@witchcraft/layout" {
 	interface Register {
-		//	Register the type
+		//	Register the type, this allows importing the type from the package, while also allowing the types to be extended
 		ExtendedLayoutFrame: z.infer<typeof zAppFrame>
 	}
 }
 ```
+Note that `zFrameId` and `zWinId` are different as they also support constants (`zFrameIdConstants` and `zWindowIdConstants`).
 
 ## Basics
 
