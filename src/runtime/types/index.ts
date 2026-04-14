@@ -4,6 +4,8 @@ import { z } from "zod"
 
 export * from "../drag/types.js"
 
+import type { HTMLAttributes, StyleValue } from "vue"
+
 import { getMaxInt } from "../settings.js"
 
 export const zUuid = z.uuid()
@@ -289,3 +291,33 @@ export const zFrameCreate = zLayoutFrame.partial({
 	width: true,
 	height: true
 })
+
+
+export type LayoutShapeSquareProps
+	= & {
+		css: BaseSquareCss
+		style?: StyleValue
+	}
+	& /** @vue-ignore */ Omit<HTMLAttributes, "class" | "onFocus"> & { class?: string }
+
+
+export type LayoutEdgesProps
+	= & {
+		edges: Edge[]
+		intersections: IntersectionEntry[]
+		/** The owning window, needed so we can correctly scale coordinates. */
+		win: LayoutWindow
+		/** The active frame, used to render the active edges. Calculate it from the `frames` returned by `useFrames` composable because otherwise it will be the wrong size while dragging. */
+		activeFrame?: LayoutFrame
+		draggingEdge?: Edge
+		draggingIntersection?: IntersectionEntry
+	}
+	& Partial<LayoutShapeSquareProps>
+
+
+export type LayoutFrameProps
+	= & {
+		frame: LayoutFrame
+		isActiveFrame: boolean
+	}
+	& Partial<LayoutShapeSquareProps>

@@ -15,7 +15,7 @@
 		left-[var(--posX)]
 	`,
 		css.translate && `[transform:var(--translate)]`,
-		$attrs.class as any
+		($attrs as any).class
 	)"
 	v-bind="{...$attrs, class: undefined}"
 >
@@ -24,15 +24,14 @@
 </template>
 <script setup lang="ts">
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { type PropType } from "vue"
 import { useAttrs } from "vue"
 
-import type { BaseSquareCss } from "../types/index.js"
+import type { LayoutShapeSquareProps } from "../types/index.js"
 const $attrs = useAttrs()
 
-
-const props = defineProps({
-	style: { type: String, required: false, default: "" },
-	css: { type: Object as PropType<BaseSquareCss>, required: true },
+defineOptions({
+	inheritAttrs: false,
 })
+
+const props = defineProps<LayoutShapeSquareProps>()
 </script>

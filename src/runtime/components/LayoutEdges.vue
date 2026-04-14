@@ -9,7 +9,9 @@
 		border-blue-500
 		border
 	`,
+		($attrs as any).class
 	)"
+	v-bind="{...$attrs, class: undefined}"
 />
 	
 <template
@@ -73,51 +75,42 @@
 </template>
 <script lang="ts" setup>
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { computed,type PropType, ref,useAttrs } from "vue"
+import { computed,useAttrs } from "vue"
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
-import { frameToEdges } from "../helpers/frameToEdges.js"
 import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss.js"
 import { getVisualEdgesCss } from "../helpers/getVisualEdgesCss.js"
 import { isEdgeEqual } from "../helpers/isEdgeEqual.js"
-import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import {
 	type Edge,
 	type EdgeCss,
 	type IntersectionEntry,
-	type LayoutFrame,
-	type LayoutWindow,
-	type Point,
+	type LayoutEdgesProps,
 } from "../types/index.js"
 const $attrs = useAttrs()
+
+defineOptions({
+	inheritAttrs: false,
+})
 
 const emit = defineEmits<{
 	dragStart: [e: PointerEvent, { edge?: Edge, intersection?: IntersectionEntry }]
 }>()
-const props = withDefaults(defineProps< {
-	edges: Edge[]
-	intersections: IntersectionEntry[]
-	/** The owning window, needed so we can correctly scale coordinates. */
-	win: LayoutWindow
-	/** The active frame, used to render the active edges. Calculate it from the `frames` returned by `useFrames` composable because otherwise it will be the wrong size while dragging. */
-	activeFrame?: LayoutFrame
-	draggingEdge?: Edge
-	draggingIntersection?: IntersectionEntry
-}>(), {
+const props = withDefaults(defineProps<LayoutEdgesProps>(), {
 	activeFrame: undefined,
 	draggingEdge: undefined,
 	draggingIntersection: undefined,
 })
 
 
-const activeFrameCssEdges = computed(() => {
-	if (!props.activeFrame) return []
-	return getVisualEdgesCss(Object.values(frameToEdges(props.activeFrame)), {
-		edgeWidth: `var(--layoutEdgeWidth, 2px)`,
-	})
-})
+// const activeFrameCssEdges = computed(() => {
+// 	if (!props.activeFrame) return []
+// 	return getVisualEdgesCss(Object.values(frameToEdges(props.activeFrame)), {
+// 		edgeWidth: `var(--layoutEdgeWidth, 2px)`,
+// 	})
+// })
 
 const cssDragEdges = computed(() => {
 	const thickEdges = getVisualEdgesCss(

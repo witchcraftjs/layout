@@ -1,5 +1,4 @@
 <template>
-<!-- @vue-expect-error just let it inherit extra attrs -->
 <!-- overflow-hidden is just in case, if the frame's css is not properly set to h-full, overflow-auto, or the border/padding are too large, we can still get overflows -->
 <LayoutShapeSquare
 	tabindex="0"
@@ -9,7 +8,7 @@
 		p-[var(--layoutEdgeWidth,_2px)]
 		overflow-hidden
 		`,
-		$attrs.class
+		($attrs as any).class
 	)"
 	v-bind="{...$attrs, class: undefined}"
 	@focus="emit('focus')"
@@ -24,15 +23,18 @@
 </template>
 <script lang="ts" setup>
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { type PropType } from "vue"
 import { useAttrs } from "vue"
 const $attrs = useAttrs()
+
+defineOptions({
+	inheritAttrs: false,
+})
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
 import { debugFrame } from "../layout/debugFrame.js"
-import { type LayoutFrame } from "../types/index.js"
+import { type LayoutFrameProps } from "../types/index.js"
 
 
 const emit = defineEmits<{
@@ -40,8 +42,6 @@ const emit = defineEmits<{
 	(e: "focus"): void
 }>()
 
-/* const props =  */defineProps({
-	frame: { type: Object as PropType<LayoutFrame>, required: true },
-	isActiveFrame: { type: Boolean, required: true },
-})
+/* const props =  */defineProps<LayoutFrameProps>(
+)
 </script>

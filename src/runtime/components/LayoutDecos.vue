@@ -1,8 +1,4 @@
 <template>
-<!-- <div -->
-<!-- 	v-bind="$attrs" -->
-<!-- 	class="decos" -->
-<!-- > -->
 <template
 	v-for="(deco) of splitDecos"
 	:key="deco.id"
@@ -34,21 +30,15 @@
 		:css="getShapeSquareCss( frames[deco.id], `var(--layoutEdgeWidth,2px)`)"
 	/>
 </template>
-<!-- </div> -->
 </template>
 <script lang="ts" setup>
-import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import type { PropType } from "vue"
-import { computed, inject, ref, useAttrs } from "vue"
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
-import { dirToOrientation } from "../helpers/dirToOrientation.js"
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
 import { getVisualEdgeCss } from "../helpers/getVisualEdgeCss"
 import { type CloseDeco, type LayoutFrames, type Size, type SplitDeco } from "../types/index.js"
 
-const $attrs = useAttrs()
 
 const props = withDefaults(defineProps<{
 	frames: LayoutFrames

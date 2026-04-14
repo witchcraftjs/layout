@@ -7,17 +7,17 @@
 	`,
 		isDragging && `dragging cursor-pointer`,
 		requestType && `request-${requestType}`,
-		$attrs.attrs.class
+		($attrs as any).class
 	)"
 	ref="windowEl"
-	v-bind="{...$attrs.attrs, class: undefined}"
+	v-bind="{...$attrs, class: undefined}"
 >
 	<template v-if="windowEl && win">
 		<LayoutFrameComponent :frame="frame"
 			:is-active-frame="frame.id === win.activeFrame"
 			v-for="frame of frames"
 			:key="frame.id"
-			v-bind="$attrs.frameAttrs"
+			v-bind="frameProps"
 			@focus="windowSetActiveFrame(win, frame.id)"
 		>
 			<slot :name="`frame-${frame.id}`" v-bind="{frame}"/>
@@ -29,14 +29,13 @@
 			:intersections="intersections"
 			:dragging-edge="draggingEdges.length === 1 ? draggingEdges[0] : undefined"
 			:dragging-intersection="draggingIntersection"
-			v-bind="$attrs.edgesAttrs"
+			v-bind="edgesProps"
 			@drag-start="dragStart"
 		/>
 		<LayoutDecosComponent
 			:frames="frames"
 			:split-decos="splitDecos"
 			:close-decos="closeDecos"
-			v-bind="$attrs.decosAttrs"
 		/>
 		<slot name="extra-decos"/>
 	</template>
@@ -45,7 +44,6 @@
 			<span
 				class="
 					after:content-['┃']
-					after:text-accent-500
 					last:after:content-none
 					after:mx-1
 					after:text-gray-500
@@ -60,10 +58,10 @@
 </div>
 </template>
 <script lang="ts" setup>
-import { useDivideAttrs } from "@witchcraft/ui/composables/useDivideAttrs"
 import { useGlobalResizeObserver } from "@witchcraft/ui/composables/useGlobalResizeObserver"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { computed, ref,watch } from "vue"
+import { computed, ref,useAttrs,watch } from "vue"
+import { type HTMLAttributes } from "vue"
 
 import LayoutDecosComponent from "./LayoutDecos.vue"
 import LayoutEdgesComponent from "./LayoutEdges.vue"
@@ -76,10 +74,10 @@ import { SplitAction } from "../drag/SplitAction.js"
 import { type DragState, type IDragAction } from "../drag/types.js"
 import { updateWindowWithEvent } from "../helpers/updateWindowSizeWithEvent.js"
 import { windowSetActiveFrame } from "../layout/windowSetActiveFrame.js"
-import { type CloseDeco, type LayoutWindow, type SplitDeco } from "../types/index.js"
+import { type CloseDeco, type LayoutEdgesProps, type LayoutFrameProps, type LayoutWindow, type SplitDeco } from "../types/index.js"
 
-const $attrs = useDivideAttrs(["frame", "edges", "decos"] as const)
 
+const $attrs = useAttrs()
 const win = defineModel<LayoutWindow>("win", { required: true })
 
 const props = withDefaults(defineProps<{
@@ -96,13 +94,15 @@ const props = withDefaults(defineProps<{
 	 * When this is turned back on again, it will trigger an update. You can also trigger updates manually with the exposed updateWindowSize function.
 	 */
 	allowWindowSizeUpdate?: boolean
+	frameProps?: Partial<Omit<LayoutFrameProps, "frame" | "isActiveFrame" | "onFocus">>,
+	edgesProps?: Partial<Omit<LayoutEdgesProps, "edges" | "intersections" | "win">>
 }>(), {
 	additionalDragActions: () => ([]),
 	splitKeyHandler: undefined,
 	closeKeyHandler: undefined,
 	usageInstructions: () => ({ }),
 	instructionTeleportTo: undefined,
-	allowWindowSizeUpdate: true
+	allowWindowSizeUpdate: true,
 })
 const emit = defineEmits<{
 	(e: "isShowingDrag", value: boolean): void
