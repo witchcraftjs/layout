@@ -60,7 +60,7 @@
 import { keys } from "@alanscodelog/utils/keys"
 // playground not resolving???
 // todo this breaks the non-playground build
-import WRoot from "@witchcraft/ui/components/LibRoot"
+import WRoot from "@witchcraft/ui/components/WRoot"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { computed, onBeforeMount, ref } from "vue"
 

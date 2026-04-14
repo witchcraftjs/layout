@@ -10,9 +10,9 @@ settings:
 catalog:
   "@alanscodelog/commitlint-config": ^3.1.2
   "@alanscodelog/eslint-config": ^6.3.0
-  "@alanscodelog/semantic-release-config": ^6.0.0
-  "@alanscodelog/tsconfigs": ^6.2.0
-  "@alanscodelog/utils": ^6.0.1
+  "@alanscodelog/semantic-release-config": ^6.0.2
+  "@alanscodelog/tsconfigs": ^6.3.0
+  "@alanscodelog/utils": ^6.2.0
   "@alanscodelog/vite-config": ^0.0.6
   "@commitlint/cli": ^19.8.1
   "@iconify/json": ^2.2.383
@@ -26,7 +26,7 @@ catalog:
   "@vitejs/plugin-vue": ^6.0.1
   "@vitest/coverage-c8": ^0.33.0
   "@witchcraft/nuxt-utils": ^0.3.6
-  "@witchcraft/ui": ^0.3.13
+  "@witchcraft/ui": 0.4.0-beta.3
   concurrently: ^9.2.1
   cross-env: ^10.0.0
   es-toolkit: ^1.39.10

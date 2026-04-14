@@ -6,7 +6,7 @@
 </div>
 </template>
 <script lang="ts" setup>
-import WDarkModeSwitcher from "@witchcraft/ui/components/LibDarkModeSwitcher"
+import WDarkModeSwitcher from "@witchcraft/ui/components/WDarkModeSwitcher"
 
 import type { LayoutFrame } from "../types/index.js"
 
