@@ -8,6 +8,7 @@
 		z-0
 		border-blue-500
 		border
+		rounded-md
 	`,
 		($attrs as any).class
 	)"
