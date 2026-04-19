@@ -15,4 +15,12 @@ export default defineNuxtConfig({
 		"@witchcraft/ui/nuxt",
 		"../src/module"
 	],
+	// workaround for hmr issue
+	vite: {
+		server: {
+			watch: {
+				usePolling: true
+			}
+		}
+	},
 })
