@@ -4,7 +4,7 @@ import { z } from "zod"
 
 export * from "../drag/types.js"
 
-import type { HTMLAttributes, StyleValue } from "vue"
+import type { HTMLAttributes } from "vue"
 
 import { getMaxInt } from "../settings.js"
 
@@ -296,9 +296,9 @@ export const zFrameCreate = zLayoutFrame.partial({
 export type LayoutShapeSquareProps
 	= & {
 		css: BaseSquareCss
-		style?: StyleValue
 	}
-	& /** @vue-ignore */ Omit<HTMLAttributes, "class" | "onFocus"> & { class?: string }
+	& /** @vue-ignore */ Omit<HTMLAttributes, "class" | "onFocus">
+	& /** @vue-ignore */ { class?: string }
 
 
 export type LayoutEdgesProps

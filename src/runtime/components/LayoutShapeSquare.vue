@@ -1,12 +1,12 @@
 <template>
 <div
-	:style="`
+	:style="[`
 		--posX:${css.x};
 		--posY:${css.y};
 		--width:${css.width};
 		--height:${css.height};
 		${css.translate ? `--translate:${css.translate}`: ``}
-	` + style"
+	`, $attrs.style]"
 	:class="twMerge(`
 		absolute
 		w-[var(--width)]
