@@ -46,7 +46,7 @@
 					after:content-['┃']
 					last:after:content-none
 					after:mx-1
-					after:text-gray-500
+					after:text-neutral-500
 				"
 				v-for="instruction of filteredUsageInstructions"
 				:key="instruction"
@@ -61,7 +61,6 @@
 import { useGlobalResizeObserver } from "@witchcraft/ui/composables/useGlobalResizeObserver"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { computed, ref,useAttrs,watch } from "vue"
-import { type HTMLAttributes } from "vue"
 
 import LayoutDecosComponent from "./LayoutDecos.vue"
 import LayoutEdgesComponent from "./LayoutEdges.vue"

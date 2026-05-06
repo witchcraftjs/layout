@@ -5,12 +5,12 @@
 	/>
 	<LayoutWindow v-if="win"
 		class="
-			flex-1 w-full
+			flex-1
+			w-full
 			border-1
 			border-neutral-300
 			dark:border-neutral-700
 			rounded-md
-			flex-1
 			self-stretch
 			[&_.frame]:flex
 			[&_.frame]:flex-col

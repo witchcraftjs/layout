@@ -38,7 +38,7 @@
 		"dev:vite": "vite --mode development --config vite.dev.config.ts",
 		"//dev": "The module needs to be build, not stubbed, for vite's dev to work.",
 		"dev": "pnpm dev:vite",
-		"lint:eslint": "eslint \"{src,tests,bin}/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=3 --report-unused-disable-directives",
+		"lint:eslint": "eslint \"{src,tests,bin}/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=0 --report-unused-disable-directives",
 		"lint:commits": "commitlint --from-last-tag --to HEAD --verbose",
 		"lint:imports": "echo disabled madge --circular --extensions ts ./src",
 		"lint": "pnpm lint:eslint && pnpm lint:types && pnpm lint:commits && pnpm lint:imports",
