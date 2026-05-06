@@ -87,7 +87,7 @@
 		"@tailwindcss/vite": "catalog:",
 		"@types/node": "catalog:",
 		"@vitejs/plugin-vue": "catalog:",
-		"@vitest/coverage-c8": "catalog:",
+		"@vitest/coverage-v8": "catalog:",
 		"@witchcraft/nuxt-utils": "catalog:",
 		"@witchcraft/ui": "catalog:",
 		"concurrently": "catalog:",
