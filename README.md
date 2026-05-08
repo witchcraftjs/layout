@@ -190,6 +190,16 @@ Edges and Decos are very simple and there are various utilies like `getVisualEdg
 
 This has the benefit for edges, that the grabable area can be easily adjusted and bigger than the displayed edge.
 
+## Making Changes
+
+The majority of actions are done in two steps:
+
+1. `get*Info` (e.g. `getFrameSplitInfo`) functions that return a `LayoutChange` object. These don't mutate the window and return the changes needed to apply the function. They can also be used to just check if the action can be done.
+2. `applyFrameChanges` which applies these changes by mutating the window.
+
+`get*Info` functions can return KnownErrors (e.g. out of bounds, can't split, no space, etc. see the `LAYOUT_ERROR` enum), which depending on the situation can be used to show an error decoration or just plain ignored.
+They only throw for logical errors (e.g. passing an invalid frame id, trying to undock an undocked frame) which indicate errors in your calling code.
+
 ## Dragging
 
 Then you will need to add dragging. This is not implemented by default (except for vue) as the state and rendering of a layout being dragged like this is almost always tightly coupled with whatever framework you're using and how you've structured your app. What I've figured out how to separate such as the `DragDirectionStore` and the drag action handlers is in `/drag`.
@@ -203,16 +213,15 @@ Add a `pointerdown` handler to all the edges.
 You can then use `toWindowCoord` to translate the event coordinates into a point.
 
 Before using it, you should be sure the window's coordinates are updated as this requires knowing the x/y px offset and the window dimensions.
-
 ```ts
 const point = toWindowCoord(win, e, snapPoint) // snapPoint is optional, it uses the global settings
-```
 
 One drag starts, I suggest making a copy of the original positions in case you need to cancel the drag. This can be further optimized by only cloning and modifying the touching frames and overlaying them over the unmoved edges to render them. See [Overlayed Frames Technique](#overlayed-frames-technique) below.
 
 You can use the `DragDirectionStore `to help keep track of which direction the user is dragging.
 
 Minus framework specific details, the drag handlers might look something like this:
+
 ```ts
 // i suggest against a barrel import if not using all features, but this is for demo purposes
 import {

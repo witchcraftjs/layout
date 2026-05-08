@@ -1,10 +1,10 @@
 import { debounce } from "@alanscodelog/utils/debounce"
 import { keys } from "@alanscodelog/utils/keys"
 import type { Ref } from "vue"
-import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 import { DragDirectionStore } from "../drag/DragDirectionStore.js"
-import type { DragChangeHandler, DragState } from "../drag/types.js"
+import type { DragChangeHandler, DragChangeResult, DragState, EdgeDragStartData, FrameDragStartData } from "../drag/types.js"
 import { cloneFrame } from "../helpers/cloneFrame.js"
 import { getIntersections } from "../helpers/getIntersections.js"
 import { getVisualEdges } from "../helpers/getVisualEdges.js"
@@ -12,21 +12,21 @@ import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { moveEdge } from "../helpers/moveEdge.js"
 import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
-import { isPointInFrame } from "../layout/isPointInFrame.js"
-import type { Direction, Edge, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
+import { isPointInRect } from "../layout/isPointInRect.js"
+import type { Direction, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
-	/** Whether to show merged the moved frames while dragging. */
-	showDragging: Ref<boolean>,
 	handler: {
 		eventHandler: (e: KeyboardEvent, state: DragState, forceRecalculateEdges: () => void) => void
 		/**
-			* Called when the drag coordinates change (during any event). Should return true to allow the edges to be moved, or false to prevent it.
+			* Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it.
+			*
+			* Can return anything for the end event as it's ignored.
 			*
 			* Can be used to save some context/info to later apply safely during onDragApply.
 			*/
-		onDragChange: DragChangeHandler
+		onDragChange: (...args: Parameters<DragChangeHandler>) => DragChangeResult
 		/**
 		 * Called when drag will be applied. If dragEnd was called with apply false, it will not be called.
 		 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
@@ -50,13 +50,16 @@ export function useFrames(
 
 	const touchingFramesArrays = computed(() => touchingFrames.value.map(entry => Object.values(entry)))
 
-	const isDragging = ref(false)
+	const isDragging = ref<false | "frame" | "edge">(false)
+	const showDragging = ref(false)
 	const dragPoint = ref<Point | undefined>()
 
 	const dragDirections = ref<Record<Orientation, Direction | undefined>>({} as any)
 
 	const draggingIntersection = ref<IntersectionEntry | undefined>(undefined)
 	const isDraggingFromWindowEdge = ref<boolean>(false)
+
+	const frameDragFrameId = ref<FrameId | undefined>()
 
 	const frames = computed(() =>
 		isDragging.value && showDragging.value
@@ -83,12 +86,14 @@ export function useFrames(
 		visualEdges.value = getVisualEdges(f, { includeWindowEdges: true })
 	}, 50, {}) as any
 
-	watchEffect(() => {
+	watch([isDragging, frames], () => {
 		// let request animation force recalc
 		if (isDragging.value) return
 		// otherwise use more performant debounced version
 		debounceGetDraggableEdges(Object.values(frames.value))
-	})
+	}, { deep: true })
+	debounceGetDraggableEdges(Object.values(frames.value))
+
 	function forceRecalculateEdges(): void {
 		visualEdges.value = getVisualEdges(Object.values(frames.value), { includeWindowEdges: true })
 	}
@@ -101,6 +106,8 @@ export function useFrames(
 		dragDirections: dragDirections.value,
 		dragPoint: dragPoint.value,
 		isDragging: isDragging.value,
+		showDragging: showDragging.value,
+		draggingFrameId: frameDragFrameId.value,
 		draggingEdges: draggingEdges.value,
 		draggingIntersection: draggingIntersection.value,
 		visualEdges: visualEdges.value,
@@ -121,11 +128,18 @@ export function useFrames(
 		isDragging.value = false
 		dragPoint.value = undefined
 		touchingFrames.value = []
+		frameDragFrameId.value = undefined
 		dragDirStore.reset()
+		showDragging.value = false
 		forceRecalculateEdges()
 	}
 
-	function dragStart(e: PointerEvent, { edge, intersection }: { edge?: Edge, intersection?: IntersectionEntry }): void {
+	function dragStart<T extends "edge" | "frame">(
+		e: PointerEvent,
+		type: T,
+		// someday this will work
+		data: T extends "edge" ? EdgeDragStartData : FrameDragStartData
+	): void {
 		controller = new AbortController()
 		controller.signal.addEventListener("abort", () => resetState())
 
@@ -135,42 +149,50 @@ export function useFrames(
 
 		const point = toWindowCoord(win.value, e)
 		dragPoint.value = point
-
-		isDragging.value = true
-
-		draggingIntersection.value = intersection
-
-		draggingEdges.value = edge
-			? [edge]
-			: [
-					...(draggingIntersection.value?.sharedEdges.horizontal ?? []),
-					...(draggingIntersection.value?.sharedEdges.vertical ?? [])
-				]
-
 		dragDirStore.update(point)
-		isDraggingFromWindowEdge.value = draggingEdges.value.some(_ => isWindowEdge(_))
 
-		const framesArray = Object.values(win.value.frames)
+		isDragging.value = type
+		showDragging.value = true
 
-		touchingFrames.value = []
-		// all frames in touchingFrames must be clones
-		// BUT they must be the same clone even if they are referenced by multiple dragging edges
-		const clones = new Map<string, LayoutFrame>()
-		for (let i = 0; i < draggingEdges.value.length; i++) {
-			const draggingEdge = draggingEdges.value[i]
-			touchingFrames.value[i] = {}
-			for (const { frame } of findFramesTouchingEdge(draggingEdge, framesArray)) {
-				if (!clones.has(frame.id)) {
-					const clone = cloneFrame(frame)
-					touchingFrames.value[i][frame.id] = clone
-					clones.set(frame.id, clone)
-				} else {
-					touchingFrames.value[i][frame.id] = clones.get(frame.id)!
+		if (type === "frame") {
+			frameDragFrameId.value = (data as FrameDragStartData).frameId
+		} else {
+			const { edge, intersection } = data as EdgeDragStartData
+			draggingIntersection.value = intersection
+
+			draggingEdges.value = edge
+				? [edge]
+				: [
+						...(draggingIntersection.value?.sharedEdges.horizontal ?? []),
+						...(draggingIntersection.value?.sharedEdges.vertical ?? [])
+					]
+
+
+			isDraggingFromWindowEdge.value = draggingEdges.value.some(_ => isWindowEdge(_))
+
+			const framesArray = Object.values(win.value.frames)
+
+			touchingFrames.value = []
+			// all frames in touchingFrames must be clones
+			// BUT they must be the same clone even if they are referenced by multiple dragging edges
+			const clones = new Map<string, LayoutFrame>()
+			for (let i = 0; i < draggingEdges.value.length; i++) {
+				const draggingEdge = draggingEdges.value[i]
+				touchingFrames.value[i] = {}
+				for (const { frame } of findFramesTouchingEdge(draggingEdge, framesArray)) {
+					if (!clones.has(frame.id)) {
+						const clone = cloneFrame(frame)
+						touchingFrames.value[i][frame.id] = clone
+						clones.set(frame.id, clone)
+					} else {
+						touchingFrames.value[i][frame.id] = clones.get(frame.id)!
+					}
 				}
 			}
 		}
 
-		handler.onDragChange("start", e, state.value, forceRecalculateEdges, cancel)
+		const res = handler.onDragChange("start", e, state.value, forceRecalculateEdges, cancel)
+		showDragging.value = res.showDragging ?? true
 	}
 
 	function dragMove(e: PointerEvent): void {
@@ -179,18 +201,23 @@ export function useFrames(
 		const didChange = dragDirStore.update(point)
 		dragPoint.value = point
 		if (!didChange) return
-		const allowed = handler.onDragChange("move", e, state.value, forceRecalculateEdges, cancel)
+		const res = handler.onDragChange("move", e, state.value, forceRecalculateEdges, cancel)
 
-		if (!allowed) return
-		requestAnimationFrame(() => {
-			for (let i = 0; i < draggingEdges.value.length; i++) {
-				const draggingEdge = draggingEdges.value[i]
-				if (draggingEdge) {
-					moveEdge(touchingFramesArrays.value[i], draggingEdge, point)
+
+		showDragging.value = res.showDragging ?? true
+		if (!res.updateEdges) return
+
+		if (isDragging.value === "edge") {
+			requestAnimationFrame(() => {
+				for (let i = 0; i < draggingEdges.value.length; i++) {
+					const draggingEdge = draggingEdges.value[i]
+					if (draggingEdge) {
+						moveEdge(touchingFramesArrays.value[i], draggingEdge, point)
+					}
 				}
-			}
-			forceRecalculateEdges()
-		})
+				forceRecalculateEdges()
+			})
+		}
 	}
 
 	function dragEnd(e?: PointerEvent, { apply = true }: { apply?: boolean } = {}): void {
@@ -233,6 +260,7 @@ export function useFrames(
 		dragStart,
 		dragEnd,
 		cancel,
+		dragMove,
 		dragDirections,
 		dragPoint,
 		isDragging,
@@ -246,6 +274,8 @@ export function useFrames(
 		intersections,
 		isDraggingFromWindowEdge,
 		forceRecalculateEdges,
-		state
+		state,
+		showDragging,
+		frameDragFrameId
 	}
 }

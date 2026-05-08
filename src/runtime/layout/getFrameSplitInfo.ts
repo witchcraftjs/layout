@@ -6,12 +6,18 @@ import { getMarginSize, getSnapPoint } from "../settings.js"
 import {
 	type Direction,
 	LAYOUT_ERROR,
+	type LayoutChange,
 	type LayoutFrame,
 	type Point,
 	type Size
 } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
+/**
+ * Returns a {@link LayoutChange} with the information necessary to split a frame in the given direction.
+ *
+ * Changes can be applied to a window with {@link applyFrameChanges}.
+ */
 export function getFrameSplitInfo(
 	frame: LayoutFrame,
 	dir: Direction,
@@ -64,5 +70,5 @@ export function getFrameSplitInfo(
 	}
 
 	newFrame = frameCreate({ ...newFrame, id: undefined })
-	return { splitFrame: frame, newFrame }
+	return { modified: [frame], created: [newFrame], deleted: [] }
 }

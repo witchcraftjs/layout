@@ -10,7 +10,7 @@
 		`,
 		($attrs as any).class
 	)"
-	v-bind="{...$attrs, class: undefined}"
+	v-bind="{ ...$attrs, class: undefined }"
 	@focus="emit('focus')"
 >
 	<slot>
@@ -21,20 +21,22 @@
 	</slot>
 </LayoutShapeSquare>
 </template>
+
 <script lang="ts" setup>
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs } from "vue"
+
 const $attrs = useAttrs()
 
 defineOptions({
-	inheritAttrs: false,
+	inheritAttrs: false
 })
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
 import { debugFrame } from "../layout/debugFrame.js"
-import { type LayoutFrameProps } from "../types/index.js"
+import type { LayoutFrameProps } from "../types/index.js"
 
 
 const emit = defineEmits<{
@@ -42,6 +44,5 @@ const emit = defineEmits<{
 	(e: "focus"): void
 }>()
 
-/* const props =  */defineProps<LayoutFrameProps>(
-)
+/* const props =  */defineProps<LayoutFrameProps>()
 </script>

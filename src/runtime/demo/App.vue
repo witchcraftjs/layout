@@ -1,9 +1,17 @@
 <template>
-<WRoot class="gap-2 p-2">
+<!-- not sure why we're needed to specify flex-col, tailwind isn't detecting the class properly in wroot maybe? -->
+<WRoot class="
+	gap-2
+	p-2
+	flex-col
+	[&_.frame-drag-ghost]:rounded-md
+">
 	<DemoControls
 		:frames="frames!"
 	/>
-	<LayoutWindow v-if="win"
+	<LayoutWindow
+		ref="layoutComponent"
+		v-if="win"
 		class="
 			flex-1
 			w-full
@@ -21,9 +29,11 @@
 			[&_.grabbed-edge]:bg-accent-500
 			[&.request-split_.grabbed-edge]:hidden
 			[&.request-split_.drag-edge]:hidden
+			[&.deco-split-error]:rounded-md
 			[&_.deco-split-new-frame]:rounded-md
 			[&_.deco-close-frame]:rounded-md
 			[&_.deco-close-frame]:bg-orange-500/50
+			[&_.deco-frame-drag-hover]:rounded-md
 		"
 		:usage-instructions="usageInstructions"
 		instructions-teleport-to="#status-bar"
@@ -31,16 +41,16 @@
 		@is-showing-drag="isShowingDrag = $event"
 		@drag-state="dragState = $event"
 	>
-		<template #[`frame-${f.id}`] v-for="f in frames" :key="f.id">
+		<template #[`frame-${f.id}`] v-for="f in frames" :key="f.id" >
 			<div
 				:data-is-active="win.activeFrame === f.id"
 				:class="twMerge(`
-						border-2
-						border-neutral-500
-						h-full
-						rounded-md
-						overflow-auto
-					`,
+					border-2
+					border-neutral-500
+					h-full
+					rounded-md
+					overflow-auto
+				`,
 					win.activeFrame === f.id && `border-blue-500`
 				)"
 				@click="win.activeFrame=f.id"
@@ -50,12 +60,24 @@
 					Set it on the first child instead, so that the frame can shrink as small as possible.
 					Too big a border can also be a problem, but usually it's small enough that it's beneath the min frame width/height allowed.
 				-->
-				<div class="p-2"> {{ debugFrame(f) }} </div>
+				<div class="p-2 flex flex-col">
+					<FrameDragHandle :frame-id="f.id">
+						<div
+							class="cursor-grab bg-neutral-200 dark:bg-neutral-700 px-2 py-1 text-xs select-none"
+						>
+							⠿ Drag to move frame
+						</div>
+					</FrameDragHandle>
+					<div class="p-2">
+						{{ debugFrame(f) }}
+					</div>
+				</div>
 			</div>
 		</template>
 	</LayoutWindow>
-</Wroot>
+</WRoot>
 </template>
+
 <script lang="ts" setup>
 import { keys } from "@alanscodelog/utils/keys"
 // playground not resolving???
@@ -67,6 +89,7 @@ import { computed, onBeforeMount, ref } from "vue"
 import DemoControls from "./DemoControls.vue"
 import { app } from "./sharedLayoutInstance.js"
 
+import FrameDragHandle from "../components/FrameDragHandle.vue"
 import LayoutWindow from "../components/LayoutWindow.vue"
 import type { DragState } from "../drag/types.js"
 import { debugFrame } from "../layout/debugFrame.js"
@@ -74,14 +97,15 @@ import {
 	frameCreate,
 	layoutAddWindow,
 	windowAddFrame,
-	windowCreate,
+	windowCreate
 } from "../layout/index.js"
 import { getMaxInt } from "../settings.js"
-import { type Layout, type Pos, type Size } from "../types/index.js"
+import type { Layout, Pos, Size } from "../types/index.js"
 
 
 const winId = ref<string | undefined>(undefined)
 const win = computed(() => winId.value !== undefined ? app.layout.windows[winId.value] : undefined)
+const layoutComponent = useTemplateRef("layoutComponent")
 
 const frames = computed(() => {
 	if (!win.value) return
@@ -92,20 +116,19 @@ onBeforeMount(() => {
 	winId.value = keys(app.layout.windows)[0]
 })
 
-const isDragging = ref(false)
 function layoutInitialize(layout: Layout, { defaultPos, defaultSize }: {
 	defaultPos: Pos
 	defaultSize: Size
 } = {
 	defaultPos: { x: 0, y: 0 },
-	defaultSize: { width: 0, height: 0 },
+	defaultSize: { width: 0, height: 0 }
 }) {
 	const w = layoutAddWindow(
 		layout,
 		windowCreate({
 			...defaultPos,
 			...defaultSize,
-			frames: {},
+			frames: {}
 		})
 	)
 
@@ -115,7 +138,7 @@ function layoutInitialize(layout: Layout, { defaultPos, defaultSize }: {
 		x: 0,
 		y: 0,
 		width: max,
-		height: max,
+		height: max
 	}))
 	w.activeFrame = frame.id
 }
@@ -134,6 +157,5 @@ const usageInstructions = computed(() => ({
 	close: dragState.value?.isDragging ? "Shift+Drag to Close" : undefined,
 	forceClose: dragState.value?.isDragging ? "Ctrl+Shift+Drag to Force Close" : undefined
 }))
-	
-</script>
 
+</script>

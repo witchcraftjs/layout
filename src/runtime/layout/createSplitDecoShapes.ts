@@ -1,14 +1,21 @@
 import { findSafeSplitEdgeAndPosition } from "./findSafeSplitEdge.js"
 
 import { getMarginSize, getSnapPoint } from "../settings.js"
-import type { LayoutFrame, Point, RawSplitDeco, Size, SplitDecoShapes } from "../types/index.js"
+import type { LayoutFrame, LayoutShape, Point, RawSplitDeco, Size } from "../types/index.js"
 
-export function createSplitDecoEdge(
+export function createSplitDecoShapes(
 	frames: Record<string, LayoutFrame>,
 	deco: RawSplitDeco,
 	snapAmount: Point = getSnapPoint(),
-	minSize: Size = getMarginSize()
-): SplitDecoShapes {
+	minSize: Size = getMarginSize(),
+	classes: {
+		/** @default "deco-split-edge bg-red-500" */
+		splitEdge?: string
+		/** @default "deco-split-new-frame bg-blue-500/50" */
+		splitNewFrame?: string
+	} = {}
+
+): LayoutShape[] {
 	const frame = frames[deco.id]
 	const { edge, position } = findSafeSplitEdgeAndPosition(frame, deco.direction, deco.position, snapAmount, minSize)
 	const newFrame = { x: frame.x, y: frame.y, width: frame.width, height: frame.height }
@@ -30,5 +37,8 @@ export function createSplitDecoEdge(
 			break
 	}
 
-	return { edge, newFrame }
+	return [
+		{ type: "edge", data: edge, attrs: { class: classes.splitEdge ?? "deco-split-edge bg-red-500" } },
+		{ type: "square", data: newFrame, attrs: { class: classes.splitNewFrame ?? "deco-split-new-frame bg-blue-500/50" } }
+	]
 }

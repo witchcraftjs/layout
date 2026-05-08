@@ -3,7 +3,7 @@ import { snapNumber } from "@alanscodelog/utils/snapNumber"
 import { getMaxInt } from "../settings.js"
 
 /**
- * Given a number (e.g. the x coordinate in px), and the max value it could be (e.g. the max width of it's container in px), returns it's position as a scaled percentage.
+ * Given a number (e.g. the x coordinate in px), and the max value it could be (e.g. the max width of it's container in px), returns it's position as a rounded scaled percentage.
  *
  * ```
  * -----------

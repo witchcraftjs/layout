@@ -1,19 +1,21 @@
 <template>
 <!-- overflow hidden is because the borders inside will make it overflow -->
-<div :class="twMerge(
-		`window
-		relative
-		overflow-hidden
-	`,
+<div
+	:class="twMerge(
+		`
+			layout-wrapper
+			flex
+			flex-col
+		`,
 		isDragging && `dragging cursor-pointer`,
 		requestType && `request-${requestType}`,
 		($attrs as any).class
 	)"
-	ref="windowEl"
-	v-bind="{...$attrs, class: undefined}"
+	v-bind="{ ...$attrs, class: undefined }"
 >
 	<template v-if="windowEl && win">
-		<LayoutFrameComponent :frame="frame"
+		<LayoutFrameComponent
+			:frame="frame"
 			:is-active-frame="frame.id === win.activeFrame"
 			v-for="frame of frames"
 			:key="frame.id"
@@ -33,25 +35,24 @@
 			@drag-start="dragStart"
 		/>
 		<LayoutDecosComponent
-			:frames="frames"
-			:split-decos="splitDecos"
-			:close-decos="closeDecos"
+			:shapes="shapes"
 		/>
 		<slot name="extra-decos"/>
 	</template>
-	<Teleport v-if="instructionsTeleportTo && filteredUsageInstructions.length > 0" defer :to="instructionsTeleportTo">
+	<Teleport v-if="instructionsTeleportTo && filteredUsageInstructions.length > 0" :to="instructionsTeleportTo" defer>
 		<span aria-live="polite">
 			<span
-				class="
+				:class="twMerge(`
+					text-hint
 					after:content-['┃']
 					last:after:content-none
 					after:mx-1
 					after:text-neutral-500
-				"
-				v-for="instruction of filteredUsageInstructions"
-				:key="instruction"
+				`, instruction.classes)"
+				v-for="instruction of textHints"
+				:key="instruction.text"
 			>
-				{{ instruction }}
+				{{ instruction.text }}
 			</span>
 		</span>
 	</Teleport>
@@ -60,31 +61,31 @@
 <script lang="ts" setup>
 import { useGlobalResizeObserver } from "@witchcraft/ui/composables/useGlobalResizeObserver"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { computed, ref,useAttrs,watch } from "vue"
+import { computed, provide, reactive, ref, useAttrs, watch } from "vue"
 
 import LayoutDecosComponent from "./LayoutDecos.vue"
 import LayoutEdgesComponent from "./LayoutEdges.vue"
 import LayoutFrameComponent from "./LayoutFrame.vue"
 
 import { useFrames } from "../composables/useFrames.js"
-import { CloseAction } from "../drag/CloseAction"
+import { createDefaultHandlers } from "../drag/createDefaultHandlers.js"
 import { DragActionHandler } from "../drag/DragActionHandler"
-import { SplitAction } from "../drag/SplitAction.js"
-import { type DragState, type IDragAction } from "../drag/types.js"
+import { dragContextInjectionKey, type DragState, type IDragAction } from "../drag/types.js"
 import { updateWindowWithEvent } from "../helpers/updateWindowSizeWithEvent.js"
 import { windowSetActiveFrame } from "../layout/windowSetActiveFrame.js"
-import { type CloseDeco, type LayoutEdgesProps, type LayoutFrameProps, type LayoutWindow, type SplitDeco } from "../types/index.js"
+import type { LayoutEdgesProps, LayoutFrameProps, LayoutWindow } from "../types/index.js"
+import { settings } from "../settings.js"
 
 
 const $attrs = useAttrs()
 const win = defineModel<LayoutWindow>("win", { required: true })
 
 const props = withDefaults(defineProps<{
-	additionalDragActions?: IDragAction[]
-	splitKeyHandler?: (e: PointerEvent | KeyboardEvent, state: DragState) => boolean
-	closeKeyHandler?: (e: PointerEvent | KeyboardEvent, state: DragState) => boolean
-	usageInstructions?: Record<string, string | undefined>
-	instructionsTeleportTo: string | undefined
+	/** Custom drag action handlers. Falls back to default split/close/frame handlers if not provided. */
+	actionHandlers?: IDragAction[]
+	textHints?: {text:string, classes?:string}[] 
+	textHintsTeleportTo: string | undefined
+	ghostTeleportTo?: string
 	/**
 	 * You might need to temporarily disable updating the window size while transitioning, depending on your layout.
 	 *
@@ -93,61 +94,28 @@ const props = withDefaults(defineProps<{
 	 * When this is turned back on again, it will trigger an update. You can also trigger updates manually with the exposed updateWindowSize function.
 	 */
 	allowWindowSizeUpdate?: boolean
-	frameProps?: Partial<Omit<LayoutFrameProps, "frame" | "isActiveFrame" | "onFocus">>,
-	edgesProps?: Partial<Omit<LayoutEdgesProps, "edges" | "intersections" | "win">>
+	frameProps?: Partial<Omit<LayoutFrameProps, "frame" | "isActiveFrame" | "onFocus">>
+	edgesProps?: Partial<Omit<LayoutEdgesProps, "edges" | "intersections" | "win">>,
 }>(), {
-	additionalDragActions: () => ([]),
-	splitKeyHandler: undefined,
-	closeKeyHandler: undefined,
-	usageInstructions: () => ({ }),
-	instructionTeleportTo: undefined,
-	allowWindowSizeUpdate: true,
+	actionHandlers: undefined,
+	textHints: () => [],
+	textHintsTeleportTo: undefined,
+	ghostTeleportTo: "#root",
+	allowWindowSizeUpdate: true
 })
 const emit = defineEmits<{
 	(e: "isShowingDrag", value: boolean): void
 	(e: "dragState", value: DragState): void
 }>()
 
-const filteredUsageInstructions = computed(() => Object.values(props.usageInstructions).filter(_ => _ !== undefined).map(_ => _))
-
-const splitKeyHandler = props.splitKeyHandler ?? ((e: PointerEvent | KeyboardEvent, state: DragState) =>
-	e.altKey || state.isDraggingFromWindowEdge)
-const closeKeyHandler = props.closeKeyHandler ?? ((e: PointerEvent | KeyboardEvent) => {
-	if (e.ctrlKey && e.shiftKey) {
-		return "force"
-	}
-	if (e.shiftKey) return true
-	return false
-})
-
 
 const windowEl = ref<HTMLElement | null>(null)
 
-const showDragging = ref(true)
-
-const closeDecos = ref<CloseDeco[]>([])
-const splitDecos = ref<SplitDeco[]>([])
 const requestType = ref<"split" | "close" | undefined | string>()
 
 const dragActionHandler = new DragActionHandler(
-	(
-		type: "start" | "move" | "end",
-		_e: PointerEvent | KeyboardEvent | undefined,
-		state: DragState
-	) => type === "move" ? !state.isDraggingFromWindowEdge : undefined,
 	[
-		new SplitAction(
-			splitKeyHandler,
-			((decos: SplitDeco[]) => splitDecos.value = decos),
-			{
-				onStart: () => showDragging.value = false,
-				onCancel: () => showDragging.value = true,
-			}),
-		new CloseAction(
-			closeKeyHandler,
-			((decos: CloseDeco[]) => closeDecos.value = decos),
-		),
-		...props.additionalDragActions
+		...(props.actionHandlers ?? createDefaultHandlers()),
 	],
 	{
 		onEvent: (e, cancel) => {
@@ -162,12 +130,21 @@ const dragActionHandler = new DragActionHandler(
 		onEnd: () => {
 			requestType.value = undefined
 			showDragging.value = true
-		}
+		},
 	}
+)
+dragActionHandler.shapes = reactive([])
+dragActionHandler.textHints = reactive({ actions: [], errors: [] })
+const shapes = dragActionHandler.shapes
+
+const dragContext  = useFrames(
+	win,
+	dragActionHandler
 )
 
 const {
 	dragStart,
+	dragPoint,
 	visualEdges,
 	isDragging,
 	draggingEdges,
@@ -175,25 +152,24 @@ const {
 	frames,
 	intersections,
 	state,
-} = useFrames(
-	win,
+	frameDragFrameId,
 	showDragging,
-	dragActionHandler,
-)
+} = dragContext
 
+provide(dragContextInjectionKey, dragContext)
 
 function getWindowOffset() {
 	const windowElRect = windowEl.value!.getBoundingClientRect()
 	return {
 		pxX: Math.floor(windowElRect.x),
-		pxY: Math.floor(windowElRect.y),
+		pxY: Math.floor(windowElRect.y)
 	}
 }
 function getWindowSize() {
 	const windowElRect = windowEl.value!.getBoundingClientRect()
 	return {
 		pxWidth: Math.floor(windowElRect.width),
-		pxHeight: Math.floor(windowElRect.height),
+		pxHeight: Math.floor(windowElRect.height)
 	}
 }
 function updateWindowSize() {
@@ -216,7 +192,7 @@ defineExpose({
 	state,
 	win,
 	updateWindowSize,
+	dragActionHandler
 })
-
 </script>
 

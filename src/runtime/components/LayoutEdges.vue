@@ -8,13 +8,12 @@
 		z-0
 		border-blue-500
 		border
-		rounded-md
 	`,
 		($attrs as any).class
 	)"
-	v-bind="{...$attrs, class: undefined}"
+	v-bind="{ ...$attrs, class: undefined }"
 />
-	
+
 <template
 	v-for="css, i of cssDragEdges"
 	:key="i"
@@ -27,9 +26,9 @@
 			hover:cursor-pointer
 			[&:hover+.edge]:bg-blue-500/50
 		`)"
-		@pointerdown="emit('dragStart', $event, {edge:edges[i]})"
+		@pointerdown="emit('dragStart', $event, 'edge', { edge: edges[i] })"
 	/>
-	<LayoutShapeSquare
+		<LayoutShapeSquare
 		:css="css.thin"
 		:class="twMerge(`
 			pointer-events-none
@@ -48,7 +47,10 @@
 	v-for="css, i of cssDragEdge"
 	:key="i"
 />
-<template v-for="css, i of cssDragIntersections" :key="i">
+<template
+	v-for="css, i of cssDragIntersections"
+	:key="i"
+>
 	<LayoutShapeSquare
 		:css="css.thick"
 		:class="twMerge(`
@@ -57,9 +59,9 @@
 		rounded-full
 		hover:cursor-pointer
 		[&:hover+.intersection]:bg-blue-500/50
-		`,
+		`
 		)"
-		@pointerdown="emit('dragStart', $event, { intersection:wantedIntersections[i]})"
+		@pointerdown="emit('dragStart', $event, 'edge', { intersection: wantedIntersections[i] })"
 	/>
 	<LayoutShapeSquare
 		:css="css.thin"
@@ -69,14 +71,15 @@
 		rounded-full
 		pointer-events-none
 		`,
-			css.thin._shifted && `w-[7px] h-[7px]`,
+			css.thin._shifted && `w-[7px] h-[7px]`
 		)"
 	/>
 </template>
 </template>
+
 <script lang="ts" setup>
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { computed,useAttrs } from "vue"
+import { computed, useAttrs } from "vue"
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
@@ -84,25 +87,27 @@ import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss.js"
 import { getVisualEdgesCss } from "../helpers/getVisualEdgesCss.js"
 import { isEdgeEqual } from "../helpers/isEdgeEqual.js"
-import {
-	type Edge,
-	type EdgeCss,
-	type IntersectionEntry,
-	type LayoutEdgesProps,
+import type {
+	Edge,
+	EdgeCss,
+	IntersectionEntry,
+	LayoutEdgesProps
 } from "../types/index.js"
+
 const $attrs = useAttrs()
 
 defineOptions({
-	inheritAttrs: false,
+	inheritAttrs: false
 })
 
 const emit = defineEmits<{
-	dragStart: [e: PointerEvent, { edge?: Edge, intersection?: IntersectionEntry }]
+	dragStart: [e: PointerEvent, type:"edge", opts:{ edge?: Edge, intersection?: IntersectionEntry }]
 }>()
+
 const props = withDefaults(defineProps<LayoutEdgesProps>(), {
 	activeFrame: undefined,
 	draggingEdge: undefined,
-	draggingIntersection: undefined,
+	draggingIntersection: undefined
 })
 
 
@@ -120,12 +125,12 @@ const cssDragEdges = computed(() => {
 			: props.edges,
 		{
 			edgeWidth: `var(--layoutHandleWidth, 8px)`,
-			padLongAxis: `var(--layoutEdgeWidth, 2px)`,
+			padLongAxis: `var(--layoutEdgeWidth, 2px)`
 		}
 	)
 	const thinEdges = getVisualEdgesCss(props.edges, {
 		edgeWidth: `var(--layoutEdgeWidth, 2px)`,
-		padLongAxis: `(var(--layoutEdgeWidth, 2px) + var(--layoutExtraDragEdgePadding, 0px))`,
+		padLongAxis: `(var(--layoutEdgeWidth, 2px) + var(--layoutExtraDragEdgePadding, 0px))`
 	})
 	const edges: { thin: EdgeCss, thick: EdgeCss }[] = []
 	for (let i = 0; i < thickEdges.length; i++) {
@@ -138,7 +143,7 @@ const cssDragEdge = computed(() => {
 	if (!props.draggingEdge) return []
 	return getVisualEdgesCss([props.draggingEdge], {
 		edgeWidth: `var(--layoutEdgeWidth, 2px)`,
-		padLongAxis: `(var(--layoutEdgeWidth, 2px) + var(--layoutExtraDragEdgePadding, 0px))`,
+		padLongAxis: `(var(--layoutEdgeWidth, 2px) + var(--layoutExtraDragEdgePadding, 0px))`
 	})
 })
 
@@ -152,7 +157,7 @@ const cssDragIntersections = computed(() => {
 		thin: ReturnType<typeof getIntersectionsCss>[number]
 	}[] = []
 	const thick = getIntersectionsCss(wantedIntersections.value, {
-		intersectionWidth: `var(--layoutIntersectionWidth, 15px)`,
+		intersectionWidth: `var(--layoutIntersectionWidth, 15px)`
 	})
 	const thin = getIntersectionsCss(wantedIntersections.value, {
 	})
@@ -161,6 +166,5 @@ const cssDragIntersections = computed(() => {
 	}
 	return intersections
 })
-
 </script>
 

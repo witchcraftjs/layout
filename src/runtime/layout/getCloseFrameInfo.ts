@@ -15,7 +15,9 @@ import { type Direction, type Edge, type EdgeSide, LAYOUT_ERROR, type LayoutFram
 import { KnownError } from "../utils/KnownError.js"
 
 /**
- * Returns the information necessary to close a frame or frames (if force: true).
+ * Returns a {@link LayoutChange} with the information necessary to close a frame or frames (if force: true).
+ *
+ * Changes can be applied to a window with {@link applyFrameChanges}.
  *
  * Can close by direction or by frame edge.
  *
@@ -74,6 +76,8 @@ import { KnownError } from "../utils/KnownError.js"
  *│C        │  │
  *└─────────┴──┘
  * ```
+ *
+ * Changes can be applied with {@link applyFrameChanges}.
  */
 
 export function getCloseFrameInfo<T extends "edge" | "dir">(
@@ -159,8 +163,8 @@ export function getCloseFrameInfo<T extends "edge" | "dir">(
 			)
 		}
 	}
-	const modifiedFrames = []
-	const deletedFrames = []
+	const modifiedFrames: LayoutFrame[] = []
+	const deletedFrames: LayoutFrame[] = []
 	const moveAmount = thisFrameSize
 
 	for (const entry of sameSideEntries) {
@@ -189,5 +193,5 @@ export function getCloseFrameInfo<T extends "edge" | "dir">(
 		clone[sizeKey] += moveAmount
 		modifiedFrames.push(clone)
 	}
-	return { modifiedFrames, deletedFrames }
+	return { modified: modifiedFrames, created: [], deleted: deletedFrames }
 }

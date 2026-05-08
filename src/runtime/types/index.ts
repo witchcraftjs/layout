@@ -4,8 +4,6 @@ import { z } from "zod"
 
 export * from "../drag/types.js"
 
-import type { HTMLAttributes } from "vue"
-
 import { getMaxInt } from "../settings.js"
 
 export const zUuid = z.uuid()
@@ -111,9 +109,13 @@ export type IntersectionEntry = {
 	sharedEdges: { horizontal: Edge[], vertical: Edge[] }
 	isWindowEdge: boolean
 }
-export const zLayoutFrame = z.looseObject({
-	id: z.uuid()
-}).extend(zBaseSquare.shape)
+
+
+export const zLayoutFrame = zBaseSquare.extend({
+	id: z.uuid(),
+	docked: zSide.optional(),
+	collapsed: z.boolean().optional()
+}).loose()
 
 export const zLayoutFrameLoose = zLayoutFrame.loose()
 
@@ -180,43 +182,49 @@ export type Layout = ExtendedLayout & {
 	activeWindow?: string
 	windows: LayoutWindows
 }
+const zLayoutShape = z.discriminatedUnion("type", [
+	z.object({ type: z.literal("square"), data: zBaseSquare, attrs: z.record(z.string(), z.string()).optional() }),
+	z.object({ type: z.literal("edge"), data: zEdge, attrs: z.record(z.string(), z.string()).optional() })
+])
 
-export const zSplitDecoShapes = z.object({
-	edge: zEdge,
-	newFrame: zBaseSquare
-}).strict()
+export type LayoutShape = z.infer<typeof zLayoutShape>
 
-export type SplitDecoShapes = z.infer<typeof zSplitDecoShapes>
-export const zSplitDeco = z.object({
+const zBaseDeco = z.object({
+	shapes: z.array(zLayoutShape).default([])
+})
+
+export type BaseDeco = z.infer<typeof zBaseDeco>
+
+export const zSplitDeco = zBaseDeco.extend({
 	id: z.uuid(),
 	type: z.literal("split"),
 	position: zScaledIntPercentage,
-	direction: zDirection,
-	shapes: zSplitDecoShapes
-}).strict()
+	direction: zDirection
+})
 export const zRawSplitDeco = zSplitDeco.omit({ shapes: true })
 export type RawSplitDeco = z.infer<typeof zRawSplitDeco>
 export type SplitDeco = z.infer<typeof zSplitDeco>
 
-const zCloseDeco = z.object({
+const zCloseDeco = zBaseDeco.extend({
 	id: z.uuid(),
 	type: z.literal("close"),
 	force: z.boolean().optional()
-}).strict()
+})
 export type CloseDeco = z.infer<typeof zCloseDeco>
 
-const zDropDeco = z.object({
+
+const zFrameDragDeco = zBaseDeco.extend({
 	id: z.uuid(),
 	type: z.literal("drop"),
 	position: zSide.or(z.enum(["center"]))
-}).strict()
+})
 
-export type DropDeco = z.infer<typeof zDropDeco>
+export type FrameDragDeco = z.infer<typeof zFrameDragDeco>
 
 export const zDeco = z.union([
 	zSplitDeco,
 	zCloseDeco,
-	zDropDeco
+	zFrameDragDeco
 ])
 
 export type Deco = z.infer<typeof zDeco>
@@ -231,7 +239,10 @@ export const LAYOUT_ERROR = enumFromArray([
 	"CANT_CLOSE_NEARBY_FRAMES_TOO_SMALL",
 	"CANT_CLOSE_SINGLE_FRAME",
 	"CANT_SPLIT_FRAME_TOO_SMALL",
-	"CANT_CLOSE_WITHOUT_FORCE"
+	"CANT_CLOSE_WITHOUT_FORCE",
+	"CANT_SWAP_WITH_SELF",
+	"CANT_REARRANGE_TO_SAME_RELATIVE_POSITION",
+	"CANT_SPLIT_DOCKED_FRAME"
 ])
 
 export type LayoutError = EnumLike<typeof LAYOUT_ERROR>
@@ -270,6 +281,27 @@ export type LayoutErrorsInfo = {
 		frame: LayoutFrame
 		framesRequiredToBeDeleted: LayoutFrame[]
 	}
+	[LAYOUT_ERROR.CANT_SWAP_WITH_SELF]: {
+		frame: LayoutFrame
+	}
+	[LAYOUT_ERROR.CANT_REARRANGE_TO_SAME_RELATIVE_POSITION]: {
+		draggingFrameId: string
+		hoveredFrameId: string
+		zoneSide: DragZone["side"]
+	}
+	[LAYOUT_ERROR.CANT_REARRANGE_WITH_DOCKED_EDGES]: {
+		draggingFrameId: string
+		hoveredFrameId: string
+		zoneSide: DragZone["side"]
+	}
+	[LAYOUT_ERROR.CANT_REARRANGE_DOCKED_WITH_NON_DOCKED]: {
+		draggingFrameId: string
+		hoveredFrameId: string
+		zoneSide: DragZone["side"]
+	}
+	[LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME]: {
+		frame: LayoutFrame
+	}
 }
 
 // todo rename to toOpposite
@@ -297,9 +329,6 @@ export type LayoutShapeSquareProps
 	= & {
 		css: BaseSquareCss
 	}
-	& /** @vue-ignore */ Omit<HTMLAttributes, "class" | "onFocus">
-	& /** @vue-ignore */ { class?: string }
-
 
 export type LayoutEdgesProps
 	= & {
@@ -314,6 +343,13 @@ export type LayoutEdgesProps
 	}
 	& Partial<LayoutShapeSquareProps>
 
+
+export type LayoutChange<TInfo = never> = {
+	modified: LayoutFrame[]
+	created: LayoutFrame[]
+	deleted: LayoutFrame[]
+	info?: TInfo
+}
 
 export type LayoutFrameProps
 	= & {
