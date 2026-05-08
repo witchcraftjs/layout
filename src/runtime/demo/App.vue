@@ -7,12 +7,15 @@
 	[&_.frame-drag-ghost]:rounded-md
 ">
 	<DemoControls
+		v-if="win"
 		:frames="frames!"
+		:win="win"
+		:dragActionHandler="dragActionHandler"
 	/>
 	<LayoutWindow
 		ref="layoutComponent"
 		v-if="win"
-		class="
+		:class="twMerge(`
 			flex-1
 			w-full
 			border-1
@@ -32,17 +35,23 @@
 			[&.deco-split-error]:rounded-md
 			[&_.deco-split-new-frame]:rounded-md
 			[&_.deco-close-frame]:rounded-md
-			[&_.deco-close-frame]:bg-orange-500/50
-			[&_.deco-frame-drag-hover]:rounded-md
-		"
-		:usage-instructions="usageInstructions"
-		instructions-teleport-to="#status-bar"
+			[&_.deco-close-frame-force]:rounded-md
+			[&_.deco-frame-drag]:rounded-md
+		`,
+			collapsedDocks.top && `border-t-2 border-t-green-500`,
+			collapsedDocks.bottom && `border-b-2 border-b-green-500`,
+			collapsedDocks.left && `border-l-2 border-l-green-500`,
+			collapsedDocks.right && `border-r-2 border-r-green-500`
+		)"
+		:textHints="textHints"
+		textHintsTeleportTo="#status-bar"
 		v-model:win="win"
 		@is-showing-drag="isShowingDrag = $event"
 		@drag-state="dragState = $event"
 	>
 		<template #[`frame-${f.id}`] v-for="f in frames" :key="f.id" >
 			<div
+				v-if="!(f.collapsed && (f.width === 0 || f.height === 0))"
 				:data-is-active="win.activeFrame === f.id"
 				:class="twMerge(`
 					border-2
@@ -68,10 +77,29 @@
 							⠿ Drag to move frame
 						</div>
 					</FrameDragHandle>
-					<div class="p-2">
+					<div class="flex gap-1 px-2 py-1 flex-wrap">
+						<button
+							v-if="f.docked && f.collapsed === false"
+							class="bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 text-xs rounded"
+							@click="handleUndock(f.id)"
+						>Undock</button>
+						<button
+							v-if="f.docked && f.collapsed === false"
+							class="bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 text-xs rounded"
+							@click="handleCollapse(f.id)"
+						>Collapse</button>
+						<button
+							v-if="f.docked && typeof f.collapsed === 'number'"
+							class="bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 text-xs rounded"
+							@click="handleUncollapse(f.id)"
+						>Uncollapse</button>
+					</div>
+					<div class="p-2 whitespace-pre-wrap">
 						{{ debugFrame(f) }}
 					</div>
 				</div>
+			</div>
+			<div v-else>
 			</div>
 		</template>
 	</LayoutWindow>
@@ -92,7 +120,11 @@ import { app } from "./sharedLayoutInstance.js"
 import FrameDragHandle from "../components/FrameDragHandle.vue"
 import LayoutWindow from "../components/LayoutWindow.vue"
 import type { DragState } from "../drag/types.js"
+import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { debugFrame } from "../layout/debugFrame.js"
+import { getFrameCollapseInfo } from "../layout/getFrameCollapseInfo.js"
+import { getFrameUncollapseInfo } from "../layout/getFrameUncollapseInfo.js"
+import { getFrameUndockInfo } from "../layout/getFrameUndockInfo.js"
 import {
 	frameCreate,
 	layoutAddWindow,
@@ -100,7 +132,10 @@ import {
 	windowCreate
 } from "../layout/index.js"
 import { getMaxInt } from "../settings.js"
-import type { Layout, Pos, Size } from "../types/index.js"
+import type { EdgeSide, Layout, Pos, Size } from "../types/index.js"
+import { throwIfError } from "@alanscodelog/utils/throwIfError"
+import { useTemplateRef } from "vue"
+import { DragActionHandler } from "../drag/DragActionHandler.js"
 
 
 const winId = ref<string | undefined>(undefined)
@@ -149,13 +184,46 @@ const isShowingDrag = ref(false)
 // drag state as returned by useFrames in LayoutWindow
 const dragState = ref<DragState | undefined>(undefined)
 
-const usageInstructions = computed(() => ({
-	// names are arbitrary and don't mean anything, they just make things easier
-	// if a key is undefined, it's ignored
-	none: !dragState.value?.isDragging ? "Drag from an edge to create a new frame." : undefined,
-	split: dragState.value?.isDragging ? "Hold Alt to Split" : undefined,
-	close: dragState.value?.isDragging ? "Shift+Drag to Close" : undefined,
-	forceClose: dragState.value?.isDragging ? "Ctrl+Shift+Drag to Force Close" : undefined
-}))
+function handleUndock(frameId: string) {
+	const changes = throwIfError(getFrameUndockInfo(win.value!, frameId))
+	DragActionHandler.debugState("undock", "before", dragState.value!, {}, undefined)
+	applyFrameChanges(win.value!, changes)
+	DragActionHandler.debugState("undock", "after", dragState.value!, {}, undefined)
+}
 
+function handleCollapse(frameId: string) {
+	const changes = throwIfError(getFrameCollapseInfo(win.value!, frameId))
+	DragActionHandler.debugState("collapse", "before", dragState.value!, {}, undefined)
+	applyFrameChanges(win.value!, changes)
+	DragActionHandler.debugState("collapse", "after", dragState.value!, {}, undefined)
+}
+
+function handleUncollapse(frameId: string) {
+	const changes = throwIfError(getFrameUncollapseInfo(win.value!, frameId))
+	DragActionHandler.debugState("uncollapse", "before", dragState.value!, {}, undefined)
+	applyFrameChanges(win.value!, changes)
+	DragActionHandler.debugState("uncollapse", "after", dragState.value!, {}, undefined)
+}
+
+const textHints = computed(() => {
+	const isDragging = dragState.value?.isDragging
+	const textHints = dragActionHandler.value?.textHints ?? {actions:[], errors:[]}
+	return [
+		...(!isDragging ? [{classes:"", text:"Drag from an edge to create a new frame."}] : []),
+		...textHints.errors.map(_ => ({classes:"text-red-500", text:_})),
+		...textHints.actions.map(_ => ({ text:_})),
+	]
+})
+
+const collapsedDocks = computed(() => {
+	const sides: Partial<Record<EdgeSide, true>> = {}
+	for (const frame of Object.values(win.value?.frames ?? {})) {
+		if (frame.docked) {
+			sides[frame.docked] = true
+		}
+	}
+	return sides
+})
+
+const dragActionHandler = computed(() => layoutComponent.value?.dragActionHandler)
 </script>

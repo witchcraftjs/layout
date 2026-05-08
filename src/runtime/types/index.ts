@@ -114,7 +114,7 @@ export type IntersectionEntry = {
 export const zLayoutFrame = zBaseSquare.extend({
 	id: z.uuid(),
 	docked: zSide.optional(),
-	collapsed: z.boolean().optional()
+	collapsed: z.union([z.literal(false), z.number()]).optional()
 }).loose()
 
 export const zLayoutFrameLoose = zLayoutFrame.loose()
@@ -128,7 +128,11 @@ export type ExtendedLayout = Register extends { ExtendedLayout: infer T } ? T : 
 export type ExtendedWorkspace = Register extends { ExtendedWorkspace: infer T } ? T : unknown
 /* eslint-enable @typescript-eslint/naming-convention */
 
-export type BaseLayoutFrame = Size & Pos & { id: FrameId }
+export type BaseLayoutFrame = Size & Pos & {
+	id: FrameId
+	docked?: EdgeSide | false
+	collapsed?: false | number
+}
 export type LayoutFrame = ExtendedLayoutFrame & BaseLayoutFrame
 export type LayoutFrames = Record<string, LayoutFrame>
 
@@ -155,7 +159,24 @@ export type BaseLayoutWindow = {
 export type LayoutWindow = ExtendedLayoutWindow & BaseLayoutWindow
 export type LayoutWindows = Record<string, LayoutWindow>
 
-const baseWorkspace = zLayoutWindow.pick({ activeFrame: true, frames: true })
+const baseWorkspace = baseLayoutWindow.pick({ activeFrame: true, frames: true }).superRefine((data, ctx) => {
+	for (const [frameId, frame] of Object.entries(data.frames ?? {})) {
+		if ((frame as any).docked === undefined) continue
+		const edge = (frame as any).docked
+		if (edge === "left" && (frame as any).x !== 0) {
+			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on left edge must have x=0`, path: ["frames", frameId, "x"] })
+		}
+		if (edge === "right" && (frame as any).x + (frame as any).width !== getMaxInt()) {
+			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on right edge must have x+width=maxInt`, path: ["frames", frameId, "x"] })
+		}
+		if (edge === "top" && (frame as any).y !== 0) {
+			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on top edge must have y=0`, path: ["frames", frameId, "y"] })
+		}
+		if (edge === "bottom" && (frame as any).y + (frame as any).height !== getMaxInt()) {
+			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on bottom edge must have y+height=maxInt`, path: ["frames", frameId, "y"] })
+		}
+	}
+})
 export const zWorkspace = baseWorkspace.strict()
 export const zWorkspaceLoose = zWorkspace.loose()
 
@@ -242,7 +263,17 @@ export const LAYOUT_ERROR = enumFromArray([
 	"CANT_CLOSE_WITHOUT_FORCE",
 	"CANT_SWAP_WITH_SELF",
 	"CANT_REARRANGE_TO_SAME_RELATIVE_POSITION",
-	"CANT_SPLIT_DOCKED_FRAME"
+	"CANT_REARRANGE_WITH_DOCKED_EDGES",
+	"CANT_REARRANGE_DOCKED_WITH_NON_DOCKED",
+	"CANT_SPLIT_DOCKED_FRAME",
+	"NO_SPACE_TO_REDISTRIBUTE",
+	"REDISTRIBUTE_OUT_OF_BOUNDS",
+	"FRAME_ALREADY_DOCKED_ON_SIDE",
+	"CANT_LEAVE_NO_UNDOCKED_FRAMES",
+	"CANT_UNDOCK_COLLAPSED_FRAME",
+	"CANT_COLLAPSE_NOT_DOCKED",
+	"CANT_UNCOLLAPSE_NOT_COLLAPSED",
+	"NO_FILL_CANDIDATES"
 ])
 
 export type LayoutError = EnumLike<typeof LAYOUT_ERROR>
@@ -302,10 +333,58 @@ export type LayoutErrorsInfo = {
 	[LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME]: {
 		frame: LayoutFrame
 	}
+	[LAYOUT_ERROR.NO_SPACE_TO_REDISTRIBUTE]: {
+		minFrameSize: number
+		frameSizeNeeded: number
+	}
+	[LAYOUT_ERROR.REDISTRIBUTE_OUT_OF_BOUNDS]: {
+		min: number
+		max: number
+		wanted: number
+	}
+	[LAYOUT_ERROR.FRAME_ALREADY_DOCKED_ON_SIDE]: {
+		side: EdgeSide
+		id: string
+	}
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+	[LAYOUT_ERROR.CANT_LEAVE_NO_UNDOCKED_FRAMES]: {}
+	[LAYOUT_ERROR.CANT_UNDOCK_COLLAPSED_FRAME]: {
+		frame: string
+	}
+	[LAYOUT_ERROR.CANT_COLLAPSE_NOT_DOCKED]: {
+		frame: LayoutFrame
+	}
+	[LAYOUT_ERROR.CANT_UNCOLLAPSE_NOT_COLLAPSED]: {
+		frame: LayoutFrame
+	}
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+	[LAYOUT_ERROR.NO_FILL_CANDIDATES]: {}
 }
 
 // todo rename to toOpposite
 export type HasOpposite = Direction | EdgeSide | ExtendedDirection | ExtendedEdgeSide | keyof Point | keyof Size
+
+
+export type BaseDragZone = {
+	x: number
+	y: number
+	width: number
+	height: number
+	pxWidth: number
+	pxHeight: number
+}
+
+export type FrameDragZone = BaseDragZone & {
+	type: "frame"
+	side: EdgeSide | "center"
+}
+
+export type WindowEdgeZone = BaseDragZone & {
+	type: "window"
+	side: EdgeSide
+}
+
+export type DragZone = FrameDragZone | WindowEdgeZone
 
 export const zWindowCreate = zLayoutWindowLoose
 	.partial({ id: true, pxWidth: true, pxHeight: true, pxX: true, pxY: true })

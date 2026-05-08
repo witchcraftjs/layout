@@ -419,11 +419,18 @@ Decos:
 - Split:
   - `.deco-split-new-frame` (new frame preview)
   - `.deco-split-edge` (edge preview)
+  - `.deco-split-error` (split preview in error state)
+- FrameDrag:
+  - `.deco-frame-drag` (frame drag ghost preview)
+  - `.deco-frame-drag-error` (frame drag preview in error state)
+  - `.deco-frame-drag-${type}-${side}` (e.g. `.deco-frame-drag-frame-left`, `.deco-frame-drag-zone-right`)
+
 
 State classes (so you can do stuff like `.request-split .drag-edge`)
 - `.dragging`
 - `.request-split`
 - `.request-close`
+- `.request-frame-drag`
 
 Several css variables are provided to help with sizing:
 - `--layoutHandleWidth`

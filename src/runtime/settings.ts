@@ -8,7 +8,12 @@ const g = {
 	snapPoint: { x: Math.round(0.5 * (10 ** 3)), y: Math.round(0.5 * (10 ** 3)) },
 	MARGIN_PERCENTAGE_WIDTH: 10 ** 3,
 	MARGIN_PERCENTAGE_HEIGHT: 10 ** 3,
-	marginSize: { width: 10 ** 3, height: 10 ** 3 }
+	marginSize: { width: 10 ** 3, height: 10 ** 3 },
+	COLLAPSE_PERCENTAGE_WIDTH: 0,
+	COLLAPSE_PERCENTAGE_HEIGHT: 0,
+	collapseSize: { width: 0, height: 0 },
+	MAX_PERPENDICULAR_PERCENTAGE: 33.333,
+	maxPerpendicularLength: Math.round(33.333 * (10 ** 3))
 }
 export const globalOptions = g
 // todo think of better way :/
@@ -60,4 +65,31 @@ export function setMarginPercentage(margin: number | Size): void {
 
 export function getMarginSize(): Readonly<Size> {
 	return g.marginSize
+}
+
+export function setCollapseSize(collapse: Size | number): void {
+	if (typeof collapse === "number") {
+		g.COLLAPSE_PERCENTAGE_WIDTH = collapse
+		g.COLLAPSE_PERCENTAGE_HEIGHT = collapse
+	} else {
+		g.COLLAPSE_PERCENTAGE_WIDTH = collapse.width
+		g.COLLAPSE_PERCENTAGE_HEIGHT = collapse.height
+	}
+	g.collapseSize = {
+		width: Math.round(g.COLLAPSE_PERCENTAGE_WIDTH * (10 ** g.SCALE)),
+		height: Math.round(g.COLLAPSE_PERCENTAGE_HEIGHT * (10 ** g.SCALE))
+	}
+}
+
+export function getCollapseSize(): Readonly<Size> {
+	return g.collapseSize
+}
+
+export function setMaxPerpendicularLength(maxPerpendicularLength: number): void {
+	g.MAX_PERPENDICULAR_PERCENTAGE = maxPerpendicularLength
+	g.maxPerpendicularLength = Math.round(maxPerpendicularLength * (10 ** g.SCALE))
+}
+
+export function getMaxPerpendicularLength(): number {
+	return g.maxPerpendicularLength
 }

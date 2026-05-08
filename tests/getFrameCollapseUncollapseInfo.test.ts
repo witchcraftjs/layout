@@ -1,0 +1,412 @@
+import { throwIfError } from "@alanscodelog/utils/throwIfError"
+import { walk } from "@alanscodelog/utils/walk"
+import { beforeEach, describe, expect, it } from "vitest"
+
+import { createTestWindow, w } from "./utils.js"
+
+import { rotateLayout } from "../src/runtime/helpers/rotateFrames.js"
+import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
+import { getFrameCollapseInfo } from "../src/runtime/layout/getFrameCollapseInfo.js"
+import { getFrameDockInfo } from "../src/runtime/layout/getFrameDockInfo.js"
+import { getFrameUncollapseInfo } from "../src/runtime/layout/getFrameUncollapseInfo.js"
+import { settings } from "../src/runtime/settings.js"
+
+
+const testWindow = createTestWindow()
+
+beforeEach(() => {
+	settings.collapseSize = { width: 0, height: 0 }
+})
+
+it("simple collapse/uncollapse", () => {
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: w.half, height: w.full },
+			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: false }
+		}
+	}
+	const expected = walk(layout, undefined, { save: true })
+
+	for (const orientation of [0, 90, 180, 270] as const) {
+		const clone = walk(layout, undefined, { save: true })
+		const expectedClone = walk(expected, undefined, { save: true })
+		if (orientation !== 0) {
+			rotateLayout(Object.values(clone.frames), orientation)
+			rotateLayout(Object.values(expectedClone.frames), orientation)
+		}
+
+		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "B")))
+		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "B")))
+
+		expect(clone).toEqual(expectedClone)
+	}
+})
+it("simple collapse/uncollapse when collapsed size !==0", () => {
+	settings.collapseSize = { width: 5, height: 5 }
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: w.half, height: w.full },
+			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: false }
+		}
+	}
+	const expected = walk(layout, undefined, { save: true })
+
+	for (const orientation of [0, 90, 180, 270] as const) {
+		const clone = walk(layout, undefined, { save: true })
+		const expectedClone = walk(expected, undefined, { save: true })
+		if (orientation !== 0) {
+			rotateLayout(Object.values(clone.frames), orientation)
+			rotateLayout(Object.values(expectedClone.frames), orientation)
+		}
+
+		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "B")))
+		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "B")))
+
+		expect(clone).toEqual(expectedClone)
+	}
+})
+
+it("all four sides collapsed", () => {
+	/**
+		* ┌────┬──────────────┐
+		* │A*  │B*            │
+		* │    ├─────────┬────┤
+		* │    │E        │C*  │
+		* │    │         │    │
+		* ├────┴─────────┤    │
+		* │D*            │    │
+		* └──────────────┴────┘
+		*/
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: w.forth, height: w.forth * 3, docked: "left" },
+			B: { id: "B", x: w.forth, y: 0, width: w.forth * 3, height: w.forth, docked: "top" },
+			C: { id: "C", x: w.forth * 3, y: w.forth, width: w.forth, height: w.forth * 3, docked: "right" },
+			D: { id: "D", x: 0, y: w.forth * 3, width: w.forth * 3, height: w.forth, docked: "bottom" },
+			E: { id: "E", x: w.forth, y: w.forth, width: w.forth * 2, height: w.forth * 2 }
+		}
+	}
+	const clone = walk(layout, undefined, { save: true })
+	const clone2 = walk(layout, undefined, { save: true })
+	/**
+		* expected sequence
+		* ┌───────────────────┐
+		* │B*                 │
+		* ├────────────┬──────┤
+		* │E           │C*    │
+		* │            │      │
+		* ├────────────┤      │
+		* │D*          │      │
+		* └────────────┴──────┘
+		*
+		* ┌────────────┬──────┐
+		* │E           │C*    │
+		* │            │      │
+		* │            │      │
+		* ├────────────┤      │
+		* │D*          │      │
+		* │            │      │
+		* └────────────┴──────┘
+		* ┌───────────────────┐
+		* │E                  │
+		* │                   │
+		* │                   │
+		* ├───────────────────┤
+		* │D*                 │
+		* │                   │
+		* └───────────────────┘
+		*
+		* ┌───────────────────┐
+		* │E                  │
+		* │                   │
+		* │                   │
+		* │                   │
+		* │                   │
+		* │                   │
+		* └───────────────────┘
+		*/
+	for (const id of ["A", "B", "C", "D"]) {
+		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, id)))
+		if (id === "A") {
+			expect(clone.frames.B).toEqual(expect.objectContaining({
+				...layout.frames.B,
+				x: 0,
+				width: w.full,
+				height: w.forth
+			}))
+			expect(clone.frames.E.width + clone.frames.C.width).toBe(w.full)
+			expect(clone.frames.D.width + clone.frames.C.width).toBe(w.full)
+			expect(clone.frames.B.x).toBe(0)
+			expect(clone.frames.E.x).toBe(0)
+			expect(clone.frames.D.x).toBe(0)
+			expect(clone.frames.C.x).toBe(clone.frames.E.width)
+		}
+		if (id === "B") {
+			expect(clone.frames.E.x).toBe(0)
+			expect(clone.frames.D.x).toBe(0)
+			expect(clone.frames.C.x).toBe(clone.frames.E.width)
+			expect(clone.frames.E.width + clone.frames.C.width).toBe(w.full)
+			expect(clone.frames.D.width + clone.frames.C.width).toBe(w.full)
+		}
+		if (id === "C") {
+			expect(clone.frames.E.width).toBe(w.full)
+			expect(clone.frames.D.width).toBe(w.full)
+		}
+		if (id === "D") {
+			expect(clone.frames.E).toEqual(expect.objectContaining({
+				x: 0,
+				y: 0,
+				width: w.full,
+				height: w.full
+			}))
+		}
+	}
+
+	for (const id of ["A", "B", "C", "D"].reverse()) {
+		applyFrameChanges(clone2, throwIfError(getFrameCollapseInfo(clone2, id)))
+	}
+	expect(clone2.frames.E).toEqual(expect.objectContaining({
+		x: 0,
+		y: 0,
+		width: w.full,
+		height: w.full
+	}))
+})
+it("all four sides collapsed then uncollapsed", () => {
+	/**
+		* ┌────┬──────────────┐
+		* │A*  │B*            │
+		* │    ├─────────┬────┤
+		* │    │E        │C*  │
+		* │    │         │    │
+		* ├────┴─────────┤    │
+		* │D*            │    │
+		* └──────────────┴────┘
+		*/
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: w.forth, height: w.forth * 3, docked: "left" },
+			B: { id: "B", x: w.forth, y: 0, width: w.forth * 3, height: w.forth, docked: "top" },
+			C: { id: "C", x: w.forth * 3, y: w.forth, width: w.forth, height: w.forth * 3, docked: "right" },
+			D: { id: "D", x: 0, y: w.forth * 3, width: w.forth * 3, height: w.forth, docked: "bottom" },
+			E: { id: "E", x: w.forth, y: w.forth, width: w.forth * 2, height: w.forth * 2 }
+		}
+	}
+	const clone = walk(layout, undefined, { save: true })
+	const clone2 = walk(layout, undefined, { save: true })
+
+	for (const id of ["A", "B", "C", "D"]) {
+		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, id)))
+	}
+	/**
+		* sequence would look like this, note how the end result very much depends on the order of the uncollapses
+		* ┌────┬──────────────┐
+		* │A*  │E             │
+		* │    │              │
+		* │    │              │
+		* │    │              │
+		* │    │              │
+		* │    │              │
+		* └────┴──────────────┘
+		*
+		* ┌───────────────────┐
+		* │B*                 │
+		* ├────┬──────────────┤
+		* │A*  │E             │
+		* │    │              │
+		* │    │              │
+		* │    │              │
+		* └────┴──────────────┘
+		* ┌──────────────┬────┐
+		* │B*            │C*  │
+		* ├────┬─────────┤    │
+		* │A*  │E        │    │
+		* │    │         │    │
+		* │    │         │    │
+		* │    │         │    │
+		* └────┴─────────┴────┘
+		* ┌──────────────┬────┐
+		* │B*            │C*  │
+		* ├────┬─────────┤    │
+		* │A*  │E        │    │
+		* │    │         │    │
+		* ├────┴─────────┴────┤
+		* │D*                 │
+		* └───────────────────┘
+		*/
+	for (const id of ["A", "B", "C", "D"]) {
+		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, id)))
+	}
+	expect(clone.frames.B.width + clone.frames.C.width).toBe(w.full)
+	expect(clone.frames.A.width + clone.frames.E.width + clone.frames.C.width).toBe(w.full)
+	expect(clone.frames.D.width).toBe(w.full)
+
+	expect(() => {
+		for (const id of ["A", "B", "C", "D"].reverse()) {
+			applyFrameChanges(clone2, throwIfError(getFrameCollapseInfo(clone2, id)))
+		}
+		for (const id of ["A", "B", "C", "D"].reverse()) {
+			applyFrameChanges(clone2, throwIfError(getFrameUncollapseInfo(clone2, id)))
+		}
+	}).not.toThrow()
+})
+
+it("collapse when collapsed size !==0", () => {
+	settings.collapseSize = { width: 5, height: 5 }
+
+	const collapseSize = 5000
+	const remainingWidth = w.full - collapseSize
+
+	/**
+	 * ┌────────────┬──┐
+	 * │A           │C~│
+	 * │            │  │
+	 * ├────────────┤  │
+	 * │B           │  │
+	 * │            │  │
+	 * └────────────┴──┘
+	 */
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: remainingWidth, height: w.half },
+			B: { id: "B", x: 0, y: w.half, width: remainingWidth, height: w.half },
+			C: { id: "C", x: remainingWidth, y: 0, width: collapseSize, height: w.full, docked: "right", collapsed: w.forth }
+		}
+	}
+
+	const clone = walk(layout, undefined, { save: true })
+
+	applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.forth)))
+
+	expect(clone.frames.A).toEqual(expect.objectContaining({
+		x: 0,
+		width: w.full - collapseSize,
+		height: w.forth
+	}))
+	expect(clone.frames.B).toEqual(expect.objectContaining({
+		height: w.full - clone.frames.A.height,
+		y: clone.frames.A.height
+	}))
+	expect(clone.frames.C).toEqual(expect.objectContaining({
+		...layout.frames.C,
+		height: w.full
+	}))
+
+	applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "A")))
+
+	expect(clone.frames.A).toEqual(expect.objectContaining({
+		x: 0,
+		width: w.full - collapseSize,
+		height: collapseSize
+	}))
+	expect(clone.frames.B).toEqual(expect.objectContaining({
+		height: w.full - clone.frames.A.height,
+		y: clone.frames.A.height
+	}))
+	expect(clone.frames.C).toEqual(expect.objectContaining({
+		...layout.frames.C,
+		height: w.full
+	}))
+})
+it("uncollapse when collapsed size !==0", () => {
+	settings.collapseSize = { width: 5, height: 5 }
+
+	const collapseSize = 5000
+	const remainingSize = w.full - collapseSize
+
+	/**
+	 * ┌────────────┬──┐
+	 * │A~          │C~│
+	 * ├────────────┤  │
+	 * │            │  │
+	 * │B           │  │
+	 * │            │  │
+	 * └────────────┴──┘
+	 */
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: remainingSize, height: collapseSize, docked: "top", collapsed: w.forth },
+			B: { id: "B", x: 0, y: collapseSize, width: remainingSize, height: remainingSize },
+			C: { id: "C", x: remainingSize, y: 0, width: collapseSize, height: w.full, docked: "right", collapsed: w.forth }
+		}
+	}
+
+	const clone = walk(layout, undefined, { save: true })
+
+	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "A")))
+
+	expect(clone.frames.A).toEqual(expect.objectContaining({
+		...layout.frames.A,
+		height: w.forth,
+		collapsed: false
+	}))
+	expect(clone.frames.B).toEqual(expect.objectContaining({
+		...layout.frames.B,
+		height: w.full - w.forth,
+		y: w.forth
+	}))
+	expect(clone.frames.C).toEqual(expect.objectContaining({
+		...layout.frames.C,
+		y: 0,
+		height: w.full
+	}))
+})
+
+it("multiple docks - a left (collasped) then b top", () => {
+	const layout = {
+		...testWindow,
+		frames: {
+			A: {
+				id: "A",
+				x: 0,
+				y: 0,
+				width: 0,
+				height: w.full,
+				collapsed: w.third,
+				docked: "left"
+			},
+			B: { id: "B", x: w.third, y: 0, width: w.full, height: w.half, docked: "top" },
+			C: { id: "C", x: w.third, y: w.half, width: w.full, height: w.full }
+		}
+	}
+	const clone = walk(layout, undefined, { save: true })
+	/**
+		* collapsed
+		* ┌────── │ ┌─────────────┐
+		* │A*Left │ │B*Top        │
+		* │       │ │             │
+		* │       │ ├─────────────┤
+		* │       │ │C            │
+		* │       │ │             │
+		* └────── │ └─────────────┘
+		*
+		*/
+	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "A")))
+
+	expect(clone.frames).toEqual(expect.objectContaining({
+		A: expect.objectContaining({
+			...layout.frames.A,
+			docked: "left",
+			collapsed: false,
+			width: w.third
+		}),
+		B: expect.objectContaining({
+			...layout.frames.B,
+			x: w.third * 2,
+			width: w.full - (w.third),
+			docked: "top"
+		}),
+		C: expect.objectContaining({
+			...layout.frames.C,
+			x: w.third * 2,
+			width: w.full - (w.third)
+		})
+	}))
+})
+

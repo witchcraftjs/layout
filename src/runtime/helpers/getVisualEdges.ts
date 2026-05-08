@@ -18,7 +18,7 @@ import type {
 } from "../types/index.js"
 
 /**
- * Returns the "visual" edges that can be dragged.
+ * Returns the "visual" edges that can be dragged (so will not return edges for collapsed frames without some area).
  *
  * Visual edges are a combination of all edges shared by frames that must be moved together.
  *
@@ -77,6 +77,7 @@ export function getVisualEdges<T extends boolean = false>(
 	}
 	const max = getMaxInt()
 	for (const frame of frames) {
+		if (frame.collapsed && (frame.width === 0 || frame.height === 0)) continue
 		const frameEdges = frameToEdges(frame)
 		addPointsToIntersection(intersections, Object.values(frameToPoints(frame)))
 

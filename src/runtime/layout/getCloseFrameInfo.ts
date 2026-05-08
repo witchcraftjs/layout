@@ -99,12 +99,21 @@ export function getCloseFrameInfo<T extends "edge" | "dir">(
 		| typeof LAYOUT_ERROR.CANT_CLOSE_NO_DRAG_EDGE
 		| typeof LAYOUT_ERROR.CANT_CLOSE_SINGLE_FRAME
 		| typeof LAYOUT_ERROR.CANT_CLOSE_WITHOUT_FORCE
+		| typeof LAYOUT_ERROR.CANT_LEAVE_NO_UNDOCKED_FRAMES
 	> {
 	if (frames.length === 1) {
 		return new KnownError(LAYOUT_ERROR.CANT_CLOSE_SINGLE_FRAME,
 			`Can't close frame ${frame.id}, it is the last frame in the window.`,
 			{ frame })
 	}
+	if (!frame.docked && frames.filter(_ => !_.docked).length === 0) {
+		return new KnownError(
+			LAYOUT_ERROR.CANT_LEAVE_NO_UNDOCKED_FRAMES,
+			`Can't close last undocked frame. One undocked frame must remain`,
+			{ frame: frame.id }
+		)
+	}
+
 	const side = closeBy === "dir"
 		? oppositeSide(dirToSide(closeDirOrSide as Direction))
 		: closeDirOrSide as EdgeSide

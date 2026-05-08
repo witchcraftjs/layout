@@ -13,33 +13,67 @@
 	)"
 	v-bind="{ ...$attrs, class: undefined }"
 >
-	<template v-if="windowEl && win">
-		<LayoutFrameComponent
-			:frame="frame"
-			:is-active-frame="frame.id === win.activeFrame"
-			v-for="frame of frames"
-			:key="frame.id"
-			v-bind="frameProps"
-			@focus="windowSetActiveFrame(win, frame.id)"
+		<!-- we need the size withot borders for correct px calculations -->
+	<div class="
+		layout-window
+		relative
+		overflow-hidden
+		flex-1
+	" ref="windowEl">
+		<template v-if="windowEl && win">
+			<LayoutFrameComponent
+				:frame="frame"
+				:is-active-frame="frame.id === win.activeFrame"
+				v-for="frame of frames"
+				:key="frame.id"
+				v-bind="frameProps"
+				@focus="windowSetActiveFrame(win, frame.id)"
+			>
+				<slot :name="`frame-${frame.id}`" v-bind="{frame}"/>
+			</LayoutFrameComponent>
+			<LayoutEdgesComponent
+				:win="win"
+				:active-frame="win.activeFrame ? frames[win.activeFrame] : undefined"
+				:edges="visualEdges"
+				:intersections="intersections"
+				:dragging-edge="draggingEdges.length === 1 ? draggingEdges[0] : undefined"
+				:dragging-intersection="draggingIntersection"
+				v-bind="edgesProps"
+				@drag-start="dragStart"
+			/>
+			<LayoutDecosComponent
+				:shapes="shapes"
+			/>
+			<slot name="extra-decos"/>
+		</template>
+	</div>
+	<Teleport
+		v-if="isDragging === 'frame' && frameDragFrameId && dragPoint"
+		:to="ghostTeleportTo"
+		defer
+	>
+		<div
+			class="fixed z-[9999] pointer-events-none"
+			:style="{
+				left: (dragPoint.x / settings.maxInt * win.pxWidth + win.pxX) + 'px',
+				top: (dragPoint.y / settings.maxInt * win.pxHeight + win.pxY) + 'px',
+				width: frames[frameDragFrameId]
+					? (frames[frameDragFrameId].width / settings.maxInt * win.pxWidth) + 'px'
+					: undefined,
+				height: frames[frameDragFrameId]
+					? (frames[frameDragFrameId].height / settings.maxInt * win.pxHeight) + 'px'
+					: undefined
+			}"
 		>
-			<slot :name="`frame-${frame.id}`" v-bind="{frame}"/>
-		</LayoutFrameComponent>
-		<LayoutEdgesComponent
-			:win="win"
-			:active-frame="win.activeFrame ? frames[win.activeFrame] : undefined"
-			:edges="visualEdges"
-			:intersections="intersections"
-			:dragging-edge="draggingEdges.length === 1 ? draggingEdges[0] : undefined"
-			:dragging-intersection="draggingIntersection"
-			v-bind="edgesProps"
-			@drag-start="dragStart"
-		/>
-		<LayoutDecosComponent
-			:shapes="shapes"
-		/>
-		<slot name="extra-decos"/>
-	</template>
-	<Teleport v-if="instructionsTeleportTo && filteredUsageInstructions.length > 0" :to="instructionsTeleportTo" defer>
+			<slot
+				:id="frameDragFrameId"
+				:name="`frame-drag-ghost`"
+			>
+				<div class="frame-drag-ghost border border-neutral-500 bg-white/50 w-10 h-10"/>
+			</slot>
+		</div>
+	</Teleport>
+	<Teleport v-if="textHintsTeleportTo && textHints.length > 0" :to="textHintsTeleportTo" defer>
 		<span aria-live="polite">
 			<span
 				:class="twMerge(`
@@ -111,7 +145,7 @@ const emit = defineEmits<{
 
 const windowEl = ref<HTMLElement | null>(null)
 
-const requestType = ref<"split" | "close" | undefined | string>()
+const requestType = ref<string | undefined | string>()
 
 const dragActionHandler = new DragActionHandler(
 	[
