@@ -94,7 +94,7 @@ export function getVisualEdges<T extends boolean = false>(
 				if (containsEdge(edge, e, dir)) {
 					continue secondlabel
 				}
-				if (doEdgesOverlap(e, edge, dir)) {
+				if (doEdgesOverlap(e, edge, dir, true)) {
 					indexes.push(i)
 					edges.push(e)
 				}
