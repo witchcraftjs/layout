@@ -67,7 +67,7 @@ export function useFrames(
 	const dragHoveredFrame = computed(() => {
 		if (isDragging.value) {
 			for (const id of keys(frames.value)) {
-				if (isPointInFrame(frames.value[id], dragPoint.value!)) {
+				if (isPointInRect(frames.value[id], dragPoint.value!)) {
 					return frames.value[id]
 				}
 			}
