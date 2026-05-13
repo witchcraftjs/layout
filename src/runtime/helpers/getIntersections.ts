@@ -6,7 +6,7 @@ import { edgeToPoints } from "./edgeToPoints.js"
 import { getEdgeOrientation } from "./getEdgeOrientation.js"
 import { inRange } from "./inRange.js"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	Edge, IntersectionEntry,
 	Orientation,
@@ -25,7 +25,7 @@ export function getIntersections(
 	}
 
 	const points: IntersectionEntry[] = []
-	const maxInt = getMaxInt()
+	const maxInt = settings.maxInt
 	for (const x of keys(intersections)) {
 		for (const y of keys(intersections[x])) {
 			// careful, x and y are really strings

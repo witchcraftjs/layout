@@ -4,7 +4,7 @@ import { z } from "zod"
 
 export * from "../drag/types.js"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 
 export const zUuid = z.uuid()
 export type AnyUuid = z.infer<typeof zUuid>
@@ -20,7 +20,7 @@ export type FrameId = z.infer<typeof zFrameId>
 export const zScaledIntPercentage = z.number()
 	.int()
 	.min(0)
-	.max(getMaxInt())
+	.max(settings.maxInt)
 	.nonnegative()
 
 const zPx = z.number()
@@ -166,13 +166,13 @@ const baseWorkspace = baseLayoutWindow.pick({ activeFrame: true, frames: true })
 		if (edge === "left" && (frame as any).x !== 0) {
 			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on left edge must have x=0`, path: ["frames", frameId, "x"] })
 		}
-		if (edge === "right" && (frame as any).x + (frame as any).width !== getMaxInt()) {
+		if (edge === "right" && (frame as any).x + (frame as any).width !== settings.maxInt) {
 			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on right edge must have x+width=maxInt`, path: ["frames", frameId, "x"] })
 		}
 		if (edge === "top" && (frame as any).y !== 0) {
 			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on top edge must have y=0`, path: ["frames", frameId, "y"] })
 		}
-		if (edge === "bottom" && (frame as any).y + (frame as any).height !== getMaxInt()) {
+		if (edge === "bottom" && (frame as any).y + (frame as any).height !== settings.maxInt) {
 			ctx.addIssue({ code: "custom", message: `Docked frame ${frameId} on bottom edge must have y+height=maxInt`, path: ["frames", frameId, "y"] })
 		}
 	}

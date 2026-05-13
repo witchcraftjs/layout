@@ -9,8 +9,9 @@ import { getFrameUndockInfo } from "./getFrameUndockInfo.js"
 import { cloneFrame } from "../helpers/cloneFrame.js"
 import { getDockBoundaries } from "../helpers/getDockBoundaries.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
-import { getMaxInt, getMaxPerpendicularLength } from "../settings.js"
-import { type EdgeSide, LAYOUT_ERROR, type LayoutFrame, type LayoutWindow } from "../types/index.js"
+import { settings } from "../settings.js"
+import type { EdgeSide, LayoutChange, LayoutWindow } from "../types/index.js"
+import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
 /**
@@ -63,28 +64,8 @@ export function getFrameDockInfo(
 	}
 
 	// if its the only frame allow it to be as big as it likes
-	const effectiveMaxPerpendicular = maxPerpendicularLength ?? getMaxPerpendicularLength()
+	const effectiveMaxPerpendicular = maxPerpendicularLength ?? settings.maxPerpendicularLengthScaled.width
 	const perpendicularLength = otherFrameIds.length > 0 ? Math.min(frame[perpendicular], effectiveMaxPerpendicular) : frame[perpendicular]
-
-	// determine the inner area by looking at already docked frames
-	let minX = 0
-	let maxX = getMaxInt()
-	let minY = 0
-	let maxY = getMaxInt()
-
-	if (otherFrameIds.length > 0) {
-		for (const f of Object.values(win.frames)) {
-			if (f.id === frameId || !f.docked) continue
-			if (f.docked === side) {
-				return new KnownError(LAYOUT_ERROR.FRAME_ALREADY_DOCKED_ON_SIDE, `Frame ${f.id} already docked on side ${side}.`, { id: f.id, side })
-			}
-			if (f.docked === "left") minX = Math.max(minX, f.x + f.width)
-			if (f.docked === "right") maxX = Math.min(maxX, f.x)
-			if (f.docked === "top") minY = Math.max(minY, f.y + f.height)
-			if (f.docked === "bottom") maxY = Math.min(maxY, f.y)
-		}
-	}
-
 
 	frame.docked = side
 	frame.collapsed = false
@@ -119,7 +100,7 @@ export function getFrameDockInfo(
 			frame.height = maxY - minY
 			break
 		case "right":
-			frame.x = getMaxInt() - perpendicularLength
+			frame.x = settings.maxInt - perpendicularLength
 			frame.y = minY
 			frame.width = perpendicularLength
 			frame.height = maxY - minY
@@ -132,7 +113,7 @@ export function getFrameDockInfo(
 			break
 		case "bottom":
 			frame.x = minX
-			frame.y = getMaxInt() - perpendicularLength
+			frame.y = settings.maxInt - perpendicularLength
 			frame.width = maxX - minX
 			frame.height = perpendicularLength
 			break

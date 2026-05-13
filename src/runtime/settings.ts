@@ -1,95 +1,83 @@
 import type { Point, Size } from "./types/index.js"
 
-const g = {
-	SCALE: 3,
-	maxInt: 100 * (10 ** 3),
-	SNAP_PERCENTAGE_X: 0.5,
-	SNAP_PERCENTAGE_Y: 0.5,
-	snapPoint: { x: Math.round(0.5 * (10 ** 3)), y: Math.round(0.5 * (10 ** 3)) },
-	MARGIN_PERCENTAGE_WIDTH: 10 ** 3,
-	MARGIN_PERCENTAGE_HEIGHT: 10 ** 3,
-	marginSize: { width: 10 ** 3, height: 10 ** 3 },
-	COLLAPSE_PERCENTAGE_WIDTH: 0,
-	COLLAPSE_PERCENTAGE_HEIGHT: 0,
-	collapseSize: { width: 0, height: 0 },
-	MAX_PERPENDICULAR_PERCENTAGE: 33.333,
-	maxPerpendicularLength: Math.round(33.333 * (10 ** 3))
-}
-export const globalOptions = g
-// todo think of better way :/
-
-export function setScale(scale: number): void {
-	const max = 100 * (10 ** scale)
-	if (!Number.isSafeInteger(max)) {
-		throw new TypeError("Scale too high. Precision will be lost!")
+export class Settings {
+	private _scale = 3
+	private _maxInt = 100 * (10 ** 3)
+	get scale() { return this._scale }
+	set scale(v: number) {
+		this._scale = v
+		this._maxInt = 100 * (10 ** v)
+		this._recalcAll()
 	}
-	g.SCALE = scale
-	g.maxInt = max
-}
 
-export function getMaxInt(): number {
-	return g.maxInt
-}
+	get maxInt() { return this._maxInt }
 
-export function setSnapPercentage(snapPercentage: number | Point): void {
-	if (typeof snapPercentage === "number") {
-		g.SNAP_PERCENTAGE_X = snapPercentage
-		g.SNAP_PERCENTAGE_Y = snapPercentage
-	} else {
-		g.SNAP_PERCENTAGE_X = snapPercentage.x
-		g.SNAP_PERCENTAGE_Y = snapPercentage.y
+
+	private _snapPoint = { x: 0.5, y: 0.5 }
+	private _snapPointScaled = { x: Math.round(0.5 * (10 ** 3)), y: Math.round(0.5 * (10 ** 3)) }
+
+	get snapPoint() { return this._snapPoint }
+	set snapPoint(v: number | Point) {
+		if (typeof v === "number") { this._snapPoint = { x: v, y: v } } else { this._snapPoint = { x: v.x, y: v.y } }
+		this._snapPointScaled = this._scalePoint(this._snapPoint)
 	}
-	g.snapPoint = {
-		x: Math.round(g.SNAP_PERCENTAGE_X * (10 ** g.SCALE)),
-		y: Math.round(g.SNAP_PERCENTAGE_Y * (10 ** g.SCALE))
+
+	get snapPointScaled() { return this._snapPointScaled }
+
+
+	private _minSize = { width: 10 ** 3, height: 10 ** 3 }
+	private _minSizeScaled = { width: 10 ** 3, height: 10 ** 3 }
+
+	get minSize() { return this._minSize }
+	set minSize(v: number | Size) {
+		if (typeof v === "number") { this._minSize = { width: v, height: v } } else { this._minSize = { width: v.width, height: v.height } }
+		this._minSizeScaled = this._scaleSize(this._minSize)
 	}
-}
 
-export function getSnapPoint(): Readonly<Point> {
-	return g.snapPoint
-}
+	get minSizeScaled() { return this._minSizeScaled }
 
-export function setMarginPercentage(margin: number | Size): void {
-	if (typeof margin === "number") {
-		g.MARGIN_PERCENTAGE_WIDTH = margin
-		g.MARGIN_PERCENTAGE_HEIGHT = margin
-	} else {
-		g.MARGIN_PERCENTAGE_WIDTH = margin.width
-		g.MARGIN_PERCENTAGE_HEIGHT = margin.height
+	private _collapseSize = { width: 0, height: 0 }
+	private _collapseSizeScaled = { width: 0, height: 0 }
+
+	get collapseSize() { return this._collapseSize }
+	set collapseSize(v: number | Size) {
+		if (typeof v === "number") { this._collapseSize = { width: v, height: v } } else { this._collapseSize = { width: v.width, height: v.height } }
+		this._collapseSizeScaled = this._scaleSize(this._collapseSize)
 	}
-	g.marginSize = {
-		width: Math.round(g.MARGIN_PERCENTAGE_WIDTH * (10 ** g.SCALE)),
-		height: Math.round(g.MARGIN_PERCENTAGE_HEIGHT * (10 ** g.SCALE))
+
+	get collapseSizeScaled() { return this._collapseSizeScaled }
+
+	private _maxPerpendicularLength = { width: 20, height: 20 }
+	private _maxPerpendicularLengthScaled = { width: Math.round(20 * (10 ** 3)), height: Math.round(20 * (10 ** 3)) }
+
+	get maxPerpendicularLength() { return this._maxPerpendicularLength }
+	set maxPerpendicularLength(v: number | Size) {
+		if (typeof v === "number") { this._maxPerpendicularLength = { width: v, height: v } } else { this._maxPerpendicularLength = { ...v } }
+		this._maxPerpendicularLengthScaled = this._scaleSize(this._maxPerpendicularLength)
 	}
-}
 
-export function getMarginSize(): Readonly<Size> {
-	return g.marginSize
-}
+	get maxPerpendicularLengthScaled() { return this._maxPerpendicularLengthScaled }
 
-export function setCollapseSize(collapse: Size | number): void {
-	if (typeof collapse === "number") {
-		g.COLLAPSE_PERCENTAGE_WIDTH = collapse
-		g.COLLAPSE_PERCENTAGE_HEIGHT = collapse
-	} else {
-		g.COLLAPSE_PERCENTAGE_WIDTH = collapse.width
-		g.COLLAPSE_PERCENTAGE_HEIGHT = collapse.height
+
+	private _scalePoint(p: Point): Point {
+		const m = 10 ** this._scale
+		return { x: Math.round(p.x * m), y: Math.round(p.y * m) }
 	}
-	g.collapseSize = {
-		width: Math.round(g.COLLAPSE_PERCENTAGE_WIDTH * (10 ** g.SCALE)),
-		height: Math.round(g.COLLAPSE_PERCENTAGE_HEIGHT * (10 ** g.SCALE))
+
+	private _scaleSize(s: Size): Size {
+		const m = 10 ** this._scale
+		return { width: Math.round(s.width * m), height: Math.round(s.height * m) }
 	}
+
+	private _recalcAll() {
+		this.snapPoint = this._snapPoint
+		this.minSize = this._minSize
+		this.collapseSize = this._collapseSize
+		this.maxPerpendicularLength = this._maxPerpendicularLength
+	}
+
+	// ==== px sized, don't require recalc
+	zoneSizes = { frameEdgePx: 40, windowEdgePx: 20 }
 }
 
-export function getCollapseSize(): Readonly<Size> {
-	return g.collapseSize
-}
-
-export function setMaxPerpendicularLength(maxPerpendicularLength: number): void {
-	g.MAX_PERPENDICULAR_PERCENTAGE = maxPerpendicularLength
-	g.maxPerpendicularLength = Math.round(maxPerpendicularLength * (10 ** g.SCALE))
-}
-
-export function getMaxPerpendicularLength(): number {
-	return g.maxPerpendicularLength
-}
+export const settings = new Settings()

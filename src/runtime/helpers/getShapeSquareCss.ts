@@ -1,4 +1,4 @@
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type { BaseSquare } from "../types/index.js"
 
 export function getShapeSquareCss(
@@ -10,7 +10,7 @@ export function getShapeSquareCss(
 	width: string
 	height: string
 } {
-	const unscale = getMaxInt() / 100
+	const unscale = settings.maxInt / 100
 	const css = {
 		x: `${obj.x / unscale}%`,
 		y: `${obj.y / unscale}%`,

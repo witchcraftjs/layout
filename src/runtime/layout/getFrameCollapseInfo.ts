@@ -5,8 +5,8 @@ import { applyFrameChanges } from "./applyFrameChanges.js"
 import { getFramesRedistributeInfo } from "./getFramesRedistributeInfo.js"
 
 import { oppositeSide } from "../helpers/oppositeSide.js"
-import { getCollapseSize } from "../settings.js"
-import type { EdgeSide, LayoutFrame, LayoutWindow, Size } from "../types/index.js"
+import { settings } from "../settings.js"
+import type { EdgeSide, LayoutChange, LayoutWindow, Size } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
@@ -45,7 +45,7 @@ export function getFrameCollapseInfo(
 	const oppositePosKey = isVertical ? "y" : "x"
 	const oppositeSizeKey = isVertical ? "height" : "width"
 
-	const collapseSize: Size = getCollapseSize()
+	const collapseSize: Size = settings.collapseSizeScaled
 
 	const currentSize = frame[sizeKey]
 	const collapseAmount = collapseSize[sizeKey]

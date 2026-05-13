@@ -1,13 +1,13 @@
 import { findSafeSplitEdgeAndPosition } from "./findSafeSplitEdge.js"
 
-import { getMarginSize, getSnapPoint } from "../settings.js"
+import { settings } from "../settings.js"
 import type { LayoutFrame, LayoutShape, Point, RawSplitDeco, Size } from "../types/index.js"
 
 export function createSplitDecoShapes(
 	frames: Record<string, LayoutFrame>,
 	deco: RawSplitDeco,
-	snapAmount: Point = getSnapPoint(),
-	minSize: Size = getMarginSize(),
+	snapAmount: Point = settings.snapPointScaled,
+	minSize: Size = settings.minSizeScaled,
 	classes: {
 		/** @default "deco-split-edge bg-red-500" */
 		splitEdge?: string

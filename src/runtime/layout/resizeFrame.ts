@@ -7,7 +7,7 @@ import { getResizeLimit } from "../helpers/getResizeLimit.js"
 import { getVisualEdges } from "../helpers/getVisualEdges.js"
 import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { resizeByEdge } from "../helpers/resizeByEdge.js"
-import { getMarginSize } from "../settings.js"
+import { settings } from "../settings.js"
 import type { Edge, ExtendedDirection, LayoutFrame, LayoutWindow, Size } from "../types/index.js"
 
 export function resizeFrame(
@@ -17,7 +17,7 @@ export function resizeFrame(
 	/** Scaled */
 	distance: Size,
 	/** Scaled */
-	minSize: Size = getMarginSize()
+	minSize: Size = settings.minSizeScaled
 ): boolean {
 	const originalDistance = distance
 	const frameEdges = frameToEdges(frame)

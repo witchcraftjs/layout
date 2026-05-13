@@ -1,5 +1,5 @@
-import { getMarginSize, getMaxInt } from "../settings.js"
-import type { EdgeSide, LayoutFrame, LayoutWindow } from "../types/index.js"
+import { settings } from "../settings.js"
+import type { EdgeSide, LayoutChange, LayoutFrame, LayoutWindow } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
@@ -49,7 +49,7 @@ export function getFramesRedistributeInfo(
 	}
 	const uniqueEdges = [...edgeSet].sort((a, b) => a - b)
 
-	const maxInt = getMaxInt()
+	const maxInt = settings.maxInt
 	const resizeSpan = uniqueEdges[uniqueEdges.length - 1] - uniqueEdges[0]
 	const newSpan = resizeSpan - amountScaled
 	if (!allowOutOfBounds && (newSpan > maxInt || newSpan < 0)) {
@@ -73,7 +73,7 @@ export function getFramesRedistributeInfo(
 	newEdges[oppositeEdgeIndex] = isLeftOrTop ? anchorEdge + newSpan : anchorEdge - newSpan
 
 
-	const minSize = getMarginSize()[sizeKey]
+	const minSize = settings.minSizeScaled[sizeKey]
 	const result: LayoutFrame[] = []
 	for (const frame of frames) {
 		if (frame.collapsed && (frame.width === 0 || frame.height === 0)) continue

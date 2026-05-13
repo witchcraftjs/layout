@@ -10,7 +10,7 @@ import { inRange } from "./inRange.js"
 import { splitEdge } from "./splitEdge.js"
 import { unionEdges } from "./unionEdges.js"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	Edge,
 	Intersections,
@@ -75,7 +75,7 @@ export function getVisualEdges<T extends boolean = false>(
 	const intersections: Intersections = {
 		// x: {y: count}
 	}
-	const max = getMaxInt()
+	const max = settings.maxInt
 	for (const frame of frames) {
 		if (frame.collapsed && (frame.width === 0 || frame.height === 0)) continue
 		const frameEdges = frameToEdges(frame)

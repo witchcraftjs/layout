@@ -10,8 +10,8 @@ import { dirToSide } from "../helpers/dirToSide.js"
 import { findFrameDraggableEdges } from "../helpers/findFrameDraggableEdges.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
-import { getMarginSize } from "../settings.js"
-import { type Direction, type Edge, type EdgeSide, LAYOUT_ERROR, type LayoutFrame, type Size } from "../types/index.js"
+import { settings } from "../settings.js"
+import { type Direction, type Edge, type EdgeSide, LAYOUT_ERROR, type LayoutChange, type LayoutFrame, type Size } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
 /**
@@ -92,8 +92,8 @@ export function getCloseFrameInfo<T extends "edge" | "dir">(
 	closeDirOrSide: (T extends "dir" ? Direction : EdgeSide),
 	closeBy: T = "dir" as any as T,
 	force: boolean = false,
-	minSize: Size = getMarginSize()
-): { modifiedFrames: LayoutFrame[], deletedFrames: LayoutFrame[] }
+	minSize: Size = settings.minSizeScaled
+): LayoutChange
 	| KnownError<
 		| typeof LAYOUT_ERROR.CANT_CLOSE_NEARBY_FRAMES_TOO_SMALL
 		| typeof LAYOUT_ERROR.CANT_CLOSE_NO_DRAG_EDGE

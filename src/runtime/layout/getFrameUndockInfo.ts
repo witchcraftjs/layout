@@ -1,5 +1,6 @@
-import { getMaxInt } from "../settings.js"
-import { LAYOUT_ERROR, type LayoutFrame, type LayoutWindow } from "../types/index.js"
+import { settings } from "../settings.js"
+import type { LayoutChange, LayoutFrame, LayoutWindow } from "../types/index.js"
+import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
 /**
@@ -25,7 +26,7 @@ export function getFrameUndockInfo(
 	const isVertical = frameSide === "left" || frameSide === "right"
 	const sizeKey = isVertical ? "height" : "width" as const
 	const posKey = isVertical ? "y" : "x" as const
-	const maxInt = getMaxInt()
+	const maxInt = settings.maxInt
 	const shrinkStartKey = isVertical ? "top" : "left" as const
 	const shrinkEndKey = isVertical ? "bottom" : "right" as const
 

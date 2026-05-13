@@ -1,6 +1,6 @@
 import { getEdgeOrientation } from "./getEdgeOrientation.js"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	Edge,
 	EdgeCss } from "../types/index.js"
@@ -20,7 +20,7 @@ export function getVisualEdgeCss(
 	} = {}
 ): EdgeCss {
 	const dir = getEdgeOrientation(edge)
-	const unscale = getMaxInt() / 100
+	const unscale = settings.maxInt / 100
 	const w = (edge.endX - edge.startX) / unscale
 	const h = (edge.endY - edge.startY) / unscale
 	const width = dir === "vertical" ? edgeWidth : `${w}%`

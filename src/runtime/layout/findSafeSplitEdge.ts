@@ -2,15 +2,15 @@ import { clampNumber, snapNumber } from "@alanscodelog/utils"
 
 import { dirToOrientation } from "../helpers/dirToOrientation.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
-import { getMarginSize, getSnapPoint } from "../settings.js"
+import { settings } from "../settings.js"
 import type { Direction, Edge, LayoutFrame, Point, Size } from "../types/index.js"
 
 export function findSafeSplitEdgeAndPosition(
 	frame: LayoutFrame,
 	dragDirection: Direction,
 	dragPointOrPosition: Point | number,
-	snapAmount: Point = getSnapPoint(),
-	minSize: Size = getMarginSize()
+	snapAmount: Point = settings.snapPointScaled,
+	minSize: Size = settings.minSizeScaled
 ): { edge: Edge, position: number } {
 	const orientation = dirToOrientation(dragDirection)
 	const position

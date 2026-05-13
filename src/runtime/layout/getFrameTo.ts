@@ -1,4 +1,4 @@
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type { EdgeSide, LayoutFrame } from "../types/index.js"
 
 export function getFrameTo(
@@ -6,7 +6,7 @@ export function getFrameTo(
 	frame: LayoutFrame,
 	frames: LayoutFrame[]
 ): LayoutFrame | undefined {
-	const max = getMaxInt()
+	const max = settings.maxInt
 	if ((side === "top" && frame.y === 0)
 		|| (side === "left" && frame.y === 0)
 		|| (side === "right" && frame.x + frame.width === max)

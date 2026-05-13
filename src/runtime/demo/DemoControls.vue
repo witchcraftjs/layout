@@ -44,7 +44,7 @@ import { copy } from "@witchcraft/ui/helpers"
 import { ref, watch } from "vue"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { getFrameUncollapseInfo } from "../layout/getFrameUncollapseInfo.js"
-import { getCollapseSize, getMaxInt, setCollapseSize } from "../settings.js"
+import { settings } from "../settings.js"
 import type { LayoutFrame, LayoutWindow } from "../types/index.js"
 import { throwIfError } from "@alanscodelog/utils/throwIfError";
 import { walk } from "@alanscodelog/utils/walk"
@@ -57,10 +57,12 @@ const props = defineProps<{
 	dragActionHandler?: DragActionHandler<any>
 }>()
 
-const collapseSizeValue = ref(Math.round(getCollapseSize().width / getMaxInt() * 100))
+const showDevActions = ref(false)
+
+const collapseSizeValue = ref(Math.round(settings.collapseSizeScaled.width / settings.maxInt * 100))
 
 function handleCollapseSizeChange(value: number) {
-	setCollapseSize(value)
+	settings.collapseSize = value
 	collapseSizeValue.value = value
 }
 

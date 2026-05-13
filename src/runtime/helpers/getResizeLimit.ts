@@ -1,7 +1,7 @@
 import { castType } from "@alanscodelog/utils/castType"
 import { keys } from "@alanscodelog/utils/keys"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	Direction,
 	Edge, ExtendedDirection, LayoutFrame
@@ -51,7 +51,7 @@ export function getResizeLimit<TDir extends ExtendedDirection>(
 	for (const key of keys(limits)) {
 		// this happens when we drag window edges
 		if (limits[key] === -Infinity) limits[key] = 0
-		if (limits[key] === Infinity) limits[key] = getMaxInt()
+		if (limits[key] === Infinity) limits[key] = settings.maxInt
 
 		limits[key]! += (dir === "left" || dir === "up" ? margin : -margin)
 	}

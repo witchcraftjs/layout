@@ -1,4 +1,4 @@
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	IntersectionEntry, PointCss
 } from "../types/index.js"
@@ -13,7 +13,7 @@ export function getIntersectionsCss(entries: IntersectionEntry[],
 		shiftAmount?: string
 	} = {}
 ): (PointCss & { _shifted?: true }) [] {
-	const unscale = getMaxInt() / 100
+	const unscale = settings.maxInt / 100
 	return entries.map(entry => {
 		const point = entry.point
 		const css = {

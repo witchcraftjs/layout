@@ -112,38 +112,25 @@ This is done like this to make it easy to keep the dimensions rounded to x decim
 
 ## Configuration
 
-There are a few variables that need to be used nearly everywhere such as `SCALE` and `SNAP_PERCENT_{X/Y}`. 
+There are a few variables that need to be used nearly everywhere internally such as `settings.scale`. 
 
-While all function that need them, can also be called with params to override them, it's much easier to just manage them globally. 
-
-They are exported from `/settings.js` and stored in a variable called `globalOptions` which you can modify, but helpers are provided for getting/setting the information we actually want to extract using these variables, `maxInt`, `margin`, `snapPoint`.
+To avoid having to pass them around into functions,  they are exported from `/settings.js` and stored in a class instance called `settings` with special getters on the non-scaled values to automatically set scaled ones.
 
 ```ts
-import {
-	globalOptions,
-	getMaxInt,
-	// this is called snapPoint because it's type looks like a point
-	// but it's more like it describes snap steps / distance in x/y
-	getSnapPoint,
-	setScale,
-	setSnapAmount
-} from "@witchcraft-layout/settings.js"
+import { settings } from "@witchcraft-layout/settings.js"
 
 // the function checks the max number is safe to use (using `isSafeInteger`)
 // 3 decimal points of precision
-setScale(3) 
+settings.scale = 3 // setter forces recacl of other values
+settings.maxInt; // 100000 (100 * (10 ** 3))
 // snap to 1%
-setSnapPercentage(1) 
+settings.snapPoint = 1
 // snap x/y differently
-setSnapPercentage({ x: 1, y: 2 })
-setMarginPercentage(1)
+settings.snapPoint = { x: 1, y: 2 }
+settings.minSize = 5 (5%)
 
-// like doing const maxInt = globalOptions.maxInt
-const maxInt = getMaxInt() // 100000
-const snapAmountPoint = getSnapPoint() // { x: 1000, y: 1000 }
-const marginSize = getMarginSize() // { width: 1000, height: 1000 }
 ```
-**NOTE: If you are saving layouts, if you change the snap or the margins to a bigger value, old layouts will become "invalid".** The should still load and you should be able to close frames, but it's not guaranteed they'll function correctly.
+**NOTE: If you are saving layouts, if you change the snap or the min size to a bigger value, old layouts will become "invalid".** They should still load and you should be able to close frames, but it's not guaranteed they'll function correctly with other actions.
 
 There are utilities for converting between non-scaled and scaled values if you need to:
 

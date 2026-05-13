@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid"
 
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	BaseLayoutFrame,
 	ExtendedLayoutFrame,
@@ -11,7 +11,7 @@ import type {
 export function frameCreate(
 	opts: Partial<BaseLayoutFrame> & Omit<ExtendedLayoutFrame, keyof BaseLayoutFrame> = {}
 ): LayoutFrame {
-	const maxInt = getMaxInt()
+	const maxInt = settings.maxInt
 	return {
 		width: maxInt,
 		height: maxInt,

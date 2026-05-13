@@ -2,7 +2,7 @@ import { findSafeSplitEdgeAndPosition } from "./findSafeSplitEdge.js"
 import { frameCreate } from "./frameCreate.js"
 
 import { cloneFrame } from "../helpers/cloneFrame.js"
-import { getMarginSize, getSnapPoint } from "../settings.js"
+import { settings } from "../settings.js"
 import {
 	type Direction,
 	LAYOUT_ERROR,
@@ -22,12 +22,11 @@ export function getFrameSplitInfo(
 	frame: LayoutFrame,
 	dir: Direction,
 	dragPointOrPosition: Point | number | "midpoint" = "midpoint",
-	minSize: Size = getMarginSize(),
-	snapAmount: Point = getSnapPoint()
-): {
-	splitFrame: LayoutFrame
-	newFrame: LayoutFrame
-} | KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_FRAME_TOO_SMALL> | KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME> {
+	minSize: Size = settings.minSizeScaled,
+	snapAmount: Point = settings.snapPointScaled
+): LayoutChange
+	| KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_FRAME_TOO_SMALL>
+	| KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME> {
 	if (frame.docked) {
 		return new KnownError(
 			LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME,

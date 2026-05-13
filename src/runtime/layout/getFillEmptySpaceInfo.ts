@@ -2,8 +2,8 @@ import { doEdgesOverlap } from "../helpers/doEdgesOverlap.js"
 import { frameToEdges } from "../helpers/frameToEdges.js"
 import { getEdgeLength } from "../helpers/getEdgeLength.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
-import { getMaxInt } from "../settings.js"
-import { type Edge, type EdgeSide, LAYOUT_ERROR, type LayoutFrame, type LayoutWindow } from "../types/index.js"
+import type { EdgeSide, LayoutChange, LayoutFrame, LayoutWindow } from "../types/index.js"
+import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 /**
  * Finds a frame to fill the empty space left behind by a moved/empty frame (e.g. a dragged frame's original position).
@@ -157,20 +157,16 @@ export function getFillEmptySpaceInfo(
 			case "top":
 				updated.y -= vacHeight
 				updated.height += vacHeight
-				if (clamp && updated.y + updated.height > getMaxInt()) updated.height = getMaxInt() - updated.y
 				break
 			case "bottom":
 				updated.height += vacHeight
-				if (clamp && updated.y + updated.height > getMaxInt()) updated.height = getMaxInt() - updated.y
 				break
 			case "left":
 				updated.x -= vacWidth
 				updated.width += vacWidth
-				if (clamp && updated.x + updated.width > getMaxInt()) updated.width = getMaxInt() - updated.x
 				break
 			case "right":
 				updated.width += vacWidth
-				if (clamp && updated.x + updated.width > getMaxInt()) updated.width = getMaxInt() - updated.x
 				break
 		}
 

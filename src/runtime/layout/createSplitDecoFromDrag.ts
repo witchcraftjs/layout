@@ -1,7 +1,7 @@
 import { createSplitDecoShapes } from "./createSplitDecoShapes.js"
 
 import { dirToOrientation } from "../helpers/dirToOrientation.js"
-import { getMarginSize, getSnapPoint } from "../settings.js"
+import { settings } from "../settings.js"
 import type { Direction, LayoutFrame, Point, RawSplitDeco, Size, SplitDeco } from "../types/index.js"
 
 export function createSplitDecoFromDrag(
@@ -9,8 +9,8 @@ export function createSplitDecoFromDrag(
 	frame: LayoutFrame,
 	dragDirection: Direction,
 	dragPoint: Point,
-	snapAmount: Point = getSnapPoint(),
-	minSize: Size = getMarginSize(),
+	snapAmount: Point = settings.snapPointScaled,
+	minSize: Size = settings.minSizeScaled,
 	classes: {
 		/** @default "deco-split-edge bg-red-500" */
 		splitEdge?: string

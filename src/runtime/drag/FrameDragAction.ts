@@ -6,8 +6,8 @@ import { getDragZones } from "../layout/getDragZones.js"
 import { getFrameDockInfo } from "../layout/getFrameDockInfo.js"
 import { getFrameRearrangeInfo } from "../layout/getFrameRearrangeInfo.js"
 import { getFrameSwapInfo } from "../layout/getFrameSwapInfo.js"
-import { getMaxInt } from "../settings.js"
-import type { ActionDragChangeResult, DragState, FrameDragDeco, IDragAction, LayoutFrame } from "../types/index.js"
+import { settings } from "../settings.js"
+import type { ActionDragChangeResult, DragState, DragZone, FrameDragDeco, IDragAction, LayoutChange } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 
@@ -57,10 +57,7 @@ export class FrameDragAction implements IDragAction {
 		if (handleEvent !== undefined) this.handleEvent = handleEvent
 		if (modifyDecos !== undefined) this.modifyDecos = modifyDecos
 		this.hooks = hooks
-		this.frameEdgePx = config?.frameEdgePx ?? 80
-		this.windowEdgePx = config?.windowEdgePx ?? 40
-		//  20% by default
-		this.maxPerpendicularPercent = config?.maxPerpendicularPercent ?? Math.floor(0.2 * getMaxInt())
+		if (config?.debug) this.debug = true
 
 		this.reset()
 	}

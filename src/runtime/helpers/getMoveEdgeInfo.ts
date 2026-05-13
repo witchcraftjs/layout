@@ -2,7 +2,7 @@ import { clampNumber } from "./clampNumber.js"
 import { getEdgeOrientation } from "./getEdgeOrientation.js"
 import { getResizeLimit } from "./getResizeLimit.js"
 
-import { getMarginSize } from "../settings.js"
+import { settings } from "../settings.js"
 import type {
 	Direction,
 	Edge, LayoutFrame,
@@ -14,7 +14,7 @@ export function getMoveEdgeInfo(
 	edge: Edge,
 	/** Window scaled/snaped position. See {@link toWindowCoord} */
 	position: Point,
-	margin: Size = getMarginSize(),
+	margin: Size = settings.minSizeScaled,
 	clamp = true
 ): {
 	x: number

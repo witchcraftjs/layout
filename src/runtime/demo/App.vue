@@ -131,7 +131,7 @@ import {
 	windowAddFrame,
 	windowCreate
 } from "../layout/index.js"
-import { getMaxInt } from "../settings.js"
+import { settings } from "../settings.js"
 import type { EdgeSide, Layout, Pos, Size } from "../types/index.js"
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { useTemplateRef } from "vue"
@@ -168,7 +168,7 @@ function layoutInitialize(layout: Layout, { defaultPos, defaultSize }: {
 	)
 
 	layout.activeWindow = w.id
-	const max = getMaxInt()
+	const max = settings.maxInt
 	const frame = windowAddFrame(w, frameCreate({
 		x: 0,
 		y: 0,
