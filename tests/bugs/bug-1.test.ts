@@ -35,7 +35,7 @@ describe("Bug 1: docking a floating frame should use latest docked frame boundar
 				x: 0,
 				y: 0,
 				docked: "top",
-				collapsed: false
+				collapsed: undefined
 			},
 			B: {
 				id: "B",
@@ -58,7 +58,7 @@ describe("Bug 1: docking a floating frame should use latest docked frame boundar
 				x: 0,
 				y: w.forth * 3,
 				docked: "bottom",
-				collapsed: false
+				collapsed: undefined
 			},
 			E: {
 				id: "E",
@@ -67,7 +67,7 @@ describe("Bug 1: docking a floating frame should use latest docked frame boundar
 				x: w.third * 2,
 				y: 0,
 				docked: "right",
-				collapsed: false
+				collapsed: undefined
 			}
 		}
 	}

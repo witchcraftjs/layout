@@ -67,8 +67,7 @@ describe("getFrameDockInfo", () => {
 			y: 0,
 			width: w.third,
 			height: w.full,
-			docked: "left",
-			collapsed: false
+			docked: "left"
 		}))
 
 		expect(clone.frames.B.width).toBeLessThan(layout.frames.C.width)
@@ -103,8 +102,7 @@ describe("getFrameDockInfo", () => {
 			y: 0,
 			width: w.third,
 			height: w.full,
-			docked: "right",
-			collapsed: false
+			docked: "right"
 		}))
 		expect(clone.frames.B.width).toBeLessThan(layout.frames.C.width)
 		expect(clone.frames.B.x).toEqual(0)
@@ -141,8 +139,7 @@ describe("getFrameDockInfo", () => {
 				y: 0,
 				width: w.full,
 				height: w.third,
-				docked: "top",
-				collapsed: false
+				docked: "top"
 			}),
 			B: expect.objectContaining({
 				...layout.frames.B,
@@ -187,8 +184,7 @@ describe("getFrameDockInfo", () => {
 				y: w.full - w.third,
 				width: w.full,
 				height: w.third,
-				docked: "bottom",
-				collapsed: false
+				docked: "bottom"
 			}),
 			B: expect.objectContaining({
 				...layout.frames.B,
@@ -238,7 +234,7 @@ describe("getFrameDockInfo", () => {
 		const layout = {
 			...testWindow,
 			frames: {
-				A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left", collapsed: false },
+				A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left" },
 				B: { id: "B", x: 0, y: 0, width: w.half, height: w.full }
 			}
 		}
@@ -339,7 +335,6 @@ describe("getFrameDockInfo", () => {
 			C: expect.objectContaining({
 				...layout.frames.C,
 				docked: "top",
-				collapsed: false,
 				x: 0,
 				y: 0,
 				height: w.half,
@@ -370,7 +365,7 @@ describe("getFrameDockInfo", () => {
 
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.forth)))
 		expect(clone.frames.A.docked).toBe("top")
-		expect(clone.frames.A.collapsed).toBe(false)
+		expect(clone.frames.A.collapsed).toBe(undefined)
 		expect(clone.frames.A.width).toBe(w.full)
 		expect(clone.frames.A.x).toBe(0)
 
@@ -427,8 +422,7 @@ describe("getFrameDockInfo", () => {
 					y: 0,
 					width: w.third,
 					height: w.full,
-					docked: "left",
-					collapsed: false
+					docked: "left"
 				}),
 				B: expect.objectContaining({
 					...layout.frames.B,
@@ -436,8 +430,7 @@ describe("getFrameDockInfo", () => {
 					y: 0,
 					width: w.full - w.third,
 					height: w.third,
-					docked: "top",
-					collapsed: false
+					docked: "top"
 				}),
 				C: expect.objectContaining({
 					...layout.frames.C,
@@ -468,7 +461,7 @@ describe("getFrameDockInfo", () => {
 			const layout = {
 				...testWindow,
 				frames: {
-					A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left", collapsed: false },
+					A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left", collapsed: undefined },
 					B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full }
 				}
 			}
@@ -508,7 +501,7 @@ describe("getFrameUndockInfo", () => {
 		const layout = {
 			...testWindow,
 			frames: {
-				A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left", collapsed: false },
+				A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left", collapsed: undefined },
 				B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full }
 			}
 		}
@@ -519,7 +512,7 @@ describe("getFrameUndockInfo", () => {
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout.frames.A,
-				docked: false
+				docked: undefined
 			}),
 			B: expect.objectContaining({
 				...layout.frames.B
@@ -544,24 +537,23 @@ describe("getFrameUndockInfo", () => {
 		const layout = {
 			...testWindow,
 			frames: {
-				A: { id: "A", x: 0, y: 0, width: w.third, height: w.full, docked: "left", collapsed: false },
-				B: { id: "B", x: 0, y: 0, width: w.full, height: w.third, docked: "top", collapsed: false },
+				A: { id: "A", x: 0, y: 0, width: w.third, height: w.full, docked: "left" },
+				B: { id: "B", x: 0, y: 0, width: w.full, height: w.third, docked: "top" },
 				C: { id: "C", x: 0, y: w.third, width: w.full, height: settings.maxInt - w.third * 2 },
-				D: { id: "D", x: 0, y: settings.maxInt - w.third, width: w.full, height: w.third, docked: "bottom", collapsed: false }
+				D: { id: "D", x: 0, y: settings.maxInt - w.third, width: w.full, height: w.third, docked: "bottom" }
 			}
 		}
 		expect(layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
 		applyFrameChanges(clone, throwIfError(getFrameUndockInfo(clone, "A")))
 
-		expect(clone.frames.A.docked).toBe(false)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout.frames.A,
 				y: layout.frames.B.height,
 				height: layout.frames.D.y - layout.frames.B.height,
-				docked: false,
-				collapsed: false
+				docked: undefined,
+				collapsed: undefined
 			}),
 			B: expect.objectContaining({
 				...layout.frames.B,

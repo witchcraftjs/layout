@@ -32,7 +32,7 @@ export function getFrameUncollapseInfo(
 	const toExtract = [frame.id]
 
 	const storedSize = frame.collapsed
-	if (storedSize === false || storedSize === undefined) {
+	if (storedSize === undefined) {
 		return new KnownError(
 			LAYOUT_ERROR.CANT_UNCOLLAPSE_NOT_COLLAPSED,
 			`Frame ${frameId} is not collapsed.`,
@@ -150,7 +150,7 @@ export function getFrameUncollapseInfo(
 	pushIfNotIn(toExtract, framesToFix.map(_ => _.id))
 
 	frame[sizeKey] = storedSize
-	frame.collapsed = false
+	frame.collapsed = undefined
 
 	if (frame.docked === "right" || frame.docked === "bottom") {
 		frame[posKey] -= expandAmount

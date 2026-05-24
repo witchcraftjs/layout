@@ -23,7 +23,7 @@ it("simple collapse/uncollapse", () => {
 		...testWindow,
 		frames: {
 			A: { id: "A", x: 0, y: 0, width: w.half, height: w.full },
-			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: false }
+			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: undefined }
 		}
 	}
 	const expected = walk(layout, undefined, { save: true })
@@ -48,7 +48,7 @@ it("simple collapse/uncollapse when collapsed size !==0", () => {
 		...testWindow,
 		frames: {
 			A: { id: "A", x: 0, y: 0, width: w.half, height: w.full },
-			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: false }
+			B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full, docked: "right", collapsed: undefined }
 		}
 	}
 	const expected = walk(layout, undefined, { save: true })
@@ -344,7 +344,7 @@ it("uncollapse when collapsed size !==0", () => {
 	expect(clone.frames.A).toEqual(expect.objectContaining({
 		...layout.frames.A,
 		height: w.forth,
-		collapsed: false
+		collapsed: undefined
 	}))
 	expect(clone.frames.B).toEqual(expect.objectContaining({
 		...layout.frames.B,
@@ -393,7 +393,7 @@ it("multiple docks - a left (collasped) then b top", () => {
 		A: expect.objectContaining({
 			...layout.frames.A,
 			docked: "left",
-			collapsed: false,
+			collapsed: undefined,
 			width: w.third
 		}),
 		B: expect.objectContaining({

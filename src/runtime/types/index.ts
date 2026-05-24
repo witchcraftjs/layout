@@ -114,7 +114,7 @@ export type IntersectionEntry = {
 export const zLayoutFrame = zBaseSquare.extend({
 	id: z.uuid(),
 	docked: zSide.optional(),
-	collapsed: z.union([z.literal(false), z.number()]).optional()
+	collapsed: z.number().min(1).optional()
 }).loose()
 
 export const zLayoutFrameLoose = zLayoutFrame.loose()
@@ -130,8 +130,8 @@ export type ExtendedWorkspace = Register extends { ExtendedWorkspace: infer T } 
 
 export type BaseLayoutFrame = Size & Pos & {
 	id: FrameId
-	docked?: EdgeSide | false
-	collapsed?: false | number
+	docked?: EdgeSide
+	collapsed?: number
 }
 export type LayoutFrame = ExtendedLayoutFrame & BaseLayoutFrame
 export type LayoutFrames = Record<string, LayoutFrame>

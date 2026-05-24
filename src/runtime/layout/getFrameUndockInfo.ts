@@ -33,7 +33,7 @@ export function getFrameUndockInfo(
 	if (frame.collapsed) {
 		return new KnownError(LAYOUT_ERROR.CANT_UNDOCK_COLLAPSED_FRAME, `Can't undock collapsed frame ${frame.id}.`, { frame: frame.id })
 	}
-	const frameClone: LayoutFrame = { ...frame, docked: false, collapsed: false }
+	const frameClone: LayoutFrame = { ...frame, docked: undefined, collapsed: undefined }
 	const otherDockedFramesToResize = []
 	// if the frame is touching either corner, there could be other docked frames  that will need to get expanded like here, * means docked, and B and D would need expanding if we undock A.
 	/**

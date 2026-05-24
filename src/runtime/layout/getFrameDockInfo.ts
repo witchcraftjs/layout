@@ -68,7 +68,7 @@ export function getFrameDockInfo(
 	const perpendicularLength = otherFrameIds.length > 0 ? Math.min(frame[perpendicular], effectiveMaxPerpendicular) : frame[perpendicular]
 
 	frame.docked = side
-	frame.collapsed = false
+	frame.collapsed = undefined
 
 	const toExtract = [frame.id]
 
