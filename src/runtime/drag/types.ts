@@ -174,4 +174,4 @@ export interface UseFramesContext {
 }
 
 
-export const dragContextInjectionKey = Symbol("dragContext") as InjectionKey<UseFramesContext>
+export const dragContextInjectionKey = Symbol.for("@witchcraft/layout:dragContext") as InjectionKey<UseFramesContext>

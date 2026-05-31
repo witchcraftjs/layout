@@ -23,7 +23,7 @@ catalog:
   '@vitejs/plugin-vue': ^6.0.7
   '@vitest/coverage-v8': ^4.1.0
   '@witchcraft/nuxt-utils': ^0.3.6
-  '@witchcraft/ui': ^0.4.4
+  '@witchcraft/ui': ^0.5.0
   concurrently: ^9.2.1
   cross-env: ^10.1.0
   es-toolkit: ^1.46.1
@@ -61,3 +61,6 @@ allowBuilds:
   core-js: false
   unrs-resolver: false
   vue-demi: false
+minimumReleaseAgeExclude:
+  - "@alanscodelog/*"
+  - "@witchcraft/*"
