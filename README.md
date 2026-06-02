@@ -1,6 +1,9 @@
-[![Docs](https://github.com/witchcraftjs/layout/workflows/Docs/badge.svg)](https://github.com/witchcraftjs/layout/actions/workflows/docs.yml)
-[![Release](https://github.com/witchcraftjs/layout/actions/workflows/release.yml/badge.svg)](https://github.com/witchcraftjs/layout/actions/workflows/release.yml)
-[![NPM Version (with latest tag)](https://img.shields.io/npm/v/%40alanscodelog%2FREPONAME/latest)](https://www.npmjs.com/package/@witchcraft/layout/v/latest)
+[![Docs][docs-src]][docs-href]
+[![Release][release-src]][release-href]
+[![npm version][npm-version-src]][npm-version-href]
+[![License][license-src]][license-href]
+[![Nuxt][nuxt-src]][nuxt-href]
+
 # [Docs](https://witchcraftjs.github.io/layout)
 # [Demo](https://witchcraftjs.github.io/layout/demo)
 
@@ -475,4 +478,14 @@ The nuxt module creates a `witchcraft-layout.css` file with the proper source im
 @import "../../../.nuxt/witchcraft-layout.css";
 ```
 
-
+<!-- Badges -->
+[docs-src]: https://github.com/witchcraftjs/layout/actions/workflows/docs.yml/badge.svg
+[docs-href]: https://github.com/witchcraftjs/layout/actions/workflows/docs.yml
+[release-src]: https://github.com/witchcraftjs/layout/actions/workflows/release.yml/badge.svg
+[release-href]: https://github.com/witchcraftjs/layout/actions/workflows/release.yml
+[npm-version-src]: https://img.shields.io/npm/v/@witchcraft/layout/latest
+[npm-version-href]: https://www.npmjs.com/package/@witchcraft/layout/v/latest
+[license-src]: https://img.shields.io/npm/l/@witchcraft/layout.svg?style=flat&colorA=020420&colorB=00DC82
+[license-href]: https://npmjs.com/package/@witchcraft/layout
+[nuxt-src]: https://img.shields.io/badge/Nuxt-020420?logo=nuxt.js
+[nuxt-href]: https://nuxt.com
