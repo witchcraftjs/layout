@@ -1,0 +1,1 @@
+import{aT as e,a2 as a,ax as s,aH as t}from"./BIYrkOIG.js";const f={__name:"WDevOnly",props:{show:{type:Boolean,required:!1,default:!1}},setup(r){return e(),a(t,s(!1)),(n,o)=>null}};export{f as default};
