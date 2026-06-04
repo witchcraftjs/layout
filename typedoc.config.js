@@ -19,7 +19,7 @@ export default {
 	exclude: [
 		"**/demo/**"
 	],
-	out: "docs",
+	out: "docs-types",
 	excludePrivate: true,
 	excludeExternals: true,
 	// // temporarily turn off plugins (just setting plugin: [] will not work)
