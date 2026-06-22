@@ -1,4 +1,4 @@
-import { clampNumber } from "./clampNumber.js"
+import { clampNumber } from "@alanscodelog/utils/clampNumber"
 import { getEdgeOrientation } from "./getEdgeOrientation.js"
 import { getResizeLimit } from "./getResizeLimit.js"
 

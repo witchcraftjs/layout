@@ -40,7 +40,7 @@
 import WDarkModeSwitcher from "@witchcraft/ui/components/WDarkModeSwitcher"
 import WButton from "@witchcraft/ui/components/WButton"
 import WPopover from "@witchcraft/ui/components/WPopover"
-import { copy } from "@witchcraft/ui/helpers"
+import { copyToClipboard } from "@alanscodelog/utils/copyToClipboard"
 import { ref, watch } from "vue"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { getFrameUncollapseInfo } from "../layout/getFrameUncollapseInfo.js"
@@ -105,7 +105,7 @@ function copyState() {
 		}
 	}
 	const state = JSON.stringify(clone, null, 2)
-	copy(state)
+	copyToClipboard(state)
 }
 
 const debugKey = ref(import.meta.dev ? "state.win.frames" : "false")

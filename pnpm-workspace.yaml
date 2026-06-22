@@ -9,7 +9,7 @@ catalog:
   '@alanscodelog/eslint-config': ^6.3.1
   '@alanscodelog/semantic-release-config': ^6.0.2
   '@alanscodelog/tsconfigs': ^6.3.0
-  '@alanscodelog/utils': ^6.2.0
+  '@alanscodelog/utils': ^6.3.0
   '@alanscodelog/vite-config': ^0.0.7
   '@commitlint/cli': ^19.8.1
   '@iconify/json': ^2.2.474
@@ -22,8 +22,8 @@ catalog:
   '@types/node': ^24.12.4
   '@vitejs/plugin-vue': ^6.0.7
   '@vitest/coverage-v8': ^4.1.0
-  '@witchcraft/nuxt-utils': ^0.3.6
-  '@witchcraft/ui': ^0.5.0
+  '@witchcraft/nuxt-utils': ^0.3.10
+  '@witchcraft/ui': ^0.5.9
   concurrently: ^9.2.1
   cross-env: ^10.1.0
   es-toolkit: ^1.46.1
