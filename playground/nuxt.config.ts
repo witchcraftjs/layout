@@ -21,6 +21,27 @@ export default defineNuxtConfig({
 			watch: {
 				usePolling: true
 			}
+		},
+		optimizeDeps: {
+			include: [
+			'@alanscodelog/utils',
+			'@alanscodelog/utils/castType',
+			'@alanscodelog/utils/clampNumber',
+			'@alanscodelog/utils/copyToClipboard',
+			'@alanscodelog/utils/debounce',
+			'@alanscodelog/utils/enumFromArray',
+			'@alanscodelog/utils/keys',
+			'@alanscodelog/utils/last',
+			'@alanscodelog/utils/multisplice',
+			'@alanscodelog/utils/pushIfNotIn',
+			'@alanscodelog/utils/readable',
+			'@alanscodelog/utils/snapNumber',
+			'@alanscodelog/utils/throwIfError',
+			'@alanscodelog/utils/unreachable',
+			'@alanscodelog/utils/walk',
+			'uuid',
+			'zod',
+			]
 		}
 	},
 })
