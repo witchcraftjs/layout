@@ -32,6 +32,10 @@ export function useFrames(
 		 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
 		 */
 		onDragApply: ((state: DragState, forceRecalculateEdges: () => void) => boolean)
+		/**
+		 * Called after visual edges are recalculated. Action handlers can annotate edges with error info.
+		 */
+		annotateEdges?: (edges: Edge[], frames: LayoutFrame[]) => void
 	}
 ) {
 	const draggingEdges = ref<Edge[]>([])
@@ -84,6 +88,7 @@ export function useFrames(
 	// all at once (e.g. by clicking on some command many times in a row)
 	const debounceGetDraggableEdges = debounce((f: LayoutFrame[]) => {
 		visualEdges.value = getVisualEdges(f, { includeWindowEdges: true })
+		handler.annotateEdges?.(visualEdges.value, f)
 	}, 50, {}) as any
 
 	watch([isDragging, frames], () => {
@@ -96,6 +101,7 @@ export function useFrames(
 
 	function forceRecalculateEdges(): void {
 		visualEdges.value = getVisualEdges(Object.values(frames.value), { includeWindowEdges: true })
+		handler.annotateEdges?.(visualEdges.value, Object.values(frames.value))
 	}
 
 	const dragDirStore = new DragDirectionStore({

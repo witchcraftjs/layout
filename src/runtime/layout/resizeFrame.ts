@@ -1,5 +1,7 @@
-import { findFramesTouchingEdge } from "./findFramesTouchingEdge.js"
 import { clampNumber } from "@alanscodelog/utils/clampNumber"
+
+import { findFramesTouchingEdge } from "./findFramesTouchingEdge.js"
+
 import { frameToEdges } from "../helpers/frameToEdges.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
 import { getResizeLimit } from "../helpers/getResizeLimit.js"

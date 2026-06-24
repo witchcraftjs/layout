@@ -2,7 +2,10 @@ import { get, type RecordFromArray } from "@alanscodelog/utils"
 
 import type { DragChangeHandler, DragChangeResult, DragState, IDragAction } from "./types.js"
 
-import type { LayoutShape } from "../types/index.js"
+import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
+import { isWindowEdge } from "../helpers/isWindowEdge.js"
+import { type Edge, LAYOUT_ERROR, type LayoutFrame, type LayoutShape } from "../types/index.js"
+import { KnownError } from "../utils/KnownError.js"
 
 /**
  * Handles the lifecycle of a drag actions {@link IDragAction} and provides additional hooks.

@@ -141,6 +141,26 @@ export interface IDragAction {
 		/** Error texts/hints to display when the action produces an error. */
 		errors?: string[]
 	}
+	/**
+	 * Called after visual edges are recalculated, once per edge. Action handlers can annotate edges with error info here ({@link Edge.error}).
+	 *
+	 * When `LayoutEdges` sees an error it adds the message as the title and the following classes:
+	 * - `data-error` attribute with the error message
+	 * - class `drag-edge-errored` on the thick drag handle
+	 * - class `edge-errored` on the thin visual edge
+	 *
+	 * Tailwind example to style errored edges:
+	 * ```css
+	 * [&_.drag-edge-errored]:cursor-not-allowed
+	 * [&_.drag-edge-errored]:bg-red-500/30
+	 * [&_.edge-errored]:bg-red-500/20
+	 * ```
+	 *
+	 * Regarding the title, this is a temporary solution until lib is refactored to more composable components.
+	 *
+	 * NOTE: Annotation does NOT prevent dragging/events on edges.
+	 */
+	annotateEdge?(edge: Edge, frames: LayoutFrame[]): void
 }
 export type EdgeDragStartData = { edge?: Edge, intersection?: IntersectionEntry }
 export type FrameDragStartData = { frameId: FrameId }

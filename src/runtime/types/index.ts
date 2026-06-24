@@ -5,6 +5,7 @@ import { z } from "zod"
 export * from "../drag/types.js"
 
 import { settings } from "../settings.js"
+import { KnownError } from "../utils/KnownError.js"
 
 export const zUuid = z.uuid()
 export type AnyUuid = z.infer<typeof zUuid>
@@ -65,7 +66,8 @@ export const zEdge = z.object({
 	startX: zScaledIntPercentage,
 	startY: zScaledIntPercentage,
 	endX: zScaledIntPercentage,
-	endY: zScaledIntPercentage
+	endY: zScaledIntPercentage,
+	error: z.instanceof<typeof KnownError>(KnownError).or(z.object({ code: z.string(), message: z.string() })).optional()
 })
 
 export type Edge = z.infer<typeof zEdge>
@@ -358,7 +360,7 @@ export type LayoutErrorsInfo = {
 	[LAYOUT_ERROR.CANT_UNCOLLAPSE_NOT_COLLAPSED]: {
 		frame: LayoutFrame
 	}
-	// eslint-disable-next-line @typescript-eslint/no-empty-type
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	[LAYOUT_ERROR.NO_FILL_CANDIDATES]: {}
 	[LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME]: {
 		frame: LayoutFrame

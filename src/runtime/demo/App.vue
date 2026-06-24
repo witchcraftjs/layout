@@ -37,6 +37,9 @@
 			[&_.deco-close-frame]:rounded-md
 			[&_.deco-close-frame-force]:rounded-md
 			[&_.deco-frame-drag]:rounded-md
+			[&_.drag-edge-errored]:cursor-not-allowed
+			[&_.drag-edge-errored]:bg-red-500/30
+			[&_.edge-errored]:bg-red-500/20
 		`,
 			collapsedDocks.top && `border-t-2 border-t-green-500`,
 			collapsedDocks.bottom && `border-b-2 border-b-green-500`,

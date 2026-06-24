@@ -20,12 +20,15 @@
 >
 	<LayoutShapeSquare
 		:css="css.thick"
+		:title="edges[i].error?.message"
 		:class="twMerge(`
 			drag-edge
 			z-20
 			hover:cursor-pointer
 			[&:hover+.edge]:bg-blue-500/50
-		`)"
+		`,
+			edges[i].error && `drag-edge-errored`
+		)"
 		@pointerdown="emit('dragStart', $event, 'edge', { edge: edges[i] })"
 	/>
 		<LayoutShapeSquare
@@ -33,17 +36,19 @@
 		:class="twMerge(`
 			pointer-events-none
 			edge
-		`)"
+		`,
+			edges[i].error && `edge-errored`
+		)"
 	/>
 </template>
 <LayoutShapeSquare
 	:css="css"
 	:class="twMerge(`
-			grabbed-edge
-			z-20
-			bg-blue-500/50
-			cursor-pointer
-		`)"
+		grabbed-edge
+		z-20
+		bg-blue-500/50
+		cursor-pointer
+	`)"
 	v-for="css, i of cssDragEdge"
 	:key="i"
 />
@@ -167,4 +172,3 @@ const cssDragIntersections = computed(() => {
 	return intersections
 })
 </script>
-
