@@ -273,7 +273,8 @@ export const LAYOUT_ERROR = enumFromArray([
 	"CANT_UNDOCK_COLLAPSED_FRAME",
 	"CANT_COLLAPSE_NOT_DOCKED",
 	"CANT_UNCOLLAPSE_NOT_COLLAPSED",
-	"NO_FILL_CANDIDATES"
+	"NO_FILL_CANDIDATES",
+	"CANT_RESIZE_COLLAPSED_FRAME"
 ])
 
 export type LayoutError = EnumLike<typeof LAYOUT_ERROR>
@@ -357,8 +358,11 @@ export type LayoutErrorsInfo = {
 	[LAYOUT_ERROR.CANT_UNCOLLAPSE_NOT_COLLAPSED]: {
 		frame: LayoutFrame
 	}
-	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+	// eslint-disable-next-line @typescript-eslint/no-empty-type
 	[LAYOUT_ERROR.NO_FILL_CANDIDATES]: {}
+	[LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME]: {
+		frame: LayoutFrame
+	}
 }
 
 // todo rename to toOpposite

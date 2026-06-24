@@ -1,13 +1,18 @@
 import { clampNumber } from "@alanscodelog/utils/clampNumber"
+
 import { getEdgeOrientation } from "./getEdgeOrientation.js"
 import { getResizeLimit } from "./getResizeLimit.js"
 
 import { settings } from "../settings.js"
 import type {
 	Direction,
-	Edge, LayoutFrame,
+	Edge,
+	LayoutFrame,
 	Point,
-	Size } from "../types/index.js"
+	Size
+} from "../types/index.js"
+import { LAYOUT_ERROR } from "../types/index.js"
+import { KnownError } from "../utils/KnownError.js"
 
 export function getMoveEdgeInfo(
 	touchingFrames: LayoutFrame[],
@@ -23,7 +28,15 @@ export function getMoveEdgeInfo(
 	isPassedLimit: boolean
 	pos: number
 	distance: number
-} {
+} | KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME> {
+	// prevent moving edges that touch collapsed frames
+	for (const frame of touchingFrames) {
+		// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
+		if (frame.collapsed) {
+			return new KnownError(LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME, `Cannot resize non-0 collapsed frame ${frame.id}.`, { frame })
+		}
+	}
+
 	const { x: posX, y: posY } = position
 
 	const edgeDirection = getEdgeOrientation(edge)

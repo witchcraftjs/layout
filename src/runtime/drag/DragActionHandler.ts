@@ -21,10 +21,18 @@ export class DragActionHandler<
 
 	boundCancel: (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void
 
-	defaultOnDragChange: DragChangeHandler = (type, _e, state, _forceRecalculateEdges, _cancel) => ({
-		updateEdges: type === "move" ? !state.isDraggingFromWindowEdge : true,
-		shapes: []
-	})
+	defaultOnDragChange: DragChangeHandler = (type, _e, state, _forceRecalculateEdges, _cancel) => {
+		const isTouchingCollapsedFrameEdge = type === "move"
+			&& state.isDragging === "edge"
+			&& state.touchingFramesArrays.some(frames =>
+				// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
+				Object.values(frames).some(f => f.collapsed)
+			)
+		return {
+			updateEdges: type === "move" ? !(state.isDraggingFromWindowEdge || isTouchingCollapsedFrameEdge) : true,
+			shapes: []
+		}
+	}
 
 	hooks: {
 		/** Called while dragging during dragChange events. You can use this to update the dragging edges. */
@@ -54,6 +62,8 @@ export class DragActionHandler<
 		 * Default onDragChange handler for when no action can handle the request.
 		 *
 		 * Should return true to allow the edges to be moved, or false to prevent it.
+		 *
+		 * The default prevents movement when the edge is a window edge and when the edge is touching a collapsed frame.
 		 */
 		defaultOnDragChange?: DragChangeHandler
 	) {
@@ -148,6 +158,32 @@ export class DragActionHandler<
 			this.textHints.actions.push(...(res?.actions ?? []))
 			this.textHints.errors.push(...(res?.errors ?? []))
 		}
+	}
+
+	annotateEdges(edges: Edge[], frames: LayoutFrame[]): void {
+		for (const edge of edges) {
+			// edge already has an error
+			if (edge.error) continue
+			for (const action of Object.values<IDragAction>(this.actions)) {
+				action.annotateEdge?.(edge, frames)
+				if (edge.error) break
+			}
+			// window edges don't resize anything
+			if (!edge.error && !isWindowEdge(edge)) {
+						const touching = findFramesTouchingEdge(edge, frames)
+						if (touching) {
+							// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
+							const collapsedFrame = touching.find(f => f.frame.collapsed)
+							if (collapsedFrame) {
+								edge.error = new KnownError(
+									LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME,
+									"Cannot Move: Can't Resize Collapsed Frame",
+									{ frame: (collapsedFrame.frame as LayoutFrame) }
+								)
+							}
+						}
+					}
+			}
 	}
 
 	onDragApply(

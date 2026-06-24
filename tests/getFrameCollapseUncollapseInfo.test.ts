@@ -4,12 +4,15 @@ import { beforeEach, describe, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
+import { getMoveEdgeInfo } from "../src/runtime/helpers/getMoveEdgeInfo.js"
 import { rotateLayout } from "../src/runtime/helpers/rotateFrames.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFrameCollapseInfo } from "../src/runtime/layout/getFrameCollapseInfo.js"
 import { getFrameDockInfo } from "../src/runtime/layout/getFrameDockInfo.js"
 import { getFrameUncollapseInfo } from "../src/runtime/layout/getFrameUncollapseInfo.js"
 import { settings } from "../src/runtime/settings.js"
+import { LAYOUT_ERROR } from "../src/runtime/types/index.js"
+import { KnownError } from "../src/runtime/utils/KnownError.js"
 
 
 const testWindow = createTestWindow()
@@ -410,3 +413,22 @@ it("multiple docks - a left (collasped) then b top", () => {
 	}))
 })
 
+it("getMoveEdgeInfo returns error when edge touches (non-0) collapsed frame", () => {
+	/**
+	 * ┌─────┬─────┐
+	 * │A*   │B    │
+	 * └─────┴─────┘
+	 */
+	const frames = [
+		{ id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left" as const, collapsed: w.third },
+		{ id: "B", x: w.half, y: 0, width: w.half, height: w.full }
+	]
+	const edge = { startX: w.half, startY: 0, endX: w.half, endY: w.full }
+	const result = getMoveEdgeInfo(frames, edge, { x: w.half - 1000, y: w.half })
+
+	expect(result).toBeInstanceOf(KnownError)
+	if (result instanceof KnownError) {
+		expect(result.code).toBe(LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME)
+		expect(result.info.frame.id).toBe("A")
+	}
+})

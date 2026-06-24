@@ -16,6 +16,8 @@ export function moveEdge(
 	margin: Size = settings.minSizeScaled
 ): void {
 	if (!edge || !touchingFrames) return
-	const { pos, dir, distance } = getMoveEdgeInfo(touchingFrames, edge, position, margin)
+	const result = getMoveEdgeInfo(touchingFrames, edge, position, margin)
+	if (result instanceof Error) return
+	const { pos, dir, distance } = result
 	resizeByEdge(touchingFrames, edge, dir, pos, distance)
 }
