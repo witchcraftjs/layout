@@ -14,37 +14,12 @@
 	v-bind="{ ...$attrs, class: undefined }"
 >
 		<!-- we need the size withot borders for correct px calculations -->
-	<div class="
-		layout-window
-		relative
-		overflow-hidden
-		flex-1
-	" ref="windowEl">
+	<div
+		class="layout-window relative overflow-hidden flex-1"
+		ref="windowEl"
+	>
 		<template v-if="windowEl && win">
-			<LayoutFrameComponent
-				:frame="frame"
-				:is-active-frame="frame.id === win.activeFrame"
-				v-for="frame of frames"
-				:key="frame.id"
-				v-bind="frameProps"
-				@focus="windowSetActiveFrame(win, frame.id)"
-			>
-				<slot :name="`frame-${frame.id}`" v-bind="{frame}"/>
-			</LayoutFrameComponent>
-			<LayoutEdgesComponent
-				:win="win"
-				:active-frame="win.activeFrame ? frames[win.activeFrame] : undefined"
-				:edges="visualEdges"
-				:intersections="intersections"
-				:dragging-edge="draggingEdges.length === 1 ? draggingEdges[0] : undefined"
-				:dragging-intersection="draggingIntersection"
-				v-bind="edgesProps"
-				@drag-start="dragStart"
-			/>
-			<LayoutDecosComponent
-				:shapes="shapes"
-			/>
-			<slot name="extra-decos"/>
+			<slot/>
 		</template>
 	</div>
 	<Teleport
@@ -97,9 +72,6 @@ import { useGlobalResizeObserver } from "@witchcraft/ui/composables/useGlobalRes
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { computed, provide, reactive, ref, useAttrs, watch } from "vue"
 
-import LayoutDecosComponent from "./LayoutDecos.vue"
-import LayoutEdgesComponent from "./LayoutEdges.vue"
-import LayoutFrameComponent from "./LayoutFrame.vue"
 
 import { useFrames } from "../composables/useFrames.js"
 import { createDefaultHandlers } from "../drag/createDefaultHandlers.js"
@@ -107,7 +79,7 @@ import { DragActionHandler } from "../drag/DragActionHandler"
 import { dragContextInjectionKey, type DragState, type IDragAction } from "../drag/types.js"
 import { updateWindowWithEvent } from "../helpers/updateWindowSizeWithEvent.js"
 import { windowSetActiveFrame } from "../layout/windowSetActiveFrame.js"
-import type { LayoutEdgesProps, LayoutFrameProps, LayoutWindow } from "../types/index.js"
+import { layoutContextInjectionKey, type LayoutWindow } from "../types/index.js"
 import { settings } from "../settings.js"
 
 
@@ -128,8 +100,6 @@ const props = withDefaults(defineProps<{
 	 * When this is turned back on again, it will trigger an update. You can also trigger updates manually with the exposed updateWindowSize function.
 	 */
 	allowWindowSizeUpdate?: boolean
-	frameProps?: Partial<Omit<LayoutFrameProps, "frame" | "isActiveFrame" | "onFocus">>
-	edgesProps?: Partial<Omit<LayoutEdgesProps, "edges" | "intersections" | "win">>,
 }>(), {
 	actionHandlers: undefined,
 	textHints: () => [],
@@ -177,14 +147,9 @@ const dragContext  = useFrames(
 )
 
 const {
-	dragStart,
 	dragPoint,
-	visualEdges,
 	isDragging,
-	draggingEdges,
-	draggingIntersection,
 	frames,
-	intersections,
 	state,
 	frameDragFrameId,
 	showDragging,
@@ -222,11 +187,20 @@ watch(() => props.allowWindowSizeUpdate, (newval, oldval) => {
 watch(state, () => emit("dragState", state.value))
 watch(showDragging, () => emit("isShowingDrag", showDragging.value))
 
+const layoutContext = computed(() => {
+	return {
+		win: win.value!,
+		shapes,
+		onFocus: (frameId:string) => windowSetActiveFrame(win.value!, frameId),
+	}
+})
+provide(layoutContextInjectionKey, layoutContext)
+
 defineExpose({
 	state,
 	win,
 	updateWindowSize,
-	dragActionHandler
+	dragActionHandler: dragActionHandler as DragActionHandler<any, any>,
 })
 </script>
 

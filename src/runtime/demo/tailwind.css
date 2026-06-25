@@ -2,3 +2,6 @@
 
 @import "../../../playground/.nuxt/witchcraft-ui.css";
 @import "../../../playground/.nuxt/witchcraft-layout.css";
+
+/* Only needed for the dev playground: the demo App.vue lives outside the Vite project root, so Tailwind's auto-scan doesn't find the [&.deco-...] classes it defines. */
+@source "../../../src/runtime/demo";

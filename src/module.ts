@@ -35,7 +35,12 @@ export default defineNuxtModule<ModuleOptions>({
 		addTemplate({
 			filename: "witchcraft-layout.css",
 			write: true,
-			getContents: () => `@source "${resolve("runtime/components")}";`
+			getContents: () => [
+				`@source "${resolve("runtime/components")}";`,
+				// the drag actions handlers and utils they use add some styles
+				`@source "${resolve("runtime/drag")}";`,
+				`@source "${resolve("runtime/utils/createSplitDecoShapes")}";`,
+			].join("\n")
 		})
 
 		nuxt.options.alias["#witchcraft-layout"] = resolve("runtime")

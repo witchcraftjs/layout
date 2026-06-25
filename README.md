@@ -165,9 +165,9 @@ import {reactive} from "vue"
 export const layout = ref(layoutCreate())
 ```
 
-Then in the page with the layout, initialize it and add a component to handle the rendering. One is included for vue, but it's pretty simple.
+Then in the page with the layout, initialize it and add a component to handle the rendering. One is included for vue with composability but you can do something simpler if needed.
 
-It uses a flat structure insides like so, so edges are always on top of frames, and decorations (drag/drop) are always on top of edges:
+The component should render to a flat structure inside like so, so edges are always on top of frames, and decorations (drag/drop) are always on top of edges:
 ```
 - LayoutWindow
   	- LayoutFrame
@@ -375,25 +375,64 @@ requestAnimationFrame(() => {
 
 ## LayoutWindow
 
-This is the main component that can render and handle dragging.
+This is the main component that provides context and handles dragging. It takes care of updating the size/pos of the window on mount.
 
-The component takes care of updating the size/pos of the window on mount.
+`LayoutWindow` does not render frames, edges, or decorations internally. You explicitly place each component inside it, which lets you override styles, add props, or wrap individual components.
 
-It also includes basic styles for the edges and decos.
+### Customizing
 
-The order and styles classes look like this:
+You can add props/classes to most components directly except for LayoutDragEdges and LayoutIntersections as they are loops and contain two components per edge/intersection. For those you must use slots
 
-- `.frame` - frames come first so that edges can be rendered on top of them when needed.
+This is so you can have a bigger invisible handle for pointer events, and a small visible indicator which by default only shows when the handle is hovered over (in the dom they are ordered like siblings: handle, visible, handle, visible, etc). You can control their size via css variables, see below.
 
-Edges are stacked in this order. 
+```vue
+<LayoutDragEdges>
+	<template #handle="slotProps">
+		<LayoutDragEdgeHandle class="..." v-bind="slotProps" />
+	</template>
+	<template #indicator="slotProps">
+		<LayoutDragEdgeVisible class="..." v-bind="slotProps" />
+	</template>
+</LayoutDragEdges>
 
-- `.active-frame-edge` (active frame - rendered as single div)
-- `.drag-edge` (thicker edge for attaching pointer events) + sibling .edge 
-	- It looks like `.drag-edge .edge .drag-edge .edge` and so on.
-	- `.edge` is not shown by default, instead frames are padded to let the background show through since that way we can support having rounded corners inside the frames.
-	- This is you can target the edge style on the drag-edge's hover: `.drag-edge:hover+.edge`
-- `.grabbed-edge` (the grabbed drag edge if any) - prefer this over drag-edge:hover for css that should remain visible when dragging to avoid flickering when the mouse moves slightly off the edge
-- `.intersection` (intersections)
+<LayoutIntersections>
+	<template #handler="slotProps">
+		<LayoutIntersectionHandle class="..." v-bind="slotProps" />
+	</template>
+	<template #indicator="slotProps">
+		<LayoutIntersectionVisible class="..." v-bind="slotProps" />
+	</template>
+</LayoutIntersections>
+```
+### CSS Variables
+
+They are all called width but apply both to width and height.
+
+- `--layoutHandleWidth`: for both edges and intersections
+- `--layoutEdgeWidth`: visible edge width
+- `--layoutSplitEdgeWidth` : drag split edge width
+- `--layoutIntersectionWidth` : visible intersection width
+
+### CSS Classes
+
+There are more classes defined internally than this that you can target, but usually what you'll want to style are the following:
+
+- LayoutWindow - has "state" classes so you can do stuff like target an edge during an event `.request-split .drag-edge`.
+	- `.dragging`
+	- `.request-split`
+	- `.request-close`
+	- `.request-frame-drag`
+- LayoutEdgesActiveFrame (`.active-frame-edge`) - active frame outline, rendered as a single div
+- LayoutDragEdgeHandle (`.drag-edge`) - thicker invisible handle for pointer events
+- LayoutDragEdgeVisible (`.visible-drag-edge`) - visible edge
+- LayoutDragEdgeGrabbed (`.drag-edge-grabbed`) - the grabbed edge while dragging
+- LayoutIntersectionHandle (`.drag-intersection`) - clickable intersection handle
+- LayoutIntersectionVisible (`.drag-intersection-visible`) - visible intersection
+
+If you need to target the visible edge when it's handle is hovered, you can do the following:
+
+`.drag-intersection:hover+.drag-intersection-visible`
+`.drag-edge:hover+.visible-drag-edge`
 
 **ALL edges except `active-frame-edge` are rendered as individual divs, so set the background color instead of the border.**
 
@@ -401,7 +440,9 @@ This is done like this for several reasons:
 	- Edges can be shared by frames, only the active edges are guaranteed to equal some frame's edges. And we need to know the full edge that is being dragged to implement dragging.
 	- The css/logic is simpler, edges can be any width without affecting the layout. We just transform translate them to be exactly centered over their position and then just pad the frames the correct amount.
 
-Decos:
+#### Decos
+
+Action handlers add these internally to the corresponding `LayoutDecosSquares/Edges` components.
 
 - Close:
   - `.deco-close-frame` (close frame preview)
@@ -416,56 +457,9 @@ Decos:
   - `.deco-frame-drag-${type}-${side}` (e.g. `.deco-frame-drag-frame-left`, `.deco-frame-drag-zone-right`)
 
 
-State classes (so you can do stuff like `.request-split .drag-edge`)
-- `.dragging`
-- `.request-split`
-- `.request-close`
-- `.request-frame-drag`
+#### Other
+See also the [demo code](https://github.com/witchcraftjs/layout/blob/main/src/runtime/demo/App.vue).
 
-Several css variables are provided to help with sizing:
-- `--layoutHandleWidth`
-- `--layoutEdgeWidth`
-- `--layoutSplitEdgeWidth`
-- `--layoutIntersectionWidth`
-
-```vue
-<template>
-
-<LayoutWindow
-	v-if="win"
-	class="flex-1 w-full
-		// hide drag/grabbed edge when splitting (let only split edge show)
-		[&.request-split_.grabbed-edge]:hidden
-		[&.request-split_.drag-edge]:hidden
-	"
-	style="--layoutSplitEdgeWidth:2px;"
-	:win="win"
->
-	<template #[`frame-${f.id}`] v-for="f in frames" :key="f.id">
-		<ContentFrame
-			:frame="f"
-			:get-component="getComponent"
-		/>
-	</template>
-</LayoutWindow>
-</template>
-
-<script setup lang="ts">
-const {
-	layout,
-	activeWindow: win,
-	activeFrame,
-	frames
-} = storeToRefs(useLayoutStore())
-
-function getComponent(type: string | undefined) {
-	if (type === "contentA") {
-		return yourContentAComponent
-	}
-}
-
-</script>
-```
 ## Nuxt w/ Tailwind
 
 The nuxt module creates a `witchcraft-layout.css` file with the proper source imports for the components folder. You just have to import it in your tailwind css file. Note that this requires `@witchcraft/ui` be installed and setup in a similar way also.

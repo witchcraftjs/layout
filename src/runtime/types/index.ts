@@ -1,5 +1,6 @@
 import type { EnumLike } from "@alanscodelog/utils"
 import { enumFromArray } from "@alanscodelog/utils/enumFromArray"
+import type { ComputedRef, InjectionKey } from "vue"
 import { z } from "zod"
 
 export * from "../drag/types.js"
@@ -415,19 +416,6 @@ export type LayoutShapeSquareProps
 		css: BaseSquareCss
 	}
 
-export type LayoutEdgesProps
-	= & {
-		edges: Edge[]
-		intersections: IntersectionEntry[]
-		/** The owning window, needed so we can correctly scale coordinates. */
-		win: LayoutWindow
-		/** The active frame, used to render the active edges. Calculate it from the `frames` returned by `useFrames` composable because otherwise it will be the wrong size while dragging. */
-		activeFrame?: LayoutFrame
-		draggingEdge?: Edge
-		draggingIntersection?: IntersectionEntry
-	}
-	& Partial<LayoutShapeSquareProps>
-
 
 export type LayoutChange<TInfo = never> = {
 	modified: LayoutFrame[]
@@ -436,9 +424,15 @@ export type LayoutChange<TInfo = never> = {
 	info?: TInfo
 }
 
-export type LayoutFrameProps
-	= & {
-		frame: LayoutFrame
-		isActiveFrame: boolean
-	}
-	& Partial<LayoutShapeSquareProps>
+
+export type LayoutContext = ComputedRef<
+	& {
+		/** The owning window, needed so we can correctly scale coordinates. */
+		win: LayoutWindow
+		onFocus: (frameId: string) => void
+		shapes: LayoutShape[]
+	}>
+
+
+export const layoutContextInjectionKey = Symbol.for("@witchcraft/layout:context") as InjectionKey<LayoutContext>
+

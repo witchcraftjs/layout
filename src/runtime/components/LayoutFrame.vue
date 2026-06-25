@@ -11,9 +11,11 @@
 		($attrs as any).class
 	)"
 	v-bind="{ ...$attrs, class: undefined }"
-	@focus="emit('focus')"
+	@focus="ctx.onFocus(frame.id); emit('focus');"
+	v-for="frame in frames"
+	:key="frame.id"
 >
-	<slot>
+	<slot :name="`frame-${frame.id}`" v-bind="{frame}">
 		<div class="p-2 text-xs bg-neutral-500">
 			{{ debugFrame(frame) }}
 		</div>
@@ -24,25 +26,30 @@
 
 <script lang="ts" setup>
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { useAttrs } from "vue"
+import { useAttrs, inject, toRef } from "vue"
 
 const $attrs = useAttrs()
-
-defineOptions({
-	inheritAttrs: false
-})
 
 import LayoutShapeSquare from "./LayoutShapeSquare.vue"
 
 import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
 import { debugFrame } from "../layout/debugFrame.js"
-import type { LayoutFrameProps } from "../types/index.js"
+import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 
+defineOptions({
+	inheritAttrs: false
+})
 
 const emit = defineEmits<{
-	/** Documentation #todo */
+	/** Focus event is always "emitted" to the provider (so it can't be cancelled), but the component also emits it in case you want to listen to it. */
 	(e: "focus"): void
 }>()
 
-/* const props =  */defineProps<LayoutFrameProps>()
+const ctx = inject(layoutContextInjectionKey, undefined)
+if (!ctx) throw new Error("LayoutEdges must be used within a LayoutWindow")
+
+const dragCtx = inject(dragContextInjectionKey, undefined)
+if (!dragCtx) throw new Error("LayoutEdges must be used within a LayoutWindow")
+
+const frames = toRef(dragCtx, "frames")
 </script>
