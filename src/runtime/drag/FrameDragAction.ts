@@ -160,7 +160,7 @@ export class FrameDragAction implements IDragAction {
 				// for the hints
 				if (!(this.state.lastReturn instanceof Error)) this.state.lastReturn.info = "swap"
 			}
-		} else if (matchedZone.type === "window") {
+		} else if (matchedZone.type === "window" && dragHoveredFrame && !dragHoveredFrame.docked) {
 			this.state.lastReturn = getFrameDockInfo(win, draggingFrameId!, matchedZone.side)
 			// for the hints
 			if (!(this.state.lastReturn instanceof Error)) this.state.lastReturn.info = "dock"
