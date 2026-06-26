@@ -40,6 +40,8 @@
 import WDarkModeSwitcher from "@witchcraft/ui/components/WDarkModeSwitcher"
 import WButton from "@witchcraft/ui/components/WButton"
 import WPopover from "@witchcraft/ui/components/WPopover"
+import WCheckbox from "@witchcraft/ui/components/WCheckbox"
+import WSimpleInput from "@witchcraft/ui/components/WSimpleInput"
 import { copyToClipboard } from "@alanscodelog/utils/copyToClipboard"
 import { ref, watch } from "vue"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
