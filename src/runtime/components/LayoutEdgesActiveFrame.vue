@@ -1,5 +1,5 @@
 <template>
-<LayoutShapeSquare
+<LayoutShapeRect
 	v-if="activeFrame"
 	:class="twMerge(`
 		active-frame-edge
@@ -12,7 +12,7 @@
 		($attrs as any).class
 	)"
 	v-bind="{ ...$attrs, class: undefined }"
-	:css="getShapeSquareCss(activeFrame, `var(--layoutEdgeWidth,2px)`)"
+	:css="getShapeRectCss(activeFrame, `var(--layoutEdgeWidth,2px)`)"
 />
 </template>
 
@@ -20,9 +20,9 @@
 import { computed, inject, useAttrs } from "vue"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
-import { getShapeSquareCss } from "../helpers/getShapeSquareCss.js"
+import { getShapeRectCss } from "../helpers/getShapeRectCss.js"
 
 
 const $attrs = useAttrs()

@@ -39,6 +39,6 @@ export function createSplitDecoShapes(
 
 	return [
 		{ type: "edge", data: edge, attrs: { class: classes.splitEdge ?? "deco-split-edge bg-red-500" } },
-		{ type: "square", data: newFrame, attrs: { class: classes.splitNewFrame ?? "deco-split-new-frame bg-blue-500/50" } }
+		{ type: "rect", data: newFrame, attrs: { class: classes.splitNewFrame ?? "deco-split-new-frame bg-blue-500/50" } }
 	]
 }

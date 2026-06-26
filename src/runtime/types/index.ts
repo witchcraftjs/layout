@@ -86,9 +86,9 @@ export type Orientation = z.infer<typeof zOrientation>
 export type EdgeSide = z.infer<typeof zSide>
 export type ExtendedEdgeSide = z.infer<typeof zExtendedSide>
 
-export const zBaseSquare = zSize.extend(zPos.shape)
-export type BaseSquare = z.infer<typeof zBaseSquare>
-export type BaseSquareCss = {
+export const zBaseRect = zSize.extend(zPos.shape)
+export type BaseRect = z.infer<typeof zBaseRect>
+export type BaseRectCss = {
 	x: string
 	y: string
 	width: string
@@ -96,10 +96,10 @@ export type BaseSquareCss = {
 	translate?: string
 }
 
-export type EdgeCss = BaseSquareCss & {
+export type EdgeCss = BaseRectCss & {
 	translate: string
 }
-export type PointCss = BaseSquareCss & {
+export type PointCss = BaseRectCss & {
 	translate: string
 }
 
@@ -114,7 +114,7 @@ export type IntersectionEntry = {
 }
 
 
-export const zLayoutFrame = zBaseSquare.extend({
+export const zLayoutFrame = zBaseRect.extend({
 	id: z.uuid(),
 	docked: zSide.optional(),
 	collapsed: z.number().min(1).optional()
@@ -207,7 +207,7 @@ export type Layout = ExtendedLayout & {
 	windows: LayoutWindows
 }
 const zLayoutShape = z.discriminatedUnion("type", [
-	z.object({ type: z.literal("square"), data: zBaseSquare, attrs: z.record(z.string(), z.string()).optional() }),
+	z.object({ type: z.literal("rect"), data: zBaseRect, attrs: z.record(z.string(), z.string()).optional() }),
 	z.object({ type: z.literal("edge"), data: zEdge, attrs: z.record(z.string(), z.string()).optional() })
 ])
 
@@ -411,9 +411,9 @@ export const zFrameCreate = zLayoutFrame.partial({
 })
 
 
-export type LayoutShapeSquareProps
+export type LayoutShapeRectProps
 	= & {
-		css: BaseSquareCss
+		css: BaseRectCss
 	}
 
 

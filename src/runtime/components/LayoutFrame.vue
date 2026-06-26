@@ -1,8 +1,8 @@
 <template>
 <!-- overflow-hidden is just in case, if the frame's css is not properly set to h-full, overflow-auto, or the border/padding are too large, we can still get overflows -->
-<LayoutShapeSquare
+<LayoutShapeRect
 	tabindex="0"
-	:css="getShapeSquareCss(frame)"
+	:css="getShapeRectCss(frame)"
 	:class="twMerge(`
 		frame
 		p-[var(--layoutEdgeWidth,_2px)]
@@ -21,7 +21,7 @@
 		</div>
 		<div>No slot found for `frame-{{ frame.id }}`. </div>
 	</slot>
-</LayoutShapeSquare>
+</LayoutShapeRect>
 </template>
 
 <script lang="ts" setup>
@@ -30,9 +30,9 @@ import { useAttrs, inject, toRef } from "vue"
 
 const $attrs = useAttrs()
 
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 
-import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
+import { getShapeRectCss } from "../helpers/getShapeRectCss"
 import { debugFrame } from "../layout/debugFrame.js"
 import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 

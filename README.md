@@ -176,7 +176,7 @@ The component should render to a flat structure inside like so, so edges are alw
 	- LayoutDecos
 ```
 
-Edges and Decos are very simple and there are various utilies like `getVisualEdgesCss` and `getShapeSquareCss` to create the css needed to display them. They can both be handled as squares making it easy to reuse a single component to render them.
+Edges and Decos are very simple and there are various utilies like `getVisualEdgesCss` and `getShapeRectCss` to create the css needed to display them. They can both be handled as rects making it easy to reuse a single component to render them.
 
 This has the benefit for edges, that the grabable area can be easily adjusted and bigger than the displayed edge.
 
@@ -442,7 +442,7 @@ This is done like this for several reasons:
 
 #### Decos
 
-Action handlers add these internally to the corresponding `LayoutDecosSquares/Edges` components.
+Action handlers add these internally to the corresponding `LayoutDecosRects/Edges` components.
 
 - Close:
   - `.deco-close-frame` (close frame preview)

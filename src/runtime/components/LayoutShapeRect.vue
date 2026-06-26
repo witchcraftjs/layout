@@ -28,7 +28,7 @@ import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs } from "vue"
 import type { HTMLAttributes } from "vue"
 
-import type { LayoutShapeSquareProps } from "../types/index.js"
+import type { LayoutShapeRectProps } from "../types/index.js"
 
 const $attrs = useAttrs()
 
@@ -37,7 +37,7 @@ defineOptions({
 })
 
 const props = defineProps<
-	& LayoutShapeSquareProps
+	& LayoutShapeRectProps
 	& /** @vue-ignore */ HTMLAttributes
 >()
 </script>

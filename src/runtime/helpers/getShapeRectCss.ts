@@ -1,8 +1,8 @@
 import { settings } from "../settings.js"
-import type { BaseSquare } from "../types/index.js"
+import type { BaseRect } from "../types/index.js"
 
-export function getShapeSquareCss(
-	obj: BaseSquare,
+export function getShapeRectCss(
+	obj: BaseRect,
 	pad?: string
 ): {
 	x: string

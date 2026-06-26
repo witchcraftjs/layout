@@ -1,18 +1,18 @@
 <template>
 <template
-	v-for="(shape) of ctx.shapes.filter(_ => _.type === 'square')"
+	v-for="(shape) of ctx.shapes.filter(_ => _.type === 'rect')"
 	:key="cssToKey(shape.data)"
 >
 	<slot
-		name="square"
+		name="rect"
 		v-bind="{
 			shape,
-			css: getShapeSquareCss(shape.data, `var(--layoutEdgeWidth,2px)`)
+			css: getShapeRectCss(shape.data, `var(--layoutEdgeWidth,2px)`)
 		}"
 	>
-		<LayoutShapeSquare
-			v-if="shape.type === 'square'"
-			:css="getShapeSquareCss(shape.data, `var(--layoutEdgeWidth,2px)`)"
+		<LayoutShapeRect
+			v-if="shape.type === 'rect'"
+			:css="getShapeRectCss(shape.data, `var(--layoutEdgeWidth,2px)`)"
 			:class="twMerge(`bg-neutral-500/20`,shape.attrs?.class, ($attrs as any).class)"
 			v-bind="{...shape.attrs, ...$attrs, class: undefined }"
 		/>
@@ -22,9 +22,9 @@
 </template>
 </template>
 <script lang="ts" setup>
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 
-import { getShapeSquareCss } from "../helpers/getShapeSquareCss"
+import { getShapeRectCss } from "../helpers/getShapeRectCss"
 import { layoutContextInjectionKey,   } from "../types/index.js"
 import { useAttrs, inject } from "vue"
 import { cssToKey } from "../utils/cssToKey.js"

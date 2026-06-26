@@ -118,7 +118,7 @@ export class FrameDragAction implements IDragAction {
 			position: matchedZone.side ?? "center",
 			shapes: [
 				{
-					type: "square",
+					type: "rect",
 					data: matchedZone,
 					attrs: clipPath
 						? { class: classes, style: `clip-path:${clipPath}` }

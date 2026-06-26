@@ -186,7 +186,7 @@ export class SplitAction implements IDragAction {
 		if (!ok) {
 			if (dragHoveredFrame && dragHoveredFrame.docked) {
 				const errorDeco: LayoutShape = {
-					type: "square",
+					type: "rect",
 					data: {
 						x: dragHoveredFrame.x,
 						y: dragHoveredFrame.y,

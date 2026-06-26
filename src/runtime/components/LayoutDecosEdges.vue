@@ -11,7 +11,7 @@
 			css: getVisualEdgeCss(shape.data, { padLongAxis: 'var(--layoutEdgeWidth,2px)' })
 		}"
 	>
-	<LayoutShapeSquare
+	<LayoutShapeRect
 		:css="getVisualEdgeCss(shape.data, { padLongAxis: 'var(--layoutEdgeWidth,2px)' })"
 		:class="twMerge(shape.attrs?.class, ($attrs as any).class)"
 		v-bind="{...shape.attrs, ...$attrs, class: undefined }"
@@ -21,7 +21,7 @@
 </template>
 </template>
 <script lang="ts" setup>
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 
 import { getVisualEdgeCss } from "../helpers/getVisualEdgeCss"
 import { layoutContextInjectionKey  } from "../types/index.js"

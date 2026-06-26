@@ -1,5 +1,5 @@
 <template>
-<LayoutShapeSquare
+<LayoutShapeRect
 	:css="css"
 	:title="edge.error?.message"
 	:class="twMerge(
@@ -25,7 +25,7 @@
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs, inject } from "vue"
 
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 import { dragContextInjectionKey, layoutContextInjectionKey, type Edge, type EdgeCss } from "../types/index.js"
 import type { EdgeDragStartData } from "../drag/types.js"
 

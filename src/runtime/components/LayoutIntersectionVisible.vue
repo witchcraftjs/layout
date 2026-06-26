@@ -1,5 +1,5 @@
 <template>
-<LayoutShapeSquare
+<LayoutShapeRect
 	:css="css"
 	:class="twMerge(`
 		drag-intersection-visible
@@ -19,7 +19,7 @@
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { inject, useAttrs } from "vue"
 
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 import { layoutContextInjectionKey } from "../types/index.js"
 
 import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"

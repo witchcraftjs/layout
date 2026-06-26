@@ -94,7 +94,7 @@ export class CloseAction implements IDragAction {
 				force,
 				shapes: [
 					{
-						type: "square",
+						type: "rect",
 						data: { x: _.x, y: _.y, width: _.width, height: _.height },
 						attrs: {
 							class: force

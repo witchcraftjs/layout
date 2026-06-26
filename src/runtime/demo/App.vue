@@ -117,7 +117,7 @@
 			</LayoutDragEdges>
 			<LayoutDecosEdges/>
 			<!-- Decos add only the most basic color indicators (which you can override, we also pretty them up here with from rounded edges. -->
-			<LayoutDecosSquares class="
+			<LayoutDecosRects class="
 				[&.deco-split-error]:rounded-md
 				[&.deco-split-new-frame]:rounded-md
 				[&.deco-close-frame]:rounded-md

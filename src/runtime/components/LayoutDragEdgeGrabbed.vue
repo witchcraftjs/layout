@@ -1,5 +1,5 @@
 <template>
-<LayoutShapeSquare
+<LayoutShapeRect
 	:css="css"
 	:class="twMerge(`
 		drag-edge-grabbed
@@ -19,7 +19,7 @@
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { computed, inject, useAttrs } from "vue"
 
-import LayoutShapeSquare from "./LayoutShapeSquare.vue"
+import LayoutShapeRect from "./LayoutShapeRect.vue"
 import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 import { getVisualEdgesCss } from "../helpers/getVisualEdgesCss.js"
 import { cssToKey } from "../utils/cssToKey.js"
