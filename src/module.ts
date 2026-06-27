@@ -39,7 +39,7 @@ export default defineNuxtModule<ModuleOptions>({
 				`@source "${resolve("runtime/components")}";`,
 				// the drag actions handlers and utils they use add some styles
 				`@source "${resolve("runtime/drag")}";`,
-				`@source "${resolve("runtime/utils/createSplitDecoShapes")}";`,
+				`@source "${resolve("runtime/utils/createSplitDecoShapes")}";`
 			].join("\n")
 		})
 

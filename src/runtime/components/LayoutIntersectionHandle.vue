@@ -13,14 +13,16 @@
 </template>
 
 <script lang="ts" setup>
+import { layoutContextInjectionKey } from "../types/vue.js"
 import { useAttrs, inject } from "vue"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { dragContextInjectionKey, layoutContextInjectionKey, type IntersectionEntry } from "../types/index.js"
 
 import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"
-import type { EdgeDragStartData } from "../drag/types.js"
+import { type EdgeDragStartData } from "../types/index.js"
+import { dragContextInjectionKey } from "../types/vue.js"
+import type { IntersectionEntry } from "../types/index.js"
 
 const $attrs = useAttrs()
 

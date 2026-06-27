@@ -22,12 +22,14 @@
 </template>
 
 <script lang="ts" setup>
+import { layoutContextInjectionKey } from "../types/vue.js"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs, inject } from "vue"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { dragContextInjectionKey, layoutContextInjectionKey, type Edge, type EdgeCss } from "../types/index.js"
-import type { EdgeDragStartData } from "../drag/types.js"
+import { type EdgeDragStartData } from "../types/index.js"
+import { dragContextInjectionKey } from "../types/vue.js"
+import type { Edge, EdgeCss } from "../types/index.js"
 
 const $attrs = useAttrs()
 

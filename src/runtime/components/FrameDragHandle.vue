@@ -8,7 +8,7 @@
 </template>
 <script lang="ts" setup>
 import { inject, onBeforeUnmount } from "vue"
-import { dragContextInjectionKey } from "../drag/types.js";
+import { dragContextInjectionKey } from "../types/vue.js"
 
 const props = defineProps<{
 	frameId: string

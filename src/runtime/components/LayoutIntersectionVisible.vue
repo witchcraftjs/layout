@@ -20,7 +20,7 @@ import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { inject, useAttrs } from "vue"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { layoutContextInjectionKey } from "../types/index.js"
+import { layoutContextInjectionKey } from "../types/vue.js"
 
 import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"
 

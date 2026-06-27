@@ -1,10 +1,9 @@
 import { get, type RecordFromArray } from "@alanscodelog/utils"
 
-import type { DragChangeHandler, DragChangeResult, DragState, IDragAction } from "./types.js"
-
-import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isWindowEdge } from "../helpers/isWindowEdge.js"
-import { type Edge, LAYOUT_ERROR, type LayoutFrame, type LayoutShape } from "../types/index.js"
+import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
+import type { DragChangeHandler, DragChangeResult, DragState, Edge, IDragAction, LayoutFrame, LayoutShape } from "../types/index.js"
+import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
 /**
@@ -173,20 +172,20 @@ export class DragActionHandler<
 			}
 			// window edges don't resize anything
 			if (!edge.error && !isWindowEdge(edge)) {
-						const touching = findFramesTouchingEdge(edge, frames)
-						if (touching) {
-							// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
-							const collapsedFrame = touching.find(f => f.frame.collapsed)
-							if (collapsedFrame) {
-								edge.error = new KnownError(
-									LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME,
-									"Cannot Move: Can't Resize Collapsed Frame",
-									{ frame: (collapsedFrame.frame as LayoutFrame) }
-								)
-							}
-						}
+				const touching = findFramesTouchingEdge(edge, frames)
+				if (touching) {
+					// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
+					const collapsedFrame = touching.find(f => f.frame.collapsed)
+					if (collapsedFrame) {
+						edge.error = new KnownError(
+							LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME,
+							"Cannot Move: Can't Resize Collapsed Frame",
+							{ frame: (collapsedFrame.frame as LayoutFrame) }
+						)
 					}
+				}
 			}
+		}
 	}
 
 	onDragApply(
@@ -220,10 +219,9 @@ export class DragActionHandler<
 		key?: string | boolean
 	): void {
 		let res = { state, pluginState }
-		let pickedRes: any = {}
 		if (typeof key === "string" && key !== "") {
-			pickedRes = {} as any
 			const paths = key.split(",").map(_ => _.trim()).filter(_ => _)
+			const pickedRes: Record<string, any> = {}
 			for (const path of paths) {
 				pickedRes[path] = get(res, path.split("."))
 			}

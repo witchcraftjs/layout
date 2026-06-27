@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts" setup>
+import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
 import { computed, inject } from "vue"
 
-import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 
 import { getIntersectionsCss } from "../helpers/getIntersectionsCss.js"
 

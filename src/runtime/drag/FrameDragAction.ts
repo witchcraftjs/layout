@@ -96,12 +96,11 @@ export class FrameDragAction implements IDragAction {
 		state: DragState,
 		result: LayoutChange<"split" | "swap" | "rearrange" | "dock"> | KnownError | undefined
 	): FrameDragDeco[] {
-		let decos: FrameDragDeco[] = []
 		const isError = result instanceof Error
 		const frame = state.dragHoveredFrame
 
 		if (!matchedZone || !frame) {
-			decos = []
+			const decos: FrameDragDeco[] = []
 			this.modifyDecos(decos)
 			return decos
 		}
@@ -112,7 +111,7 @@ export class FrameDragAction implements IDragAction {
 			? `deco-frame-drag deco-frame-drag-error deco-frame-drag-${matchedZone.type}-${matchedZone.side} bg-red-500/50`
 			: `deco-frame-drag deco-frame-drag-${matchedZone.type}-${matchedZone.side} bg-blue-500/50`
 
-		decos = [{
+		const decos: FrameDragDeco[] = [{
 			id: frame.id,
 			type: "drop",
 			position: matchedZone.side ?? "center",

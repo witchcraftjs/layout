@@ -16,7 +16,6 @@
 			:class="twMerge(`bg-neutral-500/20`,shape.attrs?.class, ($attrs as any).class)"
 			v-bind="{...shape.attrs, ...$attrs, class: undefined }"
 		/>
-			{{twMerge(shape.attrs?.class, ($attrs as any).class)}}
 	</slot>
 	
 </template>
@@ -25,7 +24,7 @@
 import LayoutShapeRect from "./LayoutShapeRect.vue"
 
 import { getShapeRectCss } from "../helpers/getShapeRectCss"
-import { layoutContextInjectionKey,   } from "../types/index.js"
+import { layoutContextInjectionKey } from "../types/vue.js"
 import { useAttrs, inject } from "vue"
 import { cssToKey } from "../utils/cssToKey.js"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"

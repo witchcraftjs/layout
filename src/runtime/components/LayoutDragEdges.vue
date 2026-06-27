@@ -26,18 +26,18 @@
 </template>
 </template>
 <script lang="ts" setup>
+import { layoutContextInjectionKey } from "../types/vue.js"
 
 import { computed, inject } from "vue"
 
 import LayoutDragEdgeHandle from "./LayoutDragEdgeHandle.vue"
 import LayoutDragEdgeVisible from "./LayoutDragEdgeVisible.vue"
-import { dragContextInjectionKey, layoutContextInjectionKey  } from "../types/index.js"
 import { getVisualEdgesCss } from "../helpers/getVisualEdgesCss.js"
 import { isEdgeEqual } from "../helpers/isEdgeEqual.js"
 import { toRef } from "vue"
 import {cssToKey} from "../utils/cssToKey.js"
-import type { EdgeCss } from "../types/index.js"
-
+import { type EdgeCss } from "../types/index.js"
+import { dragContextInjectionKey } from "../types/vue.js"
 
 defineOptions({
 	inheritAttrs: false

@@ -24,7 +24,8 @@ import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs, inject } from "vue"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { layoutContextInjectionKey, type Edge,  type EdgeCss } from "../types/index.js"
+import { type Edge, type EdgeCss } from "../types/index.js"
+import { layoutContextInjectionKey } from "../types/vue.js"
 
 
 const $attrs = useAttrs()

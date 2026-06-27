@@ -4,7 +4,6 @@ import type { Ref } from "vue"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 import { DragDirectionStore } from "../drag/DragDirectionStore.js"
-import type { DragChangeHandler, DragChangeResult, DragState, EdgeDragStartData, FrameDragStartData } from "../drag/types.js"
 import { cloneFrame } from "../helpers/cloneFrame.js"
 import { getIntersections } from "../helpers/getIntersections.js"
 import { getVisualEdges } from "../helpers/getVisualEdges.js"
@@ -13,7 +12,7 @@ import { moveEdge } from "../helpers/moveEdge.js"
 import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isPointInRect } from "../layout/isPointInRect.js"
-import type { Direction, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
+import type { Direction, DragChangeHandler, DragChangeResult, DragState, Edge, EdgeDragStartData, FrameDragStartData, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
 
 export function useFrames(
 	win: Ref<LayoutWindow>,

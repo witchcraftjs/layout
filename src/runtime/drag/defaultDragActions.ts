@@ -1,7 +1,8 @@
 import { CloseAction } from "./CloseAction"
 import { FrameDragAction } from "./FrameDragAction.js"
 import { SplitAction } from "./SplitAction.js"
-import type { IDragAction } from "./types.js"
+
+import type { IDragAction } from "../types/index.js"
 
 /**
  * Creates the default drag actions (Split, Close, FrameDrag).

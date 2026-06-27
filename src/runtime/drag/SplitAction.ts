@@ -1,17 +1,12 @@
 import { DragActionHandler } from "./DragActionHandler.js"
-import type { ActionDragChangeResult, DragState, IDragAction } from "./types.js"
 
-import { containsEdge } from "../helpers/containsEdge.js"
-import { frameToEdges } from "../helpers/frameToEdges.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
-import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { createSplitDecoFromDrag } from "../layout/createSplitDecoFromDrag.js"
-import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { getFrameSplitInfo } from "../layout/getFrameSplitInfo.js"
-import { type Edge, LAYOUT_ERROR, type LayoutFrame, type LayoutShape, type Point, type SplitDeco } from "../types/index.js"
-import { KnownError } from "../utils/KnownError.js"
+import type { ActionDragChangeResult, DragState, IDragAction, LayoutShape, Point, SplitDeco } from "../types/index.js"
+import type { KnownError } from "../utils/KnownError.js"
 
 export type SplitInfo = Exclude<ReturnType<typeof getFrameSplitInfo>, KnownError>
 

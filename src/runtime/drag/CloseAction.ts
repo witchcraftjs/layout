@@ -1,5 +1,4 @@
 import { DragActionHandler } from "./DragActionHandler.js"
-import type { ActionDragChangeResult, DragState, IDragAction } from "./types.js"
 
 import { dirToOrientation } from "../helpers/dirToOrientation.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
@@ -7,7 +6,7 @@ import { oppositeSide } from "../helpers/oppositeSide.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { getCloseFrameInfo } from "../layout/getCloseFrameInfo.js"
-import type { CloseDeco } from "../types/index.js"
+import type { ActionDragChangeResult, CloseDeco, DragState, IDragAction } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 export type CloseInfo = Exclude<ReturnType<typeof getCloseFrameInfo>, KnownError>

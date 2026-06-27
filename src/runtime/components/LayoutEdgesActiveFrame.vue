@@ -17,11 +17,11 @@
 </template>
 
 <script lang="ts" setup>
+import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
 import { computed, inject, useAttrs } from "vue"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 import { getShapeRectCss } from "../helpers/getShapeRectCss.js"
 
 

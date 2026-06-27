@@ -24,7 +24,7 @@
 import LayoutShapeRect from "./LayoutShapeRect.vue"
 
 import { getVisualEdgeCss } from "../helpers/getVisualEdgeCss"
-import { layoutContextInjectionKey  } from "../types/index.js"
+import { layoutContextInjectionKey } from "../types/vue.js"
 import { useAttrs, inject } from "vue"
 import {cssToKey} from "../utils/cssToKey.js"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"

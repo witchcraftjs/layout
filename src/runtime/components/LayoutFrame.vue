@@ -25,6 +25,7 @@
 </template>
 
 <script lang="ts" setup>
+import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs, inject, toRef } from "vue"
 
@@ -34,7 +35,6 @@ import LayoutShapeRect from "./LayoutShapeRect.vue"
 
 import { getShapeRectCss } from "../helpers/getShapeRectCss"
 import { debugFrame } from "../layout/debugFrame.js"
-import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/index.js"
 
 defineOptions({
 	inheritAttrs: false
