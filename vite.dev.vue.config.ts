@@ -18,6 +18,7 @@ const config = defineConfig({
 		typesPlugin: { dtsGenerator: "echo" }
 	}
 }, {
+	root: "src/runtime/demo",
 	plugins: [
 		vue() as any,
 		Components({

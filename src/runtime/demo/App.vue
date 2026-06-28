@@ -185,9 +185,11 @@ import LayoutDragEdgeVisible from "../components/LayoutDragEdgeVisible.vue"
 import LayoutIntersectionVisible from "../components/LayoutIntersectionVisible.vue"
 
 
+import LayoutWindow from "../components/LayoutWindow.vue"
+
 const winId = ref<string | undefined>(undefined)
 const win = computed(() => winId.value !== undefined ? app.layout.windows[winId.value] : undefined)
-const layoutComponent = useTemplateRef("layoutComponent")
+const layoutComponent = ref<InstanceType<typeof LayoutWindow> | undefined>(undefined)
 
 const frames = computed(() => {
 	if (!win.value) return
@@ -252,16 +254,6 @@ function handleUncollapse(frameId: string) {
 	DragActionHandler.debugState("uncollapse", "after", dragState.value!, {}, undefined)
 }
 
-const textHints = computed(() => {
-	const isDragging = dragState.value?.isDragging
-	const textHints = dragActionHandler.value?.textHints ?? {actions:[], errors:[]}
-	return [
-		...(!isDragging ? [{classes:"", text:"Drag from an edge to create a new frame."}] : []),
-		...textHints.errors.map(_ => ({classes:"text-red-500", text:_})),
-		...textHints.actions.map(_ => ({ text:_})),
-	]
-})
-
 const collapsedDocks = computed(() => {
 	const sides: Partial<Record<EdgeSide, true>> = {}
 	for (const frame of Object.values(win.value?.frames ?? {})) {
@@ -273,4 +265,15 @@ const collapsedDocks = computed(() => {
 })
 
 const dragActionHandler = computed(() => layoutComponent.value?.dragActionHandler)
+
+const textHints = computed(() => {
+	const isDragging = dragState.value?.isDragging
+	const textHints = dragActionHandler.value?.textHints ?? {actions:[], errors:[]}
+	return [
+		...(!isDragging ? [{classes:"", text:"Drag from an edge to create a new frame."}] : []),
+		...textHints.errors.map((_: string) => ({classes:"text-red-500", text:_})),
+		...textHints.actions.map((_: string) => ({ text:_})),
+	]
+})
+
 </script>
