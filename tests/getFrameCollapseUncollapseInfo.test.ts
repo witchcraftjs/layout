@@ -429,7 +429,7 @@ it("multiple docks - a left (collasped) then b top", () => {
 	/**
 		* collapsed
 		* ┌────── │ ┌─────────────┐
-		* │A*Left │ │B*Top        │
+		* │A~Left │ │B*Top        │
 		* │       │ │             │
 		* │       │ ├─────────────┤
 		* │       │ │C            │
@@ -463,7 +463,7 @@ it("multiple docks - a left (collasped) then b top", () => {
 it("getMoveEdgeInfo returns error when edge touches (non-0) collapsed frame", () => {
 	/**
 	 * ┌─────┬─────┐
-	 * │A*   │B    │
+	 * │A~   │B    │
 	 * └─────┴─────┘
 	 */
 	const frames = [

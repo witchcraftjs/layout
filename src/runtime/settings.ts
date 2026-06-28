@@ -16,7 +16,7 @@ export class Settings {
 	private _snapPoint = { x: 0.5, y: 0.5 }
 	private _snapPointScaled = { x: Math.round(0.5 * (10 ** 3)), y: Math.round(0.5 * (10 ** 3)) }
 
-	get snapPoint() { return this._snapPoint }
+	get snapPoint(): Point { return this._snapPoint }
 	set snapPoint(v: number | Point) {
 		if (typeof v === "number") { this._snapPoint = { x: v, y: v } } else { this._snapPoint = { x: v.x, y: v.y } }
 		this._snapPointScaled = this._scalePoint(this._snapPoint)
@@ -25,32 +25,37 @@ export class Settings {
 	get snapPointScaled() { return this._snapPointScaled }
 
 
-	private _minSize = { width: 10 ** 3, height: 10 ** 3 }
+	private _minSize = { width: 10, height: 10 }
 	private _minSizeScaled = { width: 10 ** 3, height: 10 ** 3 }
 
-	get minSize() { return this._minSize }
+	get minSize(): Size { return this._minSize }
 	set minSize(v: number | Size) {
-		if (typeof v === "number") { this._minSize = { width: v, height: v } } else { this._minSize = { width: v.width, height: v.height } }
+		if (typeof v === "number") {
+			this._minSize = { width: v, height: v }
+		} else {
+			this._minSize = { width: v.width, height: v.height }
+		}
 		this._minSizeScaled = this._scaleSize(this._minSize)
 	}
 
-	get minSizeScaled() { return this._minSizeScaled }
+	get minSizeScaled(): Size { return this._minSizeScaled }
 
 	private _collapseSize = { width: 0, height: 0 }
 	private _collapseSizeScaled = { width: 0, height: 0 }
 
-	get collapseSize() { return this._collapseSize }
+	get collapseSize(): Size { return this._collapseSize }
 	set collapseSize(v: number | Size) {
 		if (typeof v === "number") { this._collapseSize = { width: v, height: v } } else { this._collapseSize = { width: v.width, height: v.height } }
 		this._collapseSizeScaled = this._scaleSize(this._collapseSize)
 	}
 
-	get collapseSizeScaled() { return this._collapseSizeScaled }
+	get collapseSizeScaled(): Size { return this._collapseSizeScaled }
+
 
 	private _maxPerpendicularLength = { width: 20, height: 20 }
 	private _maxPerpendicularLengthScaled = { width: Math.round(20 * (10 ** 3)), height: Math.round(20 * (10 ** 3)) }
 
-	get maxPerpendicularLength() { return this._maxPerpendicularLength }
+	get maxPerpendicularLength(): Size { return this._maxPerpendicularLength }
 	set maxPerpendicularLength(v: number | Size) {
 		if (typeof v === "number") { this._maxPerpendicularLength = { width: v, height: v } } else { this._maxPerpendicularLength = { ...v } }
 		this._maxPerpendicularLengthScaled = this._scaleSize(this._maxPerpendicularLength)

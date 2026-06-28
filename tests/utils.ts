@@ -16,8 +16,8 @@ export function createTestWindow() {
 		id: "test-window",
 		activeFrame: undefined,
 		frames: {} as any,
-		pxWidth: w.full,
-		pxHeight: w.full,
+		pxWidth: 100,
+		pxHeight: 100,
 		pxX: 0,
 		pxY: 0
 	}
