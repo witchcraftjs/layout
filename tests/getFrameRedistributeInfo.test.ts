@@ -1,6 +1,6 @@
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { walk } from "@alanscodelog/utils/walk"
-import { beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
@@ -13,9 +13,30 @@ import { KnownError } from "../src/runtime/utils/KnownError.js"
 
 const testWindow = createTestWindow()
 beforeEach(() => {
-	settings.collapseSize = { width: 0, height: 0 }
+	settings.collapseSizePx = 0
 })
-describe("getFramesRedistributeInfo", () => {
+afterEach(() => {
+	settings.resetToDefaults()
+})
+
+/**
+ * ┌─────┬─────┬─────┐
+ * │A    │B    │C    │
+ * └─────┴─────┴─────┘
+ */
+const layout = {
+	...testWindow,
+	frames: {
+		A: { id: "A", x: 0, y: 0, width: w.third, height: w.full },
+		B: { id: "B", x: w.third, y: 0, width: w.third, height: w.full },
+		C: { id: "C", x: w.third * 2, y: 0, width: w.third + 1, height: w.full }
+	}
+}
+expect(layout.frames.A.width + layout.frames.B.width + layout.frames.C.width).toBe(w.full)
+
+const halfOfThird = w.third / 2
+it("shrinks along horizontal", () => {
+	const clone = walk(layout, undefined, { save: true })
 	/**
 	 * aprox end result, there is a space because the main usage is for docking and A would be the dock to expand in that case.
 	 * ┌─────┐    ┌───┬───┐

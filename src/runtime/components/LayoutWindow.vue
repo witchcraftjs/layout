@@ -78,11 +78,12 @@ import { createDefaultHandlers } from "../drag/createDefaultHandlers.js"
 import { DragActionHandler } from "../drag/DragActionHandler"
 import { dragContextInjectionKey } from "../types/vue.js"
 import { type DragState, type IDragAction } from "../types/index.js"
-import { updateWindowWithEvent } from "../helpers/updateWindowSizeWithEvent.js"
+import { getUpdateWindowSizeInfo } from "../layout/getUpdateWindowSizeInfo.js"
 import { windowSetActiveFrame } from "../layout/windowSetActiveFrame.js"
 import { type LayoutWindow } from "../types/index.js"
 import { layoutContextInjectionKey } from "../types/vue.js"
 import { settings } from "../settings.js"
+import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 
 
 const $attrs = useAttrs()
@@ -173,15 +174,18 @@ function getWindowSize() {
 		pxHeight: Math.floor(windowElRect.height)
 	}
 }
-function updateWindowSize() {
+function onWindowResize() {
 	if (!props.allowWindowSizeUpdate) return
 	const newSize = { ...getWindowSize(), ...getWindowOffset() }
-	updateWindowWithEvent(win.value, newSize)
+	win.value.pxX = newSize.pxX
+	win.value.pxY = newSize.pxY
+	applyFrameChanges(win.value, getUpdateWindowSizeInfo(win.value, newSize))
 }
-useGlobalResizeObserver(windowEl, updateWindowSize)
+
+useGlobalResizeObserver(windowEl, onWindowResize)
 watch(() => props.allowWindowSizeUpdate, (newval, oldval) => {
 	if (oldval === false && newval === true) {
-		updateWindowSize()
+		onWindowResize()
 	}
 })
 
@@ -201,7 +205,7 @@ provide(layoutContextInjectionKey, layoutContext)
 defineExpose({
 	state,
 	win,
-	updateWindowSize,
+	getUpdateWindowSizeInfo,
 	dragActionHandler: dragActionHandler as DragActionHandler<any, any>,
 })
 </script>

@@ -1,6 +1,6 @@
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { walk } from "@alanscodelog/utils/walk"
-import { beforeEach, expect, it } from "vitest"
+import { afterEach, beforeEach, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
@@ -18,7 +18,10 @@ import { KnownError } from "../src/runtime/utils/KnownError.js"
 const testWindow = createTestWindow()
 
 beforeEach(() => {
-	settings.collapseSize = { width: 0, height: 0 }
+	settings.collapseSizePx = 0
+})
+afterEach(() => {
+	settings.resetToDefaults()
 })
 
 it("simple collapse/uncollapse", () => {
@@ -46,7 +49,7 @@ it("simple collapse/uncollapse", () => {
 	}
 })
 it("simple collapse/uncollapse when collapsed size !==0", () => {
-	settings.collapseSize = { width: 5, height: 5 }
+	settings.collapseSizePx = { width: 5, height: 5 }
 	const layout = {
 		...testWindow,
 		frames: {
@@ -259,7 +262,7 @@ it("all four sides collapsed then uncollapsed", () => {
 })
 
 it("collapse when collapsed size !==0", () => {
-	settings.collapseSize = { width: 5, height: 5 }
+	settings.collapseSizePx = 0.05 * testWindow.pxWidth
 
 	const collapseSize = 5000
 	const remainingWidth = w.full - collapseSize
@@ -317,7 +320,7 @@ it("collapse when collapsed size !==0", () => {
 	}))
 })
 it("uncollapse when collapsed size !==0", () => {
-	settings.collapseSize = { width: 5, height: 5 }
+	settings.collapseSizePx = { width: 5, height: 5 }
 
 	const collapseSize = 5000
 	const remainingSize = w.full - collapseSize
@@ -361,7 +364,7 @@ it("uncollapse when collapsed size !==0", () => {
 	}))
 })
 it("uncollapse when collapsed size !==0 and opposite side is collapsed", () => {
-	settings.collapseSize = { width: 5, height: 5 }
+	settings.collapseSizePx = { width: 5, height: 5 }
 
 	const collapseSize = 5000
 

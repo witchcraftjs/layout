@@ -1,6 +1,6 @@
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { walk } from "@alanscodelog/utils/walk"
-import { beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
@@ -12,7 +12,10 @@ import { getFillEmptySpaceInfo } from "../src/runtime/layout/getFillEmptySpaceIn
 const testWindow = createTestWindow()
 
 beforeEach(() => {
-	settings.collapseSize = { width: 0, height: 0 }
+	settings.collapseSizePx = 0
+})
+afterEach(() => {
+	settings.resetToDefaults()
 })
 
 it("prefer passed frames", () => {

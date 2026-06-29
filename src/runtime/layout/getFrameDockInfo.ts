@@ -8,6 +8,7 @@ import { getFrameUndockInfo } from "./getFrameUndockInfo.js"
 
 import { cloneFrame } from "../helpers/cloneFrame.js"
 import { getDockBoundaries } from "../helpers/getDockBoundaries.js"
+import { getPinnedEdgesForCollapsedFrames } from "../helpers/getPinnedEdgesForCollapsedFrames.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
 import { settings } from "../settings.js"
 import type { EdgeSide, LayoutChange, LayoutWindow } from "../types/index.js"
@@ -28,6 +29,7 @@ export function getFrameDockInfo(
 	| LayoutChange
 	| KnownError<typeof LAYOUT_ERROR.REDISTRIBUTE_OUT_OF_BOUNDS>
 	| KnownError<typeof LAYOUT_ERROR.NO_SPACE_TO_REDISTRIBUTE>
+	| KnownError<typeof LAYOUT_ERROR.REDISTRIBUTE_WOULD_RESULT_IN_INVALID_FRAMES>
 	| KnownError<typeof LAYOUT_ERROR.CANT_LEAVE_NO_UNDOCKED_FRAMES>
 	| KnownError<typeof LAYOUT_ERROR.FRAME_ALREADY_DOCKED_ON_SIDE>
 	| KnownError<typeof LAYOUT_ERROR.CANT_UNDOCK_COLLAPSED_FRAME>
@@ -82,7 +84,12 @@ export function getFrameDockInfo(
 	// redistribute other non-docked frames to make room for the new dock.
 	const sideToPushTowards = oppositeSide(side)
 
-	const redistributeChanges = getFramesRedistributeInfo(win, sideToPushTowards, nonDockedFrameIds, perpendicularLength)
+	const posKey = isHorizontal ? "x" : "y"
+	const sizeKey = isHorizontal ? "width" : "height"
+
+	const pinnedEdgeCoordinates: number[] = getPinnedEdgesForCollapsedFrames(win, frame, side, posKey, sizeKey)
+
+	const redistributeChanges = getFramesRedistributeInfo(win, sideToPushTowards, nonDockedFrameIds, perpendicularLength, { pinnedEdgeCoordinates })
 
 	if (redistributeChanges instanceof KnownError) {
 		return redistributeChanges

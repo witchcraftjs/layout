@@ -36,4 +36,9 @@ export function applyFrameChanges(
 	for (const frame of change.deleted) {
 		delete win.frames[frame.id]
 	}
+	if (change.window) {
+		for (const [key, value] of Object.entries(change.window)) {
+			;(win as any)[key] = value as any
+		}
+	}
 }

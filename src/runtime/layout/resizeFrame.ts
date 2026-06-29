@@ -20,7 +20,7 @@ export function resizeFrame(
 	/** Scaled */
 	minSize: Size = settings.minSizeScaled
 ): boolean {
-	const originalDistance = distance
+	// const originalDistance = distance
 	const frameEdges = frameToEdges(frame)
 	const resizeEdges = dir === "up"
 		? [frameEdges.top]
@@ -86,7 +86,7 @@ export function resizeFrame(
 		}
 
 		if (!foundEdge) {
-			distance = originalDistance
+			// distance = originalDistance
 			continue
 		}
 

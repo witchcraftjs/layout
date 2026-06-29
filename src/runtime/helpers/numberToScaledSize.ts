@@ -6,7 +6,7 @@ import { settings } from "../settings.js"
 import type { LayoutWindow, PxSize, Size } from "../types/index.js"
 
 export function numberToScaledSize(
-	win: LayoutWindow,
+	win: Pick<LayoutWindow, "pxWidth" | "pxHeight">,
 	size: PxSize | number,
 	scale: number = settings.maxInt
 ): Size {

@@ -81,7 +81,7 @@
 									@click="handleCollapse(f.id)"
 								>Collapse</button>
 								<button
-									v-if="f.docked && typeof f.collapsed === 'number'"
+									v-if="f.docked && f.collapsed"
 									class="bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 text-xs rounded"
 									@click="handleUncollapse(f.id)"
 								>Uncollapse</button>

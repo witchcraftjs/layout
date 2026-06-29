@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest"
 
 import { applyFrameChanges } from "../../src/runtime/layout/applyFrameChanges.js"
 import { getFrameDockInfo } from "../../src/runtime/layout/getFrameDockInfo.js"
-import { settings } from "../../src/runtime/settings.js"
 import type { LayoutChange, LayoutWindow } from "../../src/runtime/types/index.js"
 import { createTestWindow, w } from "../utils.js"
 

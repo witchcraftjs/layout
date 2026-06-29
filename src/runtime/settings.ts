@@ -1,8 +1,35 @@
+import { numberToScaledSize } from "./helpers/numberToScaledSize.js"
 import type { Point, Size } from "./types/index.js"
 
 export class Settings {
-	private _scale = 3
-	private _maxInt = 100 * (10 ** 3)
+	private initialized = false
+	constructor() {
+		this.resetToDefaults()
+		this.initialized = true
+	}
+
+	resetToDefaults() {
+		this.scale = 3
+		this.snapPoint = 0.5
+		this.minSize = 5
+		this.collapseSizePx = 15
+		this.maxPerpendicularLength = 20
+		this.zoneSizes = { frameEdgePx: 40, windowEdgePx: 20 }
+		this._recalcAll()
+	}
+
+	_zoneSizes!: { frameEdgePx: number, windowEdgePx: number }
+	get zoneSizes(): { frameEdgePx: number, windowEdgePx: number } { return this._zoneSizes }
+	set zoneSizes(v: number | { frameEdgePx: number, windowEdgePx: number }) {
+		if (typeof v === "number") {
+			this._zoneSizes = { frameEdgePx: v, windowEdgePx: v }
+		} else {
+			this._zoneSizes = { frameEdgePx: v.frameEdgePx, windowEdgePx: v.windowEdgePx }
+		}
+	}
+
+	private _scale!: number
+	private _maxInt!: number
 	get scale() { return this._scale }
 	set scale(v: number) {
 		this._scale = v
@@ -13,20 +40,24 @@ export class Settings {
 	get maxInt() { return this._maxInt }
 
 
-	private _snapPoint = { x: 0.5, y: 0.5 }
-	private _snapPointScaled = { x: Math.round(0.5 * (10 ** 3)), y: Math.round(0.5 * (10 ** 3)) }
+	private _snapPoint!: Point
+	private _snapPointScaled!: Point
 
 	get snapPoint(): Point { return this._snapPoint }
 	set snapPoint(v: number | Point) {
-		if (typeof v === "number") { this._snapPoint = { x: v, y: v } } else { this._snapPoint = { x: v.x, y: v.y } }
+		if (typeof v === "number") {
+			this._snapPoint = { x: v, y: v }
+		} else {
+			this._snapPoint = { x: v.x, y: v.y }
+		}
 		this._snapPointScaled = this._scalePoint(this._snapPoint)
 	}
 
 	get snapPointScaled() { return this._snapPointScaled }
 
 
-	private _minSize = { width: 10, height: 10 }
-	private _minSizeScaled = { width: 10 ** 3, height: 10 ** 3 }
+	private _minSize!: Size
+	private _minSizeScaled!: Size
 
 	get minSize(): Size { return this._minSize }
 	set minSize(v: number | Size) {
@@ -40,20 +71,26 @@ export class Settings {
 
 	get minSizeScaled(): Size { return this._minSizeScaled }
 
-	private _collapseSize = { width: 0, height: 0 }
-	private _collapseSizeScaled = { width: 0, height: 0 }
+	private _collapseSizePx!: Size
 
-	get collapseSize(): Size { return this._collapseSize }
-	set collapseSize(v: number | Size) {
-		if (typeof v === "number") { this._collapseSize = { width: v, height: v } } else { this._collapseSize = { width: v.width, height: v.height } }
-		this._collapseSizeScaled = this._scaleSize(this._collapseSize)
+	get collapseSizePx(): Size { return this._collapseSizePx }
+	set collapseSizePx(v: number | Size) {
+		if (typeof v === "number") {
+			this._collapseSizePx = { width: v, height: v }
+		} else {
+			this._collapseSizePx = { width: v.width, height: v.height }
+		}
 	}
 
-	get collapseSizeScaled(): Size { return this._collapseSizeScaled }
+	getCollapseSizeScaled(win: { pxWidth: number, pxHeight: number }) {
+		return numberToScaledSize(win, {
+			pxWidth: this.collapseSizePx.width,
+			pxHeight: this.collapseSizePx.height
+		}, this.maxInt)
+	}
 
-
-	private _maxPerpendicularLength = { width: 20, height: 20 }
-	private _maxPerpendicularLengthScaled = { width: Math.round(20 * (10 ** 3)), height: Math.round(20 * (10 ** 3)) }
+	private _maxPerpendicularLength!: Size
+	private _maxPerpendicularLengthScaled!: Size
 
 	get maxPerpendicularLength(): Size { return this._maxPerpendicularLength }
 	set maxPerpendicularLength(v: number | Size) {
@@ -75,14 +112,12 @@ export class Settings {
 	}
 
 	private _recalcAll() {
+		if (!this.initialized) return
 		this.snapPoint = this._snapPoint
 		this.minSize = this._minSize
-		this.collapseSize = this._collapseSize
+		this.collapseSizePx = this._collapseSizePx
 		this.maxPerpendicularLength = this._maxPerpendicularLength
 	}
-
-	// ==== px sized, don't require recalc
-	zoneSizes = { frameEdgePx: 40, windowEdgePx: 20 }
 }
 
 export const settings = new Settings()

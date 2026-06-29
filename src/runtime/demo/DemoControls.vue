@@ -9,7 +9,7 @@
 		</template>
 		<template #popover>
 			<div class="flex flex-col gap-2 rounded-md w-full`">
-				<label class="text-xs">Collapse Size (%):</label>
+				<label class="text-xs">Collapse Size (px):</label>
 				<input
 					type="number"
 					class="w-full min-w-0 border border-neutral-300 dark:border-neutral-700 rounded px-1 py-0.5 text-xs bg-neutral-100 dark:bg-neutral-800"
@@ -61,10 +61,10 @@ const props = defineProps<{
 
 const showDevActions = ref(false)
 
-const collapseSizeValue = ref(Math.round(settings.collapseSizeScaled.width / settings.maxInt * 100))
+const collapseSizeValue = ref(settings.collapseSizePx.width) 
 
 function handleCollapseSizeChange(value: number) {
-	settings.collapseSize = value
+	settings.collapseSizePx = value
 	collapseSizeValue.value = value
 }
 

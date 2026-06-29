@@ -20,7 +20,9 @@ export function getMoveEdgeInfo(
 	/** Window scaled/snaped position. See {@link toWindowCoord} */
 	position: Point,
 	margin: Size = settings.minSizeScaled,
-	clamp = true
+	clamp = true,
+	/** Skip the collapsed frame check. Used internally during window resize adjustments. */
+	ignoreCollapsedCheck = false
 ): {
 	x: number
 	y: number
@@ -30,10 +32,12 @@ export function getMoveEdgeInfo(
 	distance: number
 } | KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME> {
 	// prevent moving edges that touch collapsed frames
-	for (const frame of touchingFrames) {
-		// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
-		if (frame.collapsed) {
-			return new KnownError(LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME, `Cannot resize non-0 collapsed frame ${frame.id}.`, { frame })
+	if (!ignoreCollapsedCheck) {
+		for (const frame of touchingFrames) {
+			// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
+			if (frame.collapsed) {
+				return new KnownError(LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME, `Cannot resize non-0 collapsed frame ${frame.id}.`, { frame })
+			}
 		}
 	}
 

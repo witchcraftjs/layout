@@ -215,9 +215,10 @@ export class DragActionHandler<
 		type: "before" | "after" | string,
 		state: DragState,
 		pluginState: Record<string, any> = {},
-		/** Object key to filter the state by, e.g. state.win.frames. If boolean is ignored. The idea is you pass this.debug and users can set this.debug to a string to filter. */
+		/** Object key to filter the state by, e.g. state.win.frames. If false is ignored. The idea is you pass this.debug and users can set this.debug to a string to filter. */
 		key?: string | boolean
 	): void {
+		if (key === false) return
 		let res = { state, pluginState }
 		if (typeof key === "string" && key !== "") {
 			const paths = key.split(",").map(_ => _.trim()).filter(_ => _)
