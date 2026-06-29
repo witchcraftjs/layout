@@ -1,6 +1,6 @@
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { walk } from "@alanscodelog/utils/walk"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
@@ -360,6 +360,53 @@ it("uncollapse when collapsed size !==0", () => {
 		height: w.full
 	}))
 })
+it("uncollapse when collapsed size !==0 and opposite side is collapsed", () => {
+	settings.collapseSize = { width: 5, height: 5 }
+
+	const collapseSize = 5000
+
+	/**
+	 * ┌────────────┬──┐
+	 * │A~          │C~│
+	 * ├──┬─────────┤  │
+	 * │B~│ D       │  │
+	 * │  │         │  │
+	 * │  │         │  │
+	 * └──┴─────────┴──┘
+	 */
+	const layout = {
+		...testWindow,
+		frames: {
+			A: { id: "A", x: 0, y: 0, width: w.full - collapseSize, height: collapseSize, docked: "top", collapsed: w.forth },
+			C: { id: "C", x: w.full - collapseSize, y: 0, width: collapseSize, height: w.full, docked: "right", collapsed: w.forth },
+			B: { id: "B", x: 0, y: collapseSize, width: collapseSize, height: w.full - collapseSize, collapsed: w.forth, docked: "left" },
+			D: { id: "D", x: collapseSize, y: collapseSize, width: w.full - collapseSize * 2, height: w.full - collapseSize }
+		}
+	}
+
+	const clone = walk(layout, undefined, { save: true })
+
+	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "C")))
+
+	expect(clone.frames.A).toEqual(expect.objectContaining({
+		...layout.frames.A,
+		width: w.full - w.forth
+	}))
+	expect(clone.frames.B).toEqual(expect.objectContaining({
+		...layout.frames.B
+	}))
+	expect(clone.frames.C).toEqual(expect.objectContaining({
+		...layout.frames.C,
+		x: w.full - w.forth,
+		width: w.forth,
+		collapsed: undefined
+	}))
+	expect(clone.frames.D).toEqual(expect.objectContaining({
+		...layout.frames.D,
+		width: w.full - w.forth - collapseSize
+	}))
+})
+
 
 it("multiple docks - a left (collasped) then b top", () => {
 	const layout = {

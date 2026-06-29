@@ -221,6 +221,54 @@ describe("getFramesRedistributeInfo", () => {
 				width: w.forth * 3 - forthOfFifth * 3
 			})
 
-		}))
-	})
+	}))
+})
+
+it("pinned frames are not redistributed - shrinking", () => {
+	const clone = walk(layout, undefined, { save: true })
+	clone.frames.A.collapsed = w.forth
+	clone.frames.A.docked = "left"
+	clone.frames.B.collapsed = w.forth
+	clone.frames.B.docked = "right"
+
+	const pinnedEdgeCoordinates = [clone.frames.C.x]
+	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", ["B", "C"], w.forth, { pinnedEdgeCoordinates })))
+
+	expect(clone.frames).toEqual(expect.objectContaining({
+		A: expect.objectContaining({
+			...layout.frames.A
+		}),
+		C: expect.objectContaining({
+			...layout.frames.C
+		}),
+		B: expect.objectContaining({
+			...layout.frames.B,
+			width: layout.frames.B.width - w.forth,
+			x: layout.frames.B.x + w.forth
+		})
+	}))
+})
+it("pinned frames are not redistributed - expanding", () => {
+	const clone = walk(layout, undefined, { save: true })
+	clone.frames.A.collapsed = w.forth
+	clone.frames.A.docked = "left"
+	clone.frames.B.collapsed = w.forth
+	clone.frames.B.docked = "right"
+	const pinnedEdgeCoordinates = [clone.frames.C.x]
+
+	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", ["B", "C"], -w.forth, { pinnedEdgeCoordinates })))
+
+	expect(clone.frames).toEqual(expect.objectContaining({
+		A: expect.objectContaining({
+			...layout.frames.A
+		}),
+		C: expect.objectContaining({
+			...layout.frames.C
+		}),
+		B: expect.objectContaining({
+			...layout.frames.B,
+			width: layout.frames.B.width + w.forth,
+			x: layout.frames.B.x - w.forth
+		})
+	}))
 })
