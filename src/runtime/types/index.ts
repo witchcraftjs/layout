@@ -2,7 +2,6 @@ import type { EnumLike } from "@alanscodelog/utils"
 import { enumFromArray } from "@alanscodelog/utils/enumFromArray"
 import { z } from "zod"
 
-import { settings } from "../settings.js"
 import { KnownError } from "../utils/KnownError.js"
 
 export const zUuid = z.uuid()
@@ -16,11 +15,24 @@ export const zFrameIdConstants = z.enum(["ACTIVE"])
 export const zFrameId = z.uuid().or(zFrameIdConstants)
 export type FrameId = z.infer<typeof zFrameId>
 
+import { settings } from "../settings.js"
+
 export const zScaledIntPercentage = z.number()
 	.int()
 	.min(0)
-	.max(settings.maxInt)
 	.nonnegative()
+	.superRefine((val, ctx) => {
+		if (val > settings.maxInt) {
+			ctx.addIssue({
+				code: "too_big",
+				type: "number",
+				origin: "number",
+				maximum: settings.maxInt,
+				inclusive: true,
+				message: `Value ${val} must be less than or equal to ${settings.maxInt}`
+			})
+		}
+	})
 
 const zPx = z.number()
 	.int()
@@ -422,6 +434,7 @@ export type LayoutChange<TInfo = never> = {
 	modified: LayoutFrame[]
 	created: LayoutFrame[]
 	deleted: LayoutFrame[]
+	window?: Partial<LayoutWindow>
 	info?: TInfo
 }
 export type DragState = {
