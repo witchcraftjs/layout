@@ -1,4 +1,4 @@
-import { numberToScaledSize } from "./helpers/numberToScaledSize.js"
+import { numberToScaledPercent } from "./helpers/numberToScaledPercent.js"
 import type { Point, Size } from "./types/index.js"
 
 export class Settings {
@@ -82,11 +82,24 @@ export class Settings {
 		}
 	}
 
-	getCollapseSizeScaled(win: { pxWidth: number, pxHeight: number }) {
-		return numberToScaledSize(win, {
-			pxWidth: this.collapseSizePx.width,
-			pxHeight: this.collapseSizePx.height
-		}, this.maxInt)
+	getCollapseSizeScaled(win: { pxWidth: number, pxHeight: number }): Size {
+		const size = this.collapseSizePx
+		return {
+			width: win.pxWidth === 0
+				? 0
+				: numberToScaledPercent(
+						typeof size === "number" ? size : size.width,
+						win.pxWidth,
+						this.maxInt
+					),
+			height: win.pxHeight === 0
+				? 0
+				: numberToScaledPercent(
+						typeof size === "number" ? size : size.height,
+						win.pxHeight,
+						this.maxInt
+					)
+		}
 	}
 
 	private _maxPerpendicularLength!: Size

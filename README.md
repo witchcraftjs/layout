@@ -138,10 +138,8 @@ settings.minSize = 5 (5%)
 There are utilities for converting between non-scaled and scaled values if you need to:
 
 ```ts
-import {
-	numberToScaledSize,
-	numverToScaledPercent
-} from "@witchcraft-layout/helpers/numberToScaledSize.js"
+import { numberToScaledPercent } from "@witchcraft-layout/helpers/numberToScaledSize.js"
+import { pxSizeToScaledSize } from "@witchcraft-layout/helpers/pxSizeToScaledSize.js" 
 
  /* -----------
  * |    *    |

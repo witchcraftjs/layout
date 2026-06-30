@@ -5,7 +5,7 @@ import { numberToScaledPercent } from "./numberToScaledPercent.js"
 import { settings } from "../settings.js"
 import type { LayoutWindow, PxSize, Size } from "../types/index.js"
 
-export function numberToScaledSize(
+export function pxSizeToScaledSize(
 	win: Pick<LayoutWindow, "pxWidth" | "pxHeight">,
 	size: PxSize | number,
 	scale: number = settings.maxInt
