@@ -69,9 +69,6 @@ catalogs:
     cross-env:
       specifier: ^10.1.0
       version: 10.1.0
-    es-toolkit:
-      specifier: ^1.46.1
-      version: 1.46.1
     fast-glob:
       specifier: ^3.3.3
       version: 3.3.3
@@ -143,9 +140,6 @@ importers:
       '@iconify/json':
         specifier: 'catalog:'
         version: 2.2.476
-      es-toolkit:
-        specifier: 'catalog:'
-        version: 1.46.1
     devDependencies:
       '@alanscodelog/commitlint-config':
         specifier: 'catalog:'
@@ -4681,12 +4675,13 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   git-raw-commits@5.0.1:
     resolution: {integrity: sha512-Y+csSm2GD/PCSh6Isd/WiMjNAydu0VBiG9J7EdQsNA5P9uXvLayqjmTsNlK5Gs9IhblFZqOU0yid5Il5JPoLiQ==}
     engines: {node: '>=18'}
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -7407,6 +7402,7 @@ packages:
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
+    deprecated: unmaintained
     hasBin: true
     peerDependencies:
       typescript: ^5.0.0
@@ -16807,7 +16803,6 @@ time:
   '@witchcraft/ui@0.5.9': '2026-06-20T23:33:24.369Z'
   concurrently@9.2.1: '2025-08-25T09:50:49.138Z'
   cross-env@10.1.0: '2025-09-29T17:34:12.232Z'
-  es-toolkit@1.46.1: '2026-04-29T09:42:09.686Z'
   fast-glob@3.3.3: '2025-01-05T10:38:42.236Z'
   http-server@14.1.1: '2022-05-31T21:34:27.707Z'
   husky@9.1.7: '2024-11-18T15:28:26.026Z'

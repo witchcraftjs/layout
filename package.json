@@ -57,8 +57,7 @@
 	},
 	"dependencies": {
 		"@alanscodelog/utils": "catalog:",
-		"@iconify/json": "catalog:",
-		"es-toolkit": "catalog:"
+		"@iconify/json": "catalog:"
 	},
 	"peerDependencies": {
 		"@witchcraft/nuxt-utils": "catalog:",
