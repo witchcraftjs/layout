@@ -325,7 +325,7 @@ export function createDebugLabeler({
 		const pos = showPos ? ` ${f.x},${f.y}` : ""
 		const pxSize = showPxSize ? ` ${widthPx}x${heightPx}px` : ""
 
-		return `${isCollapsed}${isDocked}${size}${pos}${pxSize}`
+		return `${isCollapsed}${isDocked}${pos}${size}${pxSize}`
 	}
 }
 
