@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFrameDockInfo } from "../src/runtime/layout/getFrameDockInfo.js"
 import { getFrameUndockInfo } from "../src/runtime/layout/getFrameUndockInfo.js"
@@ -47,6 +48,7 @@ describe("getFrameDockInfo", () => {
 	const halfOfThird = w.third / 2
 	it("docks to left", () => {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		/**
 		 *
 		 * C gets slightly bigger because it first fills the space A leaves behind
@@ -58,6 +60,7 @@ describe("getFrameDockInfo", () => {
 		 *
 		 */
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "left", w.third)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames.A.width + clone.frames.B.width + clone.frames.C.width).toBe(w.full)
 		expect(clone.frames.D.width + clone.frames.A.width).toBe(w.full)
@@ -86,6 +89,7 @@ describe("getFrameDockInfo", () => {
 
 	it("docks to right", () => {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		/**
 		 *
 		 * ┌────┬──────┬─────┐
@@ -97,6 +101,7 @@ describe("getFrameDockInfo", () => {
 		 */
 
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "right", w.third)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames.B.width + clone.frames.C.width + clone.frames.A.width).toBe(w.full)
 		expect(clone.frames.D.width + clone.frames.A.width).toBe(w.full)
@@ -130,7 +135,9 @@ describe("getFrameDockInfo", () => {
 		 *
 		 */
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.third)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames.A.height + clone.frames.B.height + clone.frames.D.height).toBe(w.full)
 		expect(clone.frames.A.height + clone.frames.C.height + clone.frames.D.height).toBe(w.full)
@@ -174,7 +181,9 @@ describe("getFrameDockInfo", () => {
 		 *
 		 */
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "bottom", w.third)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames.B.height + clone.frames.D.height + clone.frames.A.height).toBe(w.full)
 		expect(clone.frames.C.height + clone.frames.D.height + clone.frames.A.height).toBe(w.full)
@@ -209,6 +218,7 @@ describe("getFrameDockInfo", () => {
 	})
 	it("docking over docked edge fails", () => {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		/**
 		 *
 		 * ┌─────┬─────┬─────┐
@@ -220,6 +230,7 @@ describe("getFrameDockInfo", () => {
 		 */
 
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "left")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		const info = getFrameDockInfo(clone, "B", "left")
 		expect(info).toBeInstanceOf(KnownError)
 		if (info instanceof KnownError) {
@@ -238,11 +249,14 @@ describe("getFrameDockInfo", () => {
 			...testWindow,
 			frames: {
 				A: { id: "A", x: 0, y: 0, width: w.half, height: w.full, docked: "left" },
-				B: { id: "B", x: 0, y: 0, width: w.half, height: w.full }
+				B: { id: "B", x: w.half, y: 0, width: w.half, height: w.full }
 			}
 		}
+
 		expect(layout.frames.A.width + layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
+
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		const info = getFrameDockInfo(clone, "B", "right")
 		expect(info).toBeInstanceOf(KnownError)
 		if (info instanceof KnownError) {
@@ -273,7 +287,9 @@ describe("getFrameDockInfo", () => {
 		}
 		expect(layout.frames.A.width + layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "B", "top", w.half)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
@@ -319,7 +335,9 @@ describe("getFrameDockInfo", () => {
 		}
 		expect(layout.frames.A.width + layout.frames.B.width + layout.frames.C.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "C", "top", w.half)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
@@ -365,8 +383,10 @@ describe("getFrameDockInfo", () => {
 		}
 		expect(layout.frames.A.width + layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.forth)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames.A.docked).toBe("top")
 		expect(clone.frames.A.collapsed).toBe(undefined)
 		expect(clone.frames.A.width).toBe(w.full)
@@ -396,7 +416,7 @@ describe("getFrameDockInfo", () => {
 			frames: {
 				B: { id: "B", x: 0, y: 0, width: w.third, height: w.half },
 				C: { id: "C", x: w.third, y: 0, width: w.third, height: w.half },
-				A: { id: "A", x: w.third * 2, y: 0, width: w.third, height: w.half },
+				A: { id: "A", x: w.third * 2, y: 0, width: w.third + 1, height: w.half },
 				D: { id: "D", x: 0, y: w.half, width: w.full, height: w.half }
 			}
 		}
@@ -404,6 +424,7 @@ describe("getFrameDockInfo", () => {
 
 		it("a left then b top", () => {
 			const clone = walk(layout, undefined, { save: true })
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 			/**
 			 *
 			 * ┌─────┬───────────┐
@@ -416,7 +437,9 @@ describe("getFrameDockInfo", () => {
 			 *
 			 */
 			applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "left", w.third)))
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 			applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "B", "top", w.third)))
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 			expect(clone.frames).toEqual(expect.objectContaining({
 				A: expect.objectContaining({
@@ -439,7 +462,7 @@ describe("getFrameDockInfo", () => {
 					...layout.frames.C,
 					x: w.third,
 					y: w.third,
-					width: w.full - w.third - 1,
+					width: w.full - w.third,
 					// B was w.half - halfOfThird after A's dock
 					// So C and D redistribute into remaining height
 					height: (w.full - w.third) / 2 - 0.5
@@ -470,7 +493,9 @@ describe("getFrameDockInfo", () => {
 			}
 			expect(layout.frames.A.width + layout.frames.B.width).toBe(w.full)
 			const clone = walk(layout, undefined, { save: true })
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 			applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.half)))
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 			expect(clone.frames).toEqual(expect.objectContaining({
 				A: expect.objectContaining({
 					...layout.frames.A,
@@ -510,7 +535,9 @@ describe("getFrameUndockInfo", () => {
 		}
 		expect(layout.frames.A.width + layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameUndockInfo(clone, "A")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
@@ -547,7 +574,10 @@ describe("getFrameUndockInfo", () => {
 			}
 		}
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
+
 		applyFrameChanges(clone, throwIfError(getFrameUndockInfo(clone, "A")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({

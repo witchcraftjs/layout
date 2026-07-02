@@ -4,8 +4,10 @@ import { afterEach, beforeEach, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
+import { consoleDebugWindow } from "../src/runtime/helpers/consoleDebugWindow.js"
 import { getMoveEdgeInfo } from "../src/runtime/helpers/getMoveEdgeInfo.js"
 import { rotateLayout } from "../src/runtime/helpers/rotateFrames.js"
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFrameCollapseInfo } from "../src/runtime/layout/getFrameCollapseInfo.js"
 import { getFrameDockInfo } from "../src/runtime/layout/getFrameDockInfo.js"
@@ -36,6 +38,7 @@ it("simple collapse/uncollapse", () => {
 
 	for (const orientation of [0, 90, 180, 270] as const) {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		const expectedClone = walk(expected, undefined, { save: true })
 		if (orientation !== 0) {
 			rotateLayout(Object.values(clone.frames), orientation)
@@ -43,7 +46,9 @@ it("simple collapse/uncollapse", () => {
 		}
 
 		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "B")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "B")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone).toEqual(expectedClone)
 	}
@@ -61,6 +66,7 @@ it("simple collapse/uncollapse when collapsed size !==0", () => {
 
 	for (const orientation of [0, 90, 180, 270] as const) {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		const expectedClone = walk(expected, undefined, { save: true })
 		if (orientation !== 0) {
 			rotateLayout(Object.values(clone.frames), orientation)
@@ -68,7 +74,9 @@ it("simple collapse/uncollapse when collapsed size !==0", () => {
 		}
 
 		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "B")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "B")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		expect(clone).toEqual(expectedClone)
 	}
@@ -96,7 +104,9 @@ it("all four sides collapsed", () => {
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const clone2 = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
 	/**
 		* expected sequence
 		* ┌───────────────────┐
@@ -136,6 +146,7 @@ it("all four sides collapsed", () => {
 		*/
 	for (const id of ["A", "B", "C", "D"]) {
 		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, id)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		if (id === "A") {
 			expect(clone.frames.B).toEqual(expect.objectContaining({
 				...layout.frames.B,
@@ -173,6 +184,7 @@ it("all four sides collapsed", () => {
 
 	for (const id of ["A", "B", "C", "D"].reverse()) {
 		applyFrameChanges(clone2, throwIfError(getFrameCollapseInfo(clone2, id)))
+		expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
 	}
 	expect(clone2.frames.E).toEqual(expect.objectContaining({
 		x: 0,
@@ -203,10 +215,13 @@ it("all four sides collapsed then uncollapsed", () => {
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const clone2 = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
 
 	for (const id of ["A", "B", "C", "D"]) {
 		applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, id)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	}
 	/**
 		* sequence would look like this, note how the end result very much depends on the order of the uncollapses
@@ -246,6 +261,7 @@ it("all four sides collapsed then uncollapsed", () => {
 		*/
 	for (const id of ["A", "B", "C", "D"]) {
 		applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, id)))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	}
 	expect(clone.frames.B.width + clone.frames.C.width).toBe(w.full)
 	expect(clone.frames.A.width + clone.frames.E.width + clone.frames.C.width).toBe(w.full)
@@ -254,9 +270,11 @@ it("all four sides collapsed then uncollapsed", () => {
 	expect(() => {
 		for (const id of ["A", "B", "C", "D"].reverse()) {
 			applyFrameChanges(clone2, throwIfError(getFrameCollapseInfo(clone2, id)))
+			expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
 		}
 		for (const id of ["A", "B", "C", "D"].reverse()) {
 			applyFrameChanges(clone2, throwIfError(getFrameUncollapseInfo(clone2, id)))
+			expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
 		}
 	}).not.toThrow()
 })
@@ -286,8 +304,10 @@ it("collapse when collapsed size !==0", () => {
 	}
 
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	applyFrameChanges(clone, throwIfError(getFrameDockInfo(clone, "A", "top", w.forth)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A).toEqual(expect.objectContaining({
 		x: 0,
@@ -304,6 +324,7 @@ it("collapse when collapsed size !==0", () => {
 	}))
 
 	applyFrameChanges(clone, throwIfError(getFrameCollapseInfo(clone, "A")))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A).toEqual(expect.objectContaining({
 		x: 0,
@@ -344,8 +365,10 @@ it("uncollapse when collapsed size !==0", () => {
 	}
 
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "A")))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A).toEqual(expect.objectContaining({
 		...layout.frames.A,
@@ -388,8 +411,10 @@ it("uncollapse when collapsed size !==0 and opposite side is collapsed", () => {
 	}
 
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "C")))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A).toEqual(expect.objectContaining({
 		...layout.frames.A,
@@ -424,11 +449,12 @@ it("multiple docks - a left (collasped) then b top", () => {
 				collapsed: w.third,
 				docked: "left"
 			},
-			B: { id: "B", x: w.third, y: 0, width: w.full, height: w.half, docked: "top" },
-			C: { id: "C", x: w.third, y: w.half, width: w.full, height: w.full }
+			B: { id: "B", x: 0, y: 0, width: w.full, height: w.half, docked: "top" },
+			C: { id: "C", x: 0, y: w.half, width: w.full, height: w.half }
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	/**
 		* collapsed
 		* ┌────── │ ┌─────────────┐
@@ -441,6 +467,7 @@ it("multiple docks - a left (collasped) then b top", () => {
 		*
 		*/
 	applyFrameChanges(clone, throwIfError(getFrameUncollapseInfo(clone, "A")))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -451,13 +478,13 @@ it("multiple docks - a left (collasped) then b top", () => {
 		}),
 		B: expect.objectContaining({
 			...layout.frames.B,
-			x: w.third * 2,
+			x: w.third,
 			width: w.full - (w.third),
 			docked: "top"
 		}),
 		C: expect.objectContaining({
 			...layout.frames.C,
-			x: w.third * 2,
+			x: w.third,
 			width: w.full - (w.third)
 		})
 	}))

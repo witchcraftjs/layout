@@ -2,6 +2,7 @@ import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { walk } from "@alanscodelog/utils/walk"
 import { describe, expect, it } from "vitest"
 
+import { validateLayoutShape } from "../../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../../src/runtime/layout/applyFrameChanges.js"
 import { getFrameDockInfo } from "../../src/runtime/layout/getFrameDockInfo.js"
 import type { LayoutChange, LayoutWindow } from "../../src/runtime/types/index.js"
@@ -73,10 +74,12 @@ describe("Bug 1: docking a floating frame should use latest docked frame boundar
 
 	it("docking undocked frame to left should have height constrained by adjacent frames", () => {
 		const clone = walk(layout, undefined, { save: true })
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 		const result = throwIfError(getFrameDockInfo(clone, "C", "left"))
 
 		applyFrameChanges(clone, result)
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect((result as LayoutChange).modified.length).toBeGreaterThan(0)
 
 		expect(clone.frames.C.height).toBe(clone.frames.B.height)

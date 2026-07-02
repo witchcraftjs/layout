@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { createTestWindow, w } from "./utils.js"
 
 import { settings } from "../src/module.js"
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFillEmptySpaceInfo } from "../src/runtime/layout/getFillEmptySpaceInfo.js"
 
@@ -37,7 +38,10 @@ it("prefer passed frames", () => {
 	const empty = { x: w.half, y: 0, width: w.half, height: w.half }
 
 	const clone = walk(win, undefined, { save: true }) // deep copy
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
+
 	applyFrameChanges(clone, throwIfError(getFillEmptySpaceInfo (clone, empty, ["B"])))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining(win.frames.A),
@@ -64,7 +68,10 @@ it("prefer shortest edge (A)", () => {
 	const empty = { x: w.half, y: 0, width: w.half, height: w.half }
 
 	const clone = walk(win, undefined, { save: true }) // deep copy
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
+
 	applyFrameChanges(clone, throwIfError(getFillEmptySpaceInfo(clone, empty)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({ ...win.frames.A, y: 0, width: w.full }),
@@ -94,9 +101,18 @@ it("uses frames on side of preferredFrames", () => {
 	const clone1 = walk(win, undefined, { save: true }) // deep copy
 	const clone2 = walk(win, undefined, { save: true }) // deep copy
 	const clone3 = walk(win, undefined, { save: true }) // deep copy
+	expect(validateLayoutShape(Object.values(clone1.frames))).toBe(false)
+	expect(validateLayoutShape(Object.values(clone2.frames))).toBe(false)
+	expect(validateLayoutShape(Object.values(clone3.frames))).toBe(false)
+
 	applyFrameChanges(clone1, throwIfError(getFillEmptySpaceInfo(clone1, empty, ["C"])))
+	expect(validateLayoutShape(Object.values(clone1.frames))).toBe(true)
+
 	applyFrameChanges(clone2, throwIfError(getFillEmptySpaceInfo(clone2, empty, ["D"])))
+	expect(validateLayoutShape(Object.values(clone2.frames))).toBe(true)
+
 	applyFrameChanges(clone3, throwIfError(getFillEmptySpaceInfo(clone3, empty, ["C", "D"])))
+	expect(validateLayoutShape(Object.values(clone3.frames))).toBe(true)
 
 	for (const clone of [clone1, clone2, clone3]) {
 		expect(clone.frames).toEqual(expect.objectContaining({
@@ -129,7 +145,11 @@ it("fails to use preferences, uses shortest edge instead", () => {
 	expect(empty.height + win.frames.B.height).toBe(w.full)
 
 	const clone = walk(win, undefined, { save: true }) // deep copy
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
+
 	applyFrameChanges(clone, throwIfError(getFillEmptySpaceInfo(clone, empty, ["C"])))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
+
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining(win.frames.A),
 		B: expect.objectContaining({ ...win.frames.B, y: 0, height: w.full }),

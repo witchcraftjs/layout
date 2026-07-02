@@ -4,6 +4,7 @@ import { afterEach, expect, it } from "vitest"
 import { createTestWindow, w } from "./utils.js"
 
 import { applyFrameChanges } from "../src/module.js"
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { getUpdateWindowSizeInfo } from "../src/runtime/layout/getUpdateWindowSizeInfo.js"
 import { settings } from "../src/runtime/settings.js"
 
@@ -42,7 +43,9 @@ it("window grows - all four sides collapsed to non-0", () => {
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	applyFrameChanges(clone, getUpdateWindowSizeInfo(clone, { pxWidth: clone.pxWidth * 2, pxHeight: clone.pxHeight * 2 }))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A.width).toBe(Math.round(w.forth / 2))
 	expect(clone.frames.A.width / settings.maxInt * clone.pxWidth).toBe(settings.collapseSizePx.width)
@@ -93,12 +96,14 @@ it("window shrinks - all four sides collapsed to non-0", () => {
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	const scale = 2 / 3
 	applyFrameChanges(clone, getUpdateWindowSizeInfo(clone, {
 		pxWidth: clone.pxWidth * scale,
 		pxHeight: clone.pxHeight * scale
 	}))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames.A.width).toBeGreaterThan(layout.frames.A.width)
 	expect(Math.round(clone.frames.A.width / settings.maxInt * clone.pxWidth)).toBe(settings.collapseSizePx.width)
@@ -149,6 +154,7 @@ it("will shrink as much as possible, otherwise normally if a frame would get shr
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const oldPxWidth = clone.pxWidth
 	const oldPxHeight = clone.pxHeight
 
@@ -157,6 +163,7 @@ it("will shrink as much as possible, otherwise normally if a frame would get shr
 		pxHeight: Math.floor(oldPxHeight / 2)
 	})
 	applyFrameChanges(clone, res)
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	// because of the order attempted, A and B will succeed while C and D will stay the same
 	// in real usage, it would not be so brusque since user resizes a bit at a time
 	expect(clone.pxWidth).toBe(oldPxWidth / 2)

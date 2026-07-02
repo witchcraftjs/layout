@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { createTestWindow, w } from "./utils.js"
 
 import { settings } from "../src/module.js"
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFrameRearrangeInfo } from "../src/runtime/layout/getFrameRearrangeInfo.js"
 
@@ -38,13 +39,17 @@ const layout1 = {
 describe("getFrameRearrangeInfo - shared edge", () => {
 	it("A => B's left zone", () => {
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(() => {
 			applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "B", "left")))
+			expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		}).toThrowError()
 	})
 	it("A => B's right zone", () => {
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "B", "right")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({ ...layout1.frames.B, id: "A" }),
 			B: expect.objectContaining({ ...layout1.frames.A, id: "B" }),
@@ -54,7 +59,9 @@ describe("getFrameRearrangeInfo - shared edge", () => {
 	})
 	it("A => B's top zone", () => {
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "B", "top")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		/*
 		* ┌───────────┬─────┐
 		* │A          │C    │
@@ -71,7 +78,9 @@ describe("getFrameRearrangeInfo - shared edge", () => {
 	})
 	it("A => B's bottom zone", () => {
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "B", "bottom")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		/*
 		* ┌───────────┬─────┐
 		* │B          │C    │
@@ -102,7 +111,9 @@ describe("getFrameRearrangeInfo - partially shared edge", () => {
 		 * └─────┴───────────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "B", "C", "left")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining(layout1.frames.A),
 			// if we get an off by 1 on the x/width we can adjust the test
@@ -137,7 +148,9 @@ describe("getFrameRearrangeInfo - partially shared edge", () => {
 		 * └─────┴───────────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "B", "C", "right")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining(layout1.frames.A),
 			// if we get an off by 1 on the x/width we can adjust the test
@@ -174,7 +187,9 @@ describe("getFrameRearrangeInfo - partially shared edge", () => {
 		 * └─────┴───────────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "B", "C", "top")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining(layout1.frames.A),
 			B: expect.objectContaining({
@@ -208,7 +223,9 @@ describe("getFrameRearrangeInfo - partially shared edge", () => {
 		 * └─────┴───────────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "B", "C", "bottom")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining(layout1.frames.A),
 			B: expect.objectContaining({
@@ -251,7 +268,9 @@ describe("getFrameRearrangeInfo - none-shared edge", () => {
 		 * └───────────┴─────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "C", "left")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout1.frames.A,
@@ -282,7 +301,9 @@ describe("getFrameRearrangeInfo - none-shared edge", () => {
 		 * └───────────┴─────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "C", "right")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout1.frames.A,
@@ -311,7 +332,9 @@ describe("getFrameRearrangeInfo - none-shared edge", () => {
 		 * └───────────┴─────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "C", "top")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout1.frames.A,
@@ -341,7 +364,9 @@ describe("getFrameRearrangeInfo - none-shared edge", () => {
 		 * └───────────┴─────┘
 		 */
 		const clone = walk(layout1, undefined, { save: true }) // deep copy
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		applyFrameChanges(clone, throwIfError(getFrameRearrangeInfo(clone, "A", "C", "bottom")))
+		expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 		expect(clone.frames).toEqual(expect.objectContaining({
 			A: expect.objectContaining({
 				...layout1.frames.A,

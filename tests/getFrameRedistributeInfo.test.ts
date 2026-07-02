@@ -4,6 +4,8 @@ import { afterEach, beforeEach, expect, it } from "vitest"
 
 import { createTestWindow, w } from "./utils.js"
 
+import { consoleDebugWindow } from "../src/runtime/helpers/consoleDebugWindow.js"
+import { validateLayoutShape } from "../src/runtime/helpers/validateLayoutShape.js"
 import { applyFrameChanges } from "../src/runtime/layout/applyFrameChanges.js"
 import { getFramesRedistributeInfo } from "../src/runtime/layout/getFramesRedistributeInfo.js"
 import { settings } from "../src/runtime/settings.js"
@@ -37,6 +39,7 @@ expect(layout.frames.A.width + layout.frames.B.width + layout.frames.C.width).to
 const halfOfThird = w.third / 2
 it("shrinks along horizontal", () => {
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	/**
 	 * aprox end result, there is a space because the main usage is for docking and A would be the dock to expand in that case.
 	 * ┌─────┐    ┌───┬───┐
@@ -44,6 +47,7 @@ it("shrinks along horizontal", () => {
 	 * └─────┘    └───┴───┘
 	 */
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", ["B", "C"], w.third)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -86,7 +90,10 @@ it("shrinks along vertical and in reverse", () => {
 	}
 	expect(layout.frames.A.height + layout.frames.B.height + layout.frames.C.height).toBe(w.full)
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
+
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "top", ["A", "B"], w.third)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -119,7 +126,9 @@ it("can also expand", () => {
 	}
 
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "left", ["A", "B", "C"], -w.forth)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -138,6 +147,7 @@ it("can also expand", () => {
 })
 it("out of bounds error", () => {
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const info = getFramesRedistributeInfo(clone, "left", ["B", "C"], -w.full)
 
 	expect(info).toBeInstanceOf(KnownError)
@@ -147,6 +157,7 @@ it("out of bounds error", () => {
 })
 it("no space error", () => {
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const info = getFramesRedistributeInfo(clone, "left", ["B", "C"], w.third * 2)
 
 	expect(info).toBeInstanceOf(KnownError)
@@ -184,8 +195,10 @@ it("works with a very complex layout", () => {
 		}
 	}
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	const forthOfFifth = w.fifth / 4
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", Object.keys(layout.frames), w.fifth)))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -227,8 +240,9 @@ it("works with a very complex layout", () => {
 	}))
 })
 
-it("pinned frames are not redistributed - shrinking", () => {
+it("docked+collapsed frames are not redistributed when ignored - shrinking", () => {
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	clone.frames.A.collapsed = w.forth
 	clone.frames.A.docked = "left"
 	clone.frames.B.collapsed = w.forth
@@ -236,6 +250,7 @@ it("pinned frames are not redistributed - shrinking", () => {
 
 	const pinnedEdgeCoordinates = [clone.frames.C.x]
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", ["B", "C"], w.forth, { pinnedEdgeCoordinates })))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
@@ -251,8 +266,9 @@ it("pinned frames are not redistributed - shrinking", () => {
 		})
 	}))
 })
-it("pinned frames are not redistributed - expanding", () => {
+it("docked+collapsed frames are not redistributed when ignored - expanding", () => {
 	const clone = walk(layout, undefined, { save: true })
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(true)
 	clone.frames.A.collapsed = w.forth
 	clone.frames.A.docked = "left"
 	clone.frames.B.collapsed = w.forth
@@ -260,6 +276,7 @@ it("pinned frames are not redistributed - expanding", () => {
 	const pinnedEdgeCoordinates = [clone.frames.C.x]
 
 	applyFrameChanges(clone, throwIfError(getFramesRedistributeInfo(clone, "right", ["B", "C"], -w.forth, { pinnedEdgeCoordinates })))
+	expect(validateLayoutShape(Object.values(clone.frames))).toBe(false)
 
 	expect(clone.frames).toEqual(expect.objectContaining({
 		A: expect.objectContaining({
