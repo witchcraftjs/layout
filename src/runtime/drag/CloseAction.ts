@@ -32,7 +32,7 @@ export class CloseAction implements IDragAction {
 	textHints: { actions: string[], errors: string[] } = { actions: [], errors: [] }
 
 	closeHints: {
-		actions: string[]
+		actions: string[] | ((state: { force: boolean }) => string[])
 		transformError: (e: KnownError) => string
 	} = {
 		actions: ["Hold Shift to Close", "Hold Ctrl+Shift to Force Close"],
@@ -116,7 +116,9 @@ export class CloseAction implements IDragAction {
 			this.textHints.actions = []
 			this.textHints.errors = [this.closeHints.transformError(result)]
 		} else {
-			this.textHints.actions = this.closeHints.actions
+			this.textHints.actions = typeof this.closeHints.actions === "function"
+				? this.closeHints.actions({ force: this.state.force })
+				: this.closeHints.actions
 			this.textHints.errors = []
 		}
 	}

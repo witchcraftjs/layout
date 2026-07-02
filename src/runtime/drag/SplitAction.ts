@@ -12,6 +12,8 @@ export type SplitInfo = Exclude<ReturnType<typeof getFrameSplitInfo>, KnownError
 
 // note that we dont annotateEdges because is possible to forexample drag from a window edge to a frame that can be split, moving over a collapsed frame that was sharing the edge but can't be split
 
+export type DragChangeType = "start" | "move" | "end"
+
 export class SplitAction implements IDragAction {
 	name = "split" as const
 
@@ -30,10 +32,10 @@ export class SplitAction implements IDragAction {
 	debug: boolean | string = false
 	textHints: { actions: string[], errors: string[] } = { actions: [], errors: [] }
 	splitHints: {
-		action: string
+		actions: string[] | ((type: DragChangeType) => string[])
 		transformError: (e: KnownError) => string
 	} = {
-		action: "Hold Alt to Split",
+		actions: ["Hold Alt to Split"],
 		transformError: e => e.message
 	}
 
@@ -63,7 +65,7 @@ export class SplitAction implements IDragAction {
 		this.hooks = hooks
 		this.reset()
 		if (config?.debug) this.debug = true
-		if (config?.splitHints?.action) this.splitHints.action = config.splitHints.action
+		if (config?.splitHints?.actions) this.splitHints.actions = config.splitHints.actions
 		if (config?.splitHints?.transformError) this.splitHints.transformError = config.splitHints.transformError
 	}
 
@@ -121,7 +123,10 @@ export class SplitAction implements IDragAction {
 			this.textHints.actions = []
 			this.textHints.errors = [this.splitHints.transformError(result)]
 		} else {
-			this.textHints.actions = [this.splitHints.action]
+			this.textHints.actions = typeof this.splitHints.actions === "function"
+				? this.splitHints.actions("move")
+				: this.splitHints.actions
+
 			this.textHints.errors = []
 		}
 	}

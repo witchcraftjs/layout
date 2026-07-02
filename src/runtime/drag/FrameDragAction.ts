@@ -26,7 +26,7 @@ export class FrameDragAction implements IDragAction {
 		= (_e: PointerEvent | KeyboardEvent, state: DragState) => state.isDragging === "frame"
 
 	dragHints: {
-		actions: { split: string, swap: string, rearrange: string, dock: string }
+		actions: { split?: string, swap?: string, rearrange?: string, dock?: string } | ((state: { type: "split" | "swap" | "rearrange" | "dock" }) => string[])
 		transformError: (e: KnownError) => string
 	} = {
 		actions: {
@@ -76,8 +76,11 @@ export class FrameDragAction implements IDragAction {
 			this.textHints.actions = []
 			this.textHints.errors = [this.dragHints.transformError(result)]
 		} else {
-			const text = this.dragHints.actions[result.info]
-			this.textHints.actions = [text]
+			this.textHints.actions = typeof this.dragHints.actions === "function"
+				? this.dragHints.actions({ type: result.info })
+				: this.dragHints.actions[result.info] !== undefined
+					?	[this.dragHints.actions[result.info]!]
+					: []
 			this.textHints.errors = []
 		}
 	}
