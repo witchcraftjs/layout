@@ -541,12 +541,11 @@ describe("getFrameUndockInfo", () => {
 			...testWindow,
 			frames: {
 				A: { id: "A", x: 0, y: 0, width: w.third, height: w.full, docked: "left" },
-				B: { id: "B", x: 0, y: 0, width: w.full, height: w.third, docked: "top" },
-				C: { id: "C", x: 0, y: w.third, width: w.full, height: settings.maxInt - w.third * 2 },
-				D: { id: "D", x: 0, y: settings.maxInt - w.third, width: w.full, height: w.third, docked: "bottom" }
+				B: { id: "B", x: w.third, y: 0, width: w.full - w.third, height: w.third, docked: "top" },
+				C: { id: "C", x: w.third, y: w.third, width: w.full - w.third, height: w.third },
+				D: { id: "D", x: w.third, y: w.third * 2, width: w.full - w.third, height: w.third + 1, docked: "bottom" }
 			}
 		}
-		expect(layout.frames.B.width).toBe(w.full)
 		const clone = walk(layout, undefined, { save: true })
 		applyFrameChanges(clone, throwIfError(getFrameUndockInfo(clone, "A")))
 
@@ -564,7 +563,9 @@ describe("getFrameUndockInfo", () => {
 				width: w.full
 			}),
 			C: expect.objectContaining({
-				...layout.frames.C
+				...layout.frames.C,
+				x: clone.frames.A.x + clone.frames.A.width,
+				width: w.full - (clone.frames.A.x + clone.frames.A.width)
 			}),
 			D: expect.objectContaining({
 				...layout.frames.D,

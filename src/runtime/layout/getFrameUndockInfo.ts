@@ -78,6 +78,9 @@ export function getFrameUndockInfo(
 				: "y"
 
 	const adjustmentValue = frameSide === "left" || frameSide === "top" ? 0 : maxInt
+	// for perpendicular frames (e.g. top/bottom when undocking left/right),
+	// expand along the dimension perpendicular to the undock axis
+	const perpendicularSizeKey = isVertical ? "width" : "height" as const
 	const otherChanges = otherDockedFramesToResize.map(other => {
 		// shrink the ends of the undocking frame
 		if (other.docked === shrinkStartKey) {
@@ -86,10 +89,13 @@ export function getFrameUndockInfo(
 		} else if (other.docked === shrinkEndKey) {
 			frameClone[sizeKey] -= other[sizeKey]
 		}
+		// same-axis frames shift their position; perpendicular frames expand their dimension to fill the space
+		const otherIsVertical = other.docked === "left" || other.docked === "right"
+		const isSameAxis = isVertical === otherIsVertical
 		return {
 			...other,
 			[adjustmentKey]: adjustmentValue,
-			[secondaryAdjustmentKey]: other[secondaryAdjustmentKey] + other[adjustmentKey]
+			...(isSameAxis ? { [secondaryAdjustmentKey]: other[secondaryAdjustmentKey] + other[adjustmentKey] } : { [perpendicularSizeKey]: maxInt })
 		}
 	})
 
