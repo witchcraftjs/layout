@@ -11,6 +11,7 @@
 		<LayoutIntersectionHandle
 			:css="css.handle"
 			:intersection="draggableIntersections[i]"
+			:on-pointer-down="dragCtx.dragStart"
 		/>
 	</slot>
 	<slot name="indicator" v-bind="{ css: css.visible, intersection: draggableIntersections[i] }">

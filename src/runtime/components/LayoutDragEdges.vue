@@ -11,7 +11,7 @@
 		<LayoutDragEdgeHandle
 			:css="css.handle"
 			:edge="visualEdges[i]"
-			@pointerdown="dragCtx.dragStart"
+			:on-pointer-down="dragCtx.dragStart"
 		/>
 	</slot>
 	<slot name="indicator" v-bind="{
