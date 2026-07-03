@@ -7,8 +7,7 @@
 			drag-edge
 			z-20
 			hover:cursor-pointer
-			
-			[&.request-split]:hidden
+			[.request-split_&]:hidden
 		`,
 		edge.error && `
 			drag-edge-errored

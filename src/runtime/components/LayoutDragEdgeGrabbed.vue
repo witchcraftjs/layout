@@ -6,7 +6,7 @@
 		z-20
 		bg-accent-500
 		cursor-pointer
-		[&.request-split]:hidden
+		[.request-split_&]:hidden
 	`,
 		($attrs as any).class
 	)"
