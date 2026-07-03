@@ -59,6 +59,9 @@ export function useFrames(
 
 	const dragDirections = ref<Record<Orientation, Direction | undefined>>({} as any)
 
+	let dragStartPoint: Point | undefined
+	const dragDistance = ref(-1)
+
 	const draggingIntersection = ref<IntersectionEntry | undefined>(undefined)
 	const isDraggingFromWindowEdge = ref<boolean>(false)
 
@@ -110,6 +113,7 @@ export function useFrames(
 	const state = computed(() => ({
 		dragDirections: dragDirections.value,
 		dragPoint: dragPoint.value,
+		dragDistance: dragDistance.value,
 		isDragging: isDragging.value,
 		showDragging: showDragging.value,
 		draggingFrameId: frameDragFrameId.value,
@@ -128,10 +132,13 @@ export function useFrames(
 	let controller: AbortController
 
 	function resetState(): void {
+		dragStartPoint = undefined
+
 		draggingEdges.value = []
 		draggingIntersection.value = undefined
 		isDragging.value = false
 		dragPoint.value = undefined
+		dragDistance.value = -1
 		touchingFrames.value = []
 		frameDragFrameId.value = undefined
 		dragDirStore.reset()
@@ -154,6 +161,7 @@ export function useFrames(
 
 		const point = toWindowCoord(win.value, e)
 		dragPoint.value = point
+		dragStartPoint = { ...point }
 		dragDirStore.update(point)
 
 		isDragging.value = type
@@ -205,6 +213,13 @@ export function useFrames(
 		const point = toWindowCoord(win.value, e)
 		const didChange = dragDirStore.update(point)
 		dragPoint.value = point
+		// at least one drag move has happened
+		dragDistance.value = 0
+		if (dragStartPoint) {
+			dragDistance.value = Math.sqrt(
+				Math.pow(point.x - dragStartPoint.x, 2) + Math.pow(point.y - dragStartPoint.y, 2)
+			)
+		}
 		if (!didChange) return
 		const res = handler.onDragChange("move", e, state.value, forceRecalculateEdges, cancel)
 

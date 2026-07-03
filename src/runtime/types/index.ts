@@ -442,6 +442,8 @@ export type DragState = {
 	dragDirections: Record<Orientation, Direction | undefined>
 	/** The curren point (in scaled window coordinates) the user is dragging at. */
 	dragPoint?: Point
+	/** Cumulative pixel distance the user has dragged from the initial click point. 0 on start, increases on each move. */
+	dragDistance: number
 	/** Whether the user is currently dragging and what type of drag. Is truthy string during all drag events. */
 	isDragging: boolean | "frame" | "edge"
 	/** Whether to show the moved frames while dragging. */
