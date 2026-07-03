@@ -57,6 +57,9 @@ export function getFrameDockInfo(
 
 	const isHorizontal = side === "left" || side === "right"
 	const perpendicular = isHorizontal ? "width" : "height"
+	const posKey = isHorizontal ? "x" : "y"
+	const sizeKey = isHorizontal ? "width" : "height"
+
 
 	const oldFrame = cloneFrame(frame)
 	const otherFrameIds = Object.keys(win.frames).filter(_ => _ !== frameId)
@@ -66,13 +69,17 @@ export function getFrameDockInfo(
 	}
 
 	// if its the only frame allow it to be as big as it likes
-	const effectiveMaxPerpendicular = maxPerpendicularLength ?? settings.maxPerpendicularLengthScaled.width
-	const perpendicularLength = otherFrameIds.length > 0 ? Math.min(frame[perpendicular], effectiveMaxPerpendicular) : frame[perpendicular]
+	const maxPerpendicular = maxPerpendicularLength ?? settings.maxPerpendicularLengthScaled.width
+	const perpendicularLength = otherFrameIds.length > 0 ? Math.min(frame[perpendicular], maxPerpendicular) : frame[perpendicular]
 
 	frame.docked = side
 	frame.collapsed = undefined
 
 	const toExtract = [frame.id]
+
+	if (frame[perpendicular] === perpendicularLength) {
+		return { modified: toExtract.map(_ => win.frames[_]), created: [], deleted: [] }
+	}
 
 	// fills just the hole left by the frame when it was moved
 	const changes = getFillEmptySpaceInfo(win, oldFrame, [], [frameId])
@@ -83,10 +90,7 @@ export function getFrameDockInfo(
 
 	// redistribute other non-docked frames to make room for the new dock.
 	const sideToPushTowards = oppositeSide(side)
-
-	const posKey = isHorizontal ? "x" : "y"
-	const sizeKey = isHorizontal ? "width" : "height"
-
+	
 	const pinnedEdgeCoordinates: number[] = getPinnedEdgesForCollapsedFrames(win, frame, side, posKey, sizeKey)
 
 	const redistributeChanges = getFramesRedistributeInfo(win, sideToPushTowards, nonDockedFrameIds, perpendicularLength, { pinnedEdgeCoordinates })
