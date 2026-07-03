@@ -13,6 +13,7 @@ export type CloseInfo = Exclude<ReturnType<typeof getCloseFrameInfo>, KnownError
 
 export class CloseAction implements IDragAction {
 	name = "close" as const
+	minDragDistance = 5
 
 	state: {
 		allowed: true
@@ -62,12 +63,15 @@ export class CloseAction implements IDragAction {
 		config?: {
 			debug?: boolean | string
 			closeHints?: Partial<CloseAction["closeHints"]>
+			/** Minimum pixel distance the user must drag before the action is allowed (decos shown and action applied). Defaults to 5. */
+			minDragDistance?: number
 		}
 	) {
 		if (handleEvent !== undefined) this.handleEvent = handleEvent
 		if (modifyDecos !== undefined) this.modifyDecos = modifyDecos
 		this.hooks = hooks
 		if (config?.debug) this.debug = true
+		if (config?.minDragDistance !== undefined) this.minDragDistance = config.minDragDistance
 		this.reset()
 	}
 
@@ -151,6 +155,9 @@ export class CloseAction implements IDragAction {
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
+		if (state.dragDistance <= this.minDragDistance) {
+			return { updateEdges: false, shapes: [] }
+		}
 		const {
 			touchingFramesArrays,
 			dragDirections,

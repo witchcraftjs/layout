@@ -13,6 +13,9 @@ import type { KnownError } from "../utils/KnownError.js"
 
 export class FrameDragAction implements IDragAction {
 	name = "frameDrag" as const
+
+	minDragDistance = 5
+
 	state: {
 		lastReturn?: LayoutChange<"split" | "swap" | "rearrange" | "dock"> | KnownError
 	} = {
@@ -52,12 +55,15 @@ export class FrameDragAction implements IDragAction {
 		hooks: FrameDragAction["hooks"] = {},
 		config?: {
 			debug?: boolean | string
+			/** Minimum pixel distance the user must drag before the action is allowed (decos shown and action applied). Defaults to 5. */
+			minDragDistance?: number
 		}
 	) {
 		if (handleEvent !== undefined) this.handleEvent = handleEvent
 		if (modifyDecos !== undefined) this.modifyDecos = modifyDecos
 		this.hooks = hooks
 		if (config?.debug) this.debug = true
+		if (config?.minDragDistance !== undefined) this.minDragDistance = config.minDragDistance
 
 		this.reset()
 	}
@@ -149,6 +155,9 @@ export class FrameDragAction implements IDragAction {
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
+		if (state.dragDistance <= this.minDragDistance) {
+			return { updateEdges: false, shapes: [], showDragging: false }
+		}
 		const { win, draggingFrameId, dragHoveredFrame } = state
 		const matchedZone = getDragZones(state, settings.zoneSizes)
 

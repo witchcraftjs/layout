@@ -16,6 +16,7 @@ export type DragChangeType = "start" | "move" | "end"
 
 export class SplitAction implements IDragAction {
 	name = "split" as const
+	minDragDistance = 5
 
 	state: {
 		allowed: true
@@ -57,6 +58,8 @@ export class SplitAction implements IDragAction {
 		config?: {
 			debug?: boolean | string
 			splitHints?: Partial<SplitAction["splitHints"]>
+			/** Minimum pixel distance the user must drag before the action is allowed (decos shown and action applied). Defaults to 5. */
+			minDragDistance?: number
 		}
 	) {
 		if (handleEvent !== undefined) this.handleEvent = handleEvent
@@ -65,6 +68,7 @@ export class SplitAction implements IDragAction {
 		this.hooks = hooks
 		this.reset()
 		if (config?.debug) this.debug = true
+		if (config?.minDragDistance !== undefined) this.minDragDistance = config.minDragDistance
 		if (config?.splitHints?.actions) this.splitHints.actions = config.splitHints.actions
 		if (config?.splitHints?.transformError) this.splitHints.transformError = config.splitHints.transformError
 	}
@@ -106,7 +110,8 @@ export class SplitAction implements IDragAction {
 	canHandleRequest(e: PointerEvent | KeyboardEvent, state: DragState): boolean {
 		const { draggingEdges } = state
 		if (draggingEdges.length !== 1) return false
-		this.setTextHints(state.isDragging === "edge" ? true : undefined)
+		// hint should not be shown when dragging from window edge but we should still handle the event
+		this.setTextHints(state.isDragging === "edge" && !state.isDraggingFromWindowEdge ? true : undefined)
 		if (this.handleEvent(e, state)) {
 			this.hooks.onStart?.()
 			return true
@@ -154,7 +159,7 @@ export class SplitAction implements IDragAction {
 			dragDirections[oppositeOrientation]!,
 			dragPoint!
 		)
-		this.setTextHints(canSplit)
+		this.setTextHints(state.isDragging === "edge" && !state.isDraggingFromWindowEdge ? canSplit : undefined)
 		if (!(canSplit instanceof Error)) {
 			this.state.allowed = true
 			this.state.res = canSplit
@@ -173,7 +178,10 @@ export class SplitAction implements IDragAction {
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
-		const { dragHoveredFrame } = state
+		const { dragHoveredFrame, dragDistance } = state
+		if (dragDistance <= this.minDragDistance) {
+			return { updateEdges: false, shapes: [], showDragging: false }
+		}
 		let ok = false
 		if (dragHoveredFrame) {
 			if (this.state.lastPoint?.x === state.dragPoint?.x && this.state.lastPoint?.y === state.dragPoint?.y && this.state.lastReturn) {
