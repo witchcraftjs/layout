@@ -7,7 +7,7 @@
 			flex
 			flex-col
 		`,
-		isDragging && `dragging cursor-pointer`,
+		isDragging && `dragging cursor-pointer user-select-none`,
 		requestType && `request-${requestType}`,
 		($attrs as any).class
 	)"
