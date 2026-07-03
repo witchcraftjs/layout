@@ -11,7 +11,7 @@ export class Settings {
 	resetToDefaults() {
 		this.scale = 3
 		this.snapPoint = 0.5
-		this.minSize = 5
+		this.minSize = 3
 		this.collapseSizePx = 15
 		this.maxPerpendicularLength = 20
 		this.zoneSizes = { frameEdgePx: 40, windowEdgePx: 20 }
