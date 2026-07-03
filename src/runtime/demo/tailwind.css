@@ -5,3 +5,7 @@
 
 /* Only needed for the dev playground: the demo App.vue lives outside the Vite project root, so Tailwind's auto-scan doesn't find the [&.deco-...] classes it defines. */
 @source "../../../src/runtime/demo";
+
+button {
+	cursor: pointer;
+}
