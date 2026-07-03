@@ -90,6 +90,8 @@ const $attrs = useAttrs()
 const win = defineModel<LayoutWindow>("win", { required: true })
 
 const props = withDefaults(defineProps<{
+	/** If you really need it, you can provide your own drag action handler, note the actionHandler's prop will no longer have any effect.*/
+	dragActionHandler?: DragActionHandler<any, any>
 	/** Custom drag action handlers. Falls back to default split/close/frame handlers if not provided. */
 	actionHandlers?: IDragAction[]
 	textHints?: {text:string, classes?:string}[] 
@@ -120,9 +122,9 @@ const windowEl = ref<HTMLElement | null>(null)
 
 const requestType = ref<string | undefined | string>()
 
-const dragActionHandler = new DragActionHandler(
+const dragActionHandler = props.dragActionHandler ?? new DragActionHandler(
 	[
-		...(props.actionHandlers ?? createDefaultHandlers()),
+		...(props.actionHandlers ?? createDefaultHandlers())
 	],
 	{
 		onEvent: (e, cancel) => {
@@ -132,7 +134,7 @@ const dragActionHandler = new DragActionHandler(
 			}
 		},
 		onRequestChange: type => {
-			requestType.value = type
+			requestType.value = type as any
 		},
 		onEnd: () => {
 			requestType.value = undefined
