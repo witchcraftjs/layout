@@ -287,7 +287,8 @@ export const LAYOUT_ERROR = enumFromArray([
 	"CANT_COLLAPSE_NOT_DOCKED",
 	"CANT_UNCOLLAPSE_NOT_COLLAPSED",
 	"NO_FILL_CANDIDATES",
-	"CANT_RESIZE_COLLAPSED_FRAME"
+	"CANT_RESIZE_COLLAPSED_FRAME",
+	"CANT_RESIZE_SINGLE_FRAME"
 ])
 
 export type LayoutError = EnumLike<typeof LAYOUT_ERROR>
@@ -374,6 +375,9 @@ export type LayoutErrorsInfo = {
 	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	[LAYOUT_ERROR.NO_FILL_CANDIDATES]: {}
 	[LAYOUT_ERROR.CANT_RESIZE_COLLAPSED_FRAME]: {
+		frame: LayoutFrame
+	}
+	[LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME]: {
 		frame: LayoutFrame
 	}
 	[LAYOUT_ERROR.REDISTRIBUTE_WOULD_RESULT_IN_INVALID_FRAMES]: {

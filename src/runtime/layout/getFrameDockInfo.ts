@@ -3,10 +3,12 @@ import { walk } from "@alanscodelog/utils/walk"
 
 import { applyFrameChanges } from "./applyFrameChanges.js"
 import { getFillEmptySpaceInfo } from "./getFillEmptySpaceInfo.js"
+import { getFrameShrinkInfo } from "./getFrameShrinkInfo.js"
 import { getFramesRedistributeInfo } from "./getFramesRedistributeInfo.js"
 import { getFrameUndockInfo } from "./getFrameUndockInfo.js"
 
 import { cloneFrame } from "../helpers/cloneFrame.js"
+import { findEdgesTouchingWindow } from "../helpers/findEdgesTouchingWindow.js"
 import { getDockBoundaries } from "../helpers/getDockBoundaries.js"
 import { getPinnedEdgesForCollapsedFrames } from "../helpers/getPinnedEdgesForCollapsedFrames.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
@@ -33,7 +35,8 @@ export function getFrameDockInfo(
 	| KnownError<typeof LAYOUT_ERROR.CANT_LEAVE_NO_UNDOCKED_FRAMES>
 	| KnownError<typeof LAYOUT_ERROR.FRAME_ALREADY_DOCKED_ON_SIDE>
 	| KnownError<typeof LAYOUT_ERROR.CANT_UNDOCK_COLLAPSED_FRAME>
-	| KnownError<typeof LAYOUT_ERROR.NO_FILL_CANDIDATES> {
+	| KnownError<typeof LAYOUT_ERROR.NO_FILL_CANDIDATES>
+	| KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME> {
 	// its easier to just clone the window and extract changes later
 	// setting the var ensures we don't accidentally mutate the original
 	win = walk(win, undefined, { save: true }) as typeof win
@@ -60,8 +63,6 @@ export function getFrameDockInfo(
 	const posKey = isHorizontal ? "x" : "y"
 	const sizeKey = isHorizontal ? "width" : "height"
 
-
-	const oldFrame = cloneFrame(frame)
 	const otherFrameIds = Object.keys(win.frames).filter(_ => _ !== frameId)
 	const nonDockedFrameIds = otherFrameIds.filter(id => !win.frames[id].docked)
 	if (nonDockedFrameIds.length === 0) {
@@ -81,57 +82,72 @@ export function getFrameDockInfo(
 		return { modified: toExtract.map(_ => win.frames[_]), created: [], deleted: [] }
 	}
 
-	// fills just the hole left by the frame when it was moved
-	const changes = getFillEmptySpaceInfo(win, oldFrame, [], [frameId])
-	if (changes instanceof Error) return changes
-	applyFrameChanges(win, changes)
-	pushIfNotIn(toExtract, changes.modified.map(_ => _.id))
+	// check if the frame touches the full edge it will be docked to (not just it's dock boundary)
+	// if so, we can use getFrameShrinkInfo instead of fill-empty-space + redistribute
+	// this feels better as otherwise, the other frames feel like they are unnecessarily moved to the other side
+	// this way where the frame *was* feels like it's taken into account
+	const touchesEntireEdge = findEdgesTouchingWindow(frame)[side] === "full"
 
+	if (touchesEntireEdge) {
+		const shrinkAmount = frame[sizeKey] - perpendicularLength
+		if (shrinkAmount > 0) {
+			const shrinkResult = getFrameShrinkInfo(win, frameId, shrinkAmount, side)
+			if (shrinkResult instanceof KnownError) {
+				return shrinkResult
+			}
+			applyFrameChanges(win, shrinkResult)
+			pushIfNotIn(toExtract, shrinkResult.modified.map(_ => _.id))
+		}
+	} else {
+		const oldFrame = cloneFrame(frame)
 
-	// redistribute other non-docked frames to make room for the new dock.
-	const sideToPushTowards = oppositeSide(side)
-	
-	const pinnedEdgeCoordinates: number[] = getPinnedEdgesForCollapsedFrames(win, frame, side, posKey, sizeKey)
+		// fills just the hole left by the frame when it was moved
+		const changes = getFillEmptySpaceInfo(win, oldFrame, [], [frameId])
+		if (changes instanceof Error) return changes
+		applyFrameChanges(win, changes)
+		pushIfNotIn(toExtract, changes.modified.map(_ => _.id))
 
-	const redistributeChanges = getFramesRedistributeInfo(win, sideToPushTowards, nonDockedFrameIds, perpendicularLength, { pinnedEdgeCoordinates })
+		// redistribute other non-docked frames to make room for the new dock.
+		const sideToPushTowards = oppositeSide(side)
 
-	if (redistributeChanges instanceof KnownError) {
-		return redistributeChanges
+		const pinnedEdgeCoordinates: number[] = getPinnedEdgesForCollapsedFrames(win, frame, side, posKey, sizeKey)
+
+		const redistributeChanges = getFramesRedistributeInfo(win, sideToPushTowards, nonDockedFrameIds, perpendicularLength, { pinnedEdgeCoordinates })
+
+		if (redistributeChanges instanceof KnownError) {
+			return redistributeChanges
+		}
+		applyFrameChanges(win, redistributeChanges)
+		pushIfNotIn(toExtract, redistributeChanges.modified.map(_ => _.id))
+
+		const { minX, maxX, minY, maxY } = getDockBoundaries(win)
+		switch (side) {
+			case "left":
+				frame.x = 0
+				frame.y = minY
+				frame.width = perpendicularLength
+				frame.height = maxY - minY
+				break
+			case "right":
+				frame.x = settings.maxInt - perpendicularLength
+				frame.y = minY
+				frame.width = perpendicularLength
+				frame.height = maxY - minY
+				break
+			case "top":
+				frame.x = minX
+				frame.y = 0
+				frame.width = maxX - minX
+				frame.height = perpendicularLength
+				break
+			case "bottom":
+				frame.x = minX
+				frame.y = settings.maxInt - perpendicularLength
+				frame.width = maxX - minX
+				frame.height = perpendicularLength
+				break
+		}
 	}
-	applyFrameChanges(win, redistributeChanges)
-	pushIfNotIn(toExtract, redistributeChanges.modified.map(_ => _.id))
 
-
-	const { minX, maxX, minY, maxY } = getDockBoundaries(win)
-	switch (side) {
-		case "left":
-			frame.x = 0
-			frame.y = minY
-			frame.width = perpendicularLength
-			frame.height = maxY - minY
-			break
-		case "right":
-			frame.x = settings.maxInt - perpendicularLength
-			frame.y = minY
-			frame.width = perpendicularLength
-			frame.height = maxY - minY
-			break
-		case "top":
-			frame.x = minX
-			frame.y = 0
-			frame.width = maxX - minX
-			frame.height = perpendicularLength
-			break
-		case "bottom":
-			frame.x = minX
-			frame.y = settings.maxInt - perpendicularLength
-			frame.width = maxX - minX
-			frame.height = perpendicularLength
-			break
-	}
-
-
-	const res = toExtract.map(_ => win.frames[_])
-
-	return { modified: res, created: [], deleted: [] }
+	return { modified: toExtract.map(_ => win.frames[_]), created: [], deleted: [] }
 }

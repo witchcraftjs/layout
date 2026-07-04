@@ -2,8 +2,8 @@ import { pushIfNotIn } from "@alanscodelog/utils/pushIfNotIn"
 import { walk } from "@alanscodelog/utils/walk"
 
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
-import { getFrameCollapseInfo } from "../layout/getFrameCollapseInfo.js"
-import { getFrameUncollapseInfo } from "../layout/getFrameUncollapseInfo.js"
+import { getFrameExpandInfo } from "../layout/getFrameExpandInfo.js"
+import { getFrameShrinkInfo } from "../layout/getFrameShrinkInfo.js"
 import { getRelaxFramesInfo } from "../layout/getRelaxFramesInfo.js"
 import { settings } from "../settings.js"
 import type { LayoutChange, LayoutWindow, PxSize } from "../types/index.js"
@@ -48,39 +48,33 @@ export function getUpdateWindowSizeInfo(
 	for (const frameId of dockedFrameIds) {
 		const frame = win.frames[frameId]
 		const orientation = (frame.docked === "left" || frame.docked === "right") ? "horizontal" : "vertical"
-		const sizeKey = orientation === "horizontal" ? "width" : "height" as const
+		const sizeKey = orientation === "horizontal" ? "width" : "height"
 		const targetPxSize = settings.collapseSizePx[sizeKey]
 		const targetScaled = Math.round((targetPxSize / (orientation === "horizontal" ? win.pxWidth : win.pxHeight)) * maxInt)
-
 
 		if (frame[sizeKey] === targetScaled) continue
 		if (frame[sizeKey] === 0) continue
 
-		let result: LayoutChange | KnownError<any>
+		const side = frame.docked!
+		const diff = targetScaled - frame[sizeKey]
 
-		// the logic needed to do this is nearly identical to the collapse/uncollapse logic
-		// so we abuse the functions a bit, in future might allow a more flexible collapse/uncollapse function
-		const wasCollapsed = frame.collapsed
-		const wasMinSize = { ...settings.minSize }
-		settings.minSize = 1
-		if (targetScaled < frame[sizeKey]) {
-			// clear temporarily so collapse doesn't error
-			frame.collapsed = undefined
-			result = getFrameCollapseInfo(win, frame.id, { collapseSizeScaled: { width: targetScaled, height: targetScaled } })
+		let result: ReturnType<typeof getFrameShrinkInfo> | ReturnType<typeof getFrameExpandInfo>
+
+		if (diff < 0) {
+			result = getFrameShrinkInfo(win, frame.id, -diff, side, { allowOutOfBounds: true })
 		} else {
-			// set to something, could be anything
-			frame.collapsed = Infinity
-			result = getFrameUncollapseInfo(win, frame.id, { restoreSize: { width: targetScaled, height: targetScaled } })
+			// in worst case scenario allow frames to shrink
+			// minSize must be 1 (not 0) to avoid zero-size frames during redistribution
+			const wasMinSize = { ...settings.minSize }
+			settings.minSize = 1
+			result = getFrameExpandInfo(win, frame.id, diff, side)
+			settings.minSize = wasMinSize
 		}
 
 		if (!(result instanceof KnownError)) {
 			applyFrameChanges(win, result)
 			pushIfNotIn(toExtract, result.modified.map(f => f.id))
 		}
-
-		// restore original collapsed value
-		frame.collapsed = wasCollapsed
-		settings.minSize = wasMinSize
 
 
 		// attempt relaxation
