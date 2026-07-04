@@ -53,7 +53,7 @@
 		"doc:dev": "concurrently \"pnpm doc:watch\" \"pnpm doc:serve\"",
 		"doc:check-invalid": "typedoc --listInvalidSymbolLinks",
 		"actions:debug": "act -r -v -j release",
-		"gen:exports": "indexit update --ignore **/*.d.ts **.vue src/assets/** -o '${path}.js'"
+		"gen:exports": "indexit update --ignore **/*.d.ts **.vue src/assets/** **/demo/** **/dist/** -o '${path}.js'"
 	},
 	"dependencies": {
 		"@alanscodelog/utils": "catalog:",
@@ -72,6 +72,7 @@
 		}
 	},
 	"devDependencies": {
+		"@babel/runtime": "catalog:",
 		"@alanscodelog/commitlint-config": "catalog:",
 		"@alanscodelog/eslint-config": "catalog:",
 		"@alanscodelog/semantic-release-config": "catalog:",

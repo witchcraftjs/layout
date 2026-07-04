@@ -5,6 +5,7 @@ packages:
 allowUnusedPatches: true
 
 catalog:
+  '@babel/runtime': ^7.20.7
   '@alanscodelog/commitlint-config': ^3.1.2
   '@alanscodelog/eslint-config': ^6.3.1
   '@alanscodelog/semantic-release-config': ^6.0.2
