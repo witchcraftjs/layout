@@ -6,7 +6,7 @@ import type { LayoutWindow, WindowEdgeZone } from "../types/index.js"
  * Returns window edge drag zones (in scaled coordinates)
  *
  */
-export function getWindowDragZones(
+export function getWindowZones(
 	win: LayoutWindow,
 	thresholdPx: number
 ): WindowEdgeZone[] {

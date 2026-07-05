@@ -1,4 +1,4 @@
-import { findDraggableEdge } from "./findDraggableEdge.js"
+import { findMoveableEdge } from "./findMoveableEdge.js"
 import { frameToEdges } from "./frameToEdges.js"
 import { isWindowEdge } from "./isWindowEdge.js"
 import { sideToOrientation } from "./sideToOrientation.js"
@@ -8,10 +8,10 @@ import type {
 	EdgeSide, LayoutFrame
 } from "../types/index.js"
 
-export function findFrameDraggableEdges(
+export function findFrameMoveableEdges(
 	frame: LayoutFrame,
 	edges: Edge[],
-	/** See {@link findDraggableEdge} */
+	/** See {@link findMoveableEdge} */
 	exact: boolean = true,
 	sides: EdgeSide[] = ["left", "right", "top", "bottom"]
 ): { edge: Edge, side: EdgeSide }[] | undefined {
@@ -23,7 +23,7 @@ export function findFrameDraggableEdges(
 		const isWinEdge = isWindowEdge(edge, edgeDirection)
 
 		if (isWinEdge) continue
-		const maybeEdge = findDraggableEdge(edge, edges, exact, edgeDirection)
+		const maybeEdge = findMoveableEdge(edge, edges, exact, edgeDirection)
 
 		if (maybeEdge) res.push({ edge: maybeEdge, side })
 	}

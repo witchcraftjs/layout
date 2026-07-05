@@ -21,7 +21,7 @@ import { KnownError } from "../utils/KnownError.js"
 export function getFrameSplitInfo(
 	frame: LayoutFrame,
 	dir: Direction,
-	dragPointOrPosition: Point | number | "midpoint" = "midpoint",
+	movePointOrPosition: Point | number | "midpoint" = "midpoint",
 	minSize: Size = settings.minSizeScaled,
 	snapAmount: Point = settings.snapPointScaled
 ): LayoutChange
@@ -42,11 +42,11 @@ export function getFrameSplitInfo(
 	const sizeKey: "width" | "height" = isHorz ? "width" : "height"
 	const posKey: "x" | "y" = isHorz ? "x" : "y"
 
-	const position = dragPointOrPosition === "midpoint"
+	const position = movePointOrPosition === "midpoint"
 		? (isHorz ? frame.x + (frame.width / 2) : frame.y + (frame.height / 2))
-		: typeof dragPointOrPosition === "number"
-			? dragPointOrPosition
-			: dragPointOrPosition[isHorz ? "x" : "y"]
+		: typeof movePointOrPosition === "number"
+			? movePointOrPosition
+			: movePointOrPosition[isHorz ? "x" : "y"]
 
 	const safePosition = findSafeSplitEdgeAndPosition(
 		frame,

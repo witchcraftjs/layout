@@ -7,7 +7,7 @@
 			flex
 			flex-col
 		`,
-		isDragging && `dragging cursor-pointer user-select-none pointer-events-none`,
+		isMoving && `dragging cursor-pointer user-select-none pointer-events-none`,
 		requestType && `request-${requestType}`,
 		($attrs as any).class
 	)"
@@ -23,25 +23,25 @@
 		</template>
 	</div>
 	<Teleport
-		v-if="isDragging === 'frame' && frameDragFrameId && dragPoint"
+		v-if="isMoving === 'frame' && movingFrameId && movePoint"
 		:to="ghostTeleportTo"
 		defer
 	>
 		<div
 			class="fixed z-[9999] pointer-events-none"
 			:style="{
-				left: (dragPoint.x / settings.maxInt * win.pxWidth + win.pxX) + 'px',
-				top: (dragPoint.y / settings.maxInt * win.pxHeight + win.pxY) + 'px',
-				width: frames[frameDragFrameId]
-					? (frames[frameDragFrameId].width / settings.maxInt * win.pxWidth) + 'px'
+				left: (movePoint.x / settings.maxInt * win.pxWidth + win.pxX) + 'px',
+				top: (movePoint.y / settings.maxInt * win.pxHeight + win.pxY) + 'px',
+				width: frames[movingFrameId]
+					? (frames[movingFrameId].width / settings.maxInt * win.pxWidth) + 'px'
 					: undefined,
-				height: frames[frameDragFrameId]
-					? (frames[frameDragFrameId].height / settings.maxInt * win.pxHeight) + 'px'
+				height: frames[movingFrameId]
+					? (frames[movingFrameId].height / settings.maxInt * win.pxHeight) + 'px'
 					: undefined
 			}"
 		>
 			<slot
-				:id="frameDragFrameId"
+				:id="movingFrameId"
 				:name="`frame-drag-ghost`"
 			>
 				<div class="frame-drag-ghost border border-neutral-500 bg-white/50 w-10 h-10"/>
@@ -74,10 +74,10 @@ import { computed, markRaw, provide, reactive, ref, useAttrs, watch } from "vue"
 
 
 import { useFrames } from "../composables/useFrames.js"
-import { createDefaultHandlers } from "../drag/createDefaultHandlers.js"
-import { DragActionHandler } from "../drag/DragActionHandler"
-import { dragContextInjectionKey } from "../types/vue.js"
-import { type DragState, type IDragAction } from "../types/index.js"
+import { createDefaultHandlers } from "../move/createDefaultHandlers.js"
+import { ActionHandler } from "../move/ActionHandler"
+import { moveContextInjectionKey } from "../types/vue.js"
+import { type MoveState, type IAction } from "../types/index.js"
 import { getUpdateWindowSizeInfo } from "../layout/getUpdateWindowSizeInfo.js"
 import { windowSetActiveFrame } from "../layout/windowSetActiveFrame.js"
 import { type LayoutWindow } from "../types/index.js"
@@ -91,9 +91,9 @@ const win = defineModel<LayoutWindow>("win", { required: true })
 
 const props = withDefaults(defineProps<{
 	/** If you really need it, you can provide your own drag action handler (remember to markRaw it), note the actionHandler's prop will no longer have any effect.*/
-	dragActionHandler?: DragActionHandler<any, any>
+	actionHandler?: ActionHandler<any, any>
 	/** Custom drag action handlers. Falls back to default split/close/frame handlers if not provided. */
-	actionHandlers?: IDragAction[]
+	actionHandlers?: IAction[]
 	textHints?: {text:string, classes?:string}[] 
 	textHintsTeleportTo: string | undefined
 	ghostTeleportTo?: string
@@ -113,8 +113,8 @@ const props = withDefaults(defineProps<{
 	allowWindowSizeUpdate: true
 })
 const emit = defineEmits<{
-	(e: "isShowingDrag", value: boolean): void
-	(e: "dragState", value: DragState): void
+	(e: "isShowingMove", value: boolean): void
+	(e: "moveState", value: MoveState): void
 }>()
 
 
@@ -122,13 +122,13 @@ const windowEl = ref<HTMLElement | null>(null)
 
 const requestType = ref<string | undefined | string>()
 
-const dragActionHandler = props.dragActionHandler ?? markRaw(new DragActionHandler(
+const actionHandler = props.actionHandler ?? markRaw(new ActionHandler(
 	[
 		...(props.actionHandlers ?? createDefaultHandlers())
 	],
 	{
 		onEvent: (e, cancel) => {
-			showDragging.value = true
+			showMoving.value = true
 			if (e instanceof KeyboardEvent && e.key === "Escape") {
 				cancel()
 			}
@@ -138,29 +138,29 @@ const dragActionHandler = props.dragActionHandler ?? markRaw(new DragActionHandl
 		},
 		onEnd: () => {
 			requestType.value = undefined
-			showDragging.value = true
+			showMoving.value = true
 		},
 	}
 ))
-dragActionHandler.shapes = reactive([])
-dragActionHandler.textHints = reactive({ actions: [], errors: [] })
-const shapes = dragActionHandler.shapes
+actionHandler.shapes = reactive([])
+actionHandler.textHints = reactive({ actions: [], errors: [] })
+const shapes = actionHandler.shapes
 
 const dragContext  = useFrames(
 	win,
-	dragActionHandler
+	actionHandler
 )
 
 const {
-	dragPoint,
-	isDragging,
+	movePoint,
+	isMoving,
 	frames,
 	state,
-	frameDragFrameId,
-	showDragging,
+	movingFrameId,
+	showMoving,
 } = dragContext
 
-provide(dragContextInjectionKey, dragContext)
+provide(moveContextInjectionKey, dragContext)
 
 function getWindowOffset() {
 	const windowElRect = windowEl.value!.getBoundingClientRect()
@@ -192,8 +192,8 @@ watch(() => props.allowWindowSizeUpdate, (newval, oldval) => {
 })
 
 
-watch(state, () => emit("dragState", state.value))
-watch(showDragging, () => emit("isShowingDrag", showDragging.value))
+watch(state, () => emit("moveState", state.value))
+watch(showMoving, () => emit("isShowingMove", showMoving.value))
 
 const layoutContext = computed(() => {
 	return {
@@ -208,7 +208,7 @@ defineExpose({
 	state,
 	win,
 	getUpdateWindowSizeInfo,
-	dragActionHandler: dragActionHandler as DragActionHandler<any, any>,
+	actionHandler: actionHandler as ActionHandler<any, any>,
 })
 </script>
 

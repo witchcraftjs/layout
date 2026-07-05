@@ -246,18 +246,18 @@ const zCloseDeco = zBaseDeco.extend({
 export type CloseDeco = z.infer<typeof zCloseDeco>
 
 
-const zFrameDragDeco = zBaseDeco.extend({
+const zFrameDeco = zBaseDeco.extend({
 	id: z.uuid(),
 	type: z.literal("drop"),
 	position: zSide.or(z.enum(["center"]))
 })
 
-export type FrameDragDeco = z.infer<typeof zFrameDragDeco>
+export type FrameDeco = z.infer<typeof zFrameDeco>
 
 export const zDeco = z.union([
 	zSplitDeco,
 	zCloseDeco,
-	zFrameDragDeco
+	zFrameDeco
 ])
 
 export type Deco = z.infer<typeof zDeco>
@@ -331,19 +331,19 @@ export type LayoutErrorsInfo = {
 		frame: LayoutFrame
 	}
 	[LAYOUT_ERROR.CANT_REARRANGE_TO_SAME_RELATIVE_POSITION]: {
-		draggingFrameId: string
+		movingFrameId: string
 		hoveredFrameId: string
-		zoneSide: DragZone["side"]
+		zoneSide: Zone["side"]
 	}
 	[LAYOUT_ERROR.CANT_REARRANGE_WITH_DOCKED_EDGES]: {
-		draggingFrameId: string
+		movingFrameId: string
 		hoveredFrameId: string
-		zoneSide: DragZone["side"]
+		zoneSide: Zone["side"]
 	}
 	[LAYOUT_ERROR.CANT_REARRANGE_DOCKED_WITH_NON_DOCKED]: {
-		draggingFrameId: string
+		movingFrameId: string
 		hoveredFrameId: string
-		zoneSide: DragZone["side"]
+		zoneSide: Zone["side"]
 	}
 	[LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME]: {
 		frame: LayoutFrame
@@ -389,7 +389,7 @@ export type LayoutErrorsInfo = {
 export type HasOpposite = Direction | EdgeSide | ExtendedDirection | ExtendedEdgeSide | keyof Point | keyof Size
 
 
-export type BaseDragZone = {
+export type BaseZone = {
 	x: number
 	y: number
 	width: number
@@ -398,17 +398,17 @@ export type BaseDragZone = {
 	pxHeight: number
 }
 
-export type FrameDragZone = BaseDragZone & {
+export type FrameZone = BaseZone & {
 	type: "frame"
 	side: EdgeSide | "center"
 }
 
-export type WindowEdgeZone = BaseDragZone & {
+export type WindowEdgeZone = BaseZone & {
 	type: "window"
 	side: EdgeSide
 }
 
-export type DragZone = FrameDragZone | WindowEdgeZone
+export type Zone = FrameZone | WindowEdgeZone
 
 export const zWindowCreate = zLayoutWindowLoose
 	.partial({ id: true, pxWidth: true, pxHeight: true, pxX: true, pxY: true })
@@ -441,33 +441,33 @@ export type LayoutChange<TInfo = never> = {
 	window?: Partial<LayoutWindow>
 	info?: TInfo
 }
-export type DragState = {
+export type MoveState = {
 	/** The current directions in the corresponding orientations that the user is dragging in. */
-	dragDirections: Record<Orientation, Direction | undefined>
+	moveDirections: Record<Orientation, Direction | undefined>
 	/** The curren point (in scaled window coordinates) the user is dragging at. */
-	dragPoint?: Point
+	movePoint?: Point
 	/** Cumulative pixel distance the user has dragged from the initial click point. 0 on start, increases on each move. */
-	dragDistance: number
+	moveDistance: number
 	/** Whether the user is currently dragging and what type of drag. Is truthy string during all drag events. */
-	isDragging: boolean | "frame" | "edge"
+	isMoving: boolean | "frame" | "edge"
 	/** Whether to show the moved frames while dragging. */
-	showDragging: boolean
-	/** The frame being dragged during a frame drag. Only set when isDragging is "frame". */
-	draggingFrameId?: FrameId
+	showMoving: boolean
+	/** The frame being dragged during a frame drag. Only set when isMoving is "frame". */
+	movingFrameId?: FrameId
 	/**
 	 * The edges that are currently being dragged. There are multiple edges if they drag an intersection since what's actually happening is we're just dragging the closest horizontal and vertical edges.
 	 */
-	draggingEdges: Edge[]
+	movingEdges: Edge[]
 	/**
 	 * The intersection that is currently being dragged.
 	 */
-	draggingIntersection?: IntersectionEntry
+	movingIntersection?: IntersectionEntry
 	/** The "visual" edges that can be displayed for dragging. See {@link getVisualEdges} */
 	visualEdges: Edge[]
 	/**
 	 * The frames touching the currently dragged edges. Each entry corresponds to the frames touching the corresponding dragging edge.
 	 *
-	 * So you can use the index in draggingEdges to get the corresponding frames.
+	 * So you can use the index in movingEdges to get the corresponding frames.
 	 */
 	touchingFrames: Record<string, LayoutFrame>[]
 	/**
@@ -475,13 +475,13 @@ export type DragState = {
 	 */
 	touchingFramesArrays: LayoutFrame[][]
 	/**
-	 * All the frames, with/without the currently dragged frames depending on if `showDragging` is true.
+	 * All the frames, with/without the currently dragged frames depending on if `showMoving` is true.
 	 */
 	frames: Record<string, LayoutFrame>
 	/**
-	 * The frame that is currently being hovered over (according to whether `dragPoint` in in the frame or not).
+	 * The frame that is currently being hovered over (according to whether `movePoint` in in the frame or not).
 	 */
-	dragHoveredFrame: LayoutFrame | undefined
+	moveHoveredFrame: LayoutFrame | undefined
 	/**
 	 * A list of corner intersections. Frames can also be dragged by these.
 	 */
@@ -489,22 +489,22 @@ export type DragState = {
 	/**
 	 * Whether the drag was initiated from a point along the window edge.
 	 */
-	isDraggingFromWindowEdge: boolean
-	/** Custom context passed to dragStart, available to action handlers via state.eventContext. */
+	isMovingFromWindowEdge: boolean
+	/** Custom context passed to moveStart, available to action handlers via state.eventContext. */
 	eventContext?: Record<string, unknown>
 	win: LayoutWindow
 }
 
 
-export interface ActionDragChangeResult {
+export interface ActionChangeResult {
 	/** Whether the drag should update the edges. Defaults to false. */
 	updateEdges?: boolean
 	/** Deco shapes produced by this action during this drag step. */
 	shapes: LayoutShape[]
 	/** Whether to show the moved edges while dragging. Defaults to true. */
-	showDragging?: boolean
+	showMoving?: boolean
 }
-export type DragChangeResult = Omit<ActionDragChangeResult, "shapes">
+export type MoveChangeResult = Omit<ActionChangeResult, "shapes">
 
 /**
  * Called when the drag coordinates change (during any event).
@@ -515,18 +515,18 @@ export type DragChangeResult = Omit<ActionDragChangeResult, "shapes">
  *
  * Use also to cleanup your action when type is "end".
  *
- * See also {@link ActionHandler.onDragChange} to understand it's lifecycle as it is the extended version of.
+ * See also {@link ActionHandler.onMoveChange} to understand it's lifecycle as it is the extended version of.
  */
-export type DragChangeHandler = <T extends "start" | "move" | "end">(
+export type MoveChangeHandler = <T extends "start" | "move" | "end">(
 	type: T,
 	e: T extends "end" ? PointerEvent | undefined : PointerEvent,
-	state: DragState,
+	state: MoveState,
 	forceRecalculateEdges: () => void,
-	/** Calls dragEnd with apply: false */
-	cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void,
-	/** Saves result to resolve dragStart promise with then calls dragEnd with given apply. */
+	/** Calls moveEnd with apply: false */
+	cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
+	/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. */
 	resolve: T extends "end" ? undefined : ({ apply, result }: { apply: boolean, result: any }) => void
-) => ActionDragChangeResult
+) => ActionChangeResult
 
 /**
  * A drag action describes when and how to handle a drag event.
@@ -536,21 +536,21 @@ export type DragChangeHandler = <T extends "start" | "move" | "end">(
  * Each action should handle it's configuration and saving/caching any state it needs. See {@link SplitAction} and {@link CloseAction} for examples.
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export interface IDragAction {
+export interface IAction {
 	/** A unique name for your action. */
 	name: string
-	onDragChange: DragChangeHandler
+	onMoveChange: MoveChangeHandler
 	/**
 	 *
-	 * Is called before `onDragChange("end")` with the same event. Might not be called if the request was cancelled.
+	 * Is called before `onMoveChange("end")` with the same event. Might not be called if the request was cancelled.
 	 *
 	 * You should apply your action if possible and return whether it was applied.
 	 *
-	 * Do not reset state here, use onDragChange ("end").
+	 * Do not reset state here, use onMoveChange ("end").
 	 *
-	 * See also {@link ActionHandler.onDragApply} which this is the extended version of.
+	 * See also {@link ActionHandler.onMoveApply} which this is the extended version of.
 	 */
-	onDragApply: (state: DragState, forceRecalculateEdges: () => void) => boolean
+	onMoveApply: (state: MoveState, forceRecalculateEdges: () => void) => boolean
 	/**
 	 * Should return true if it should handle the "request"/event (e.g. some modifier is being pressed => user is requesting x action).
 	 *
@@ -560,16 +560,16 @@ export interface IDragAction {
 	 */
 	canHandleRequest(
 		e: KeyboardEvent | PointerEvent,
-		state: DragState,
+		state: MoveState,
 		forceRecalculateEdges: () => void
 	): boolean
 	/**
-	 * Plugins should implement some basic debug logs by calling {@link DragActionHandler.debugState } at least before and after applying actions in onDragApply. Debug can be a string because it can be an object key to filter on (see the debugState function).
+	 * Plugins should implement some basic debug logs by calling {@link ActionHandler.debugState } at least before and after applying actions in onMoveApply. Debug can be a string because it can be an object key to filter on (see the debugState function).
 	 *
 	 *
 	 * Calls look like this usually, where this.state is the plugin state:
 	 * ```ts
-	 * DragActionHandler.debugState(this.name, "before", state, this.state, this.debug)
+	 * ActionHandler.debugState(this.name, "before", state, this.state, this.debug)
 	 * ```
 	 */
 	debug: boolean | string
@@ -608,8 +608,8 @@ export interface IDragAction {
 	 */
 	annotateEdge?(edge: Edge, frames: LayoutFrame[]): void
 }
-export type EdgeDragStartData = { edge?: Edge, intersection?: IntersectionEntry }
-export type FrameDragStartData = { frameId: FrameId }
+export type EdgeMoveStartData = { edge?: Edge, intersection?: IntersectionEntry }
+export type FrameMoveStartData = { frameId: FrameId }
 
 export type ActionHandlerApplyResult = {
 	/** Whether to apply the regular drag end changes. Return false to reset to the position before dragging. */
@@ -622,27 +622,27 @@ export type ActionHandlerApplyResult = {
  * Handler interface for drag actions.
  */
 export interface ActionHandler {
-	eventHandler: (e: KeyboardEvent, state: DragState, forceRecalculateEdges: () => void) => void
+	eventHandler: (e: KeyboardEvent, state: MoveState, forceRecalculateEdges: () => void) => void
 	/**
-	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. Note that the return only affects the move event but it's typed like this for ease of use. See also {@link DragChangeHandler}.
+	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. Note that the return only affects the move event but it's typed like this for ease of use. See also {@link MoveChangeHandler}.
 	 *
-	 * Can be used to save some context/info to later apply safely during onDragApply.
+	 * Can be used to save some context/info to later apply safely during onMoveApply.
 	 *
 	 * The call order is:
-	 * - onDragChange("start", ...)
-	 * - onDragChange("move", ...)
-	 * - onDragApply(...) (IF dragEnd was called with apply: true, otherwise this is skipped)
-	 * - onDragChange("end", ...) // always called last, do cleanup here
+	 * - onMoveChange("start", ...)
+	 * - onMoveChange("move", ...)
+	 * - onMoveApply(...) (IF moveEnd was called with apply: true, otherwise this is skipped)
+	 * - onMoveChange("end", ...) // always called last, do cleanup here
 	 */
-	onDragChange: (...args: Parameters<DragChangeHandler>) => DragChangeResult
+	onMoveChange: (...args: Parameters<MoveChangeHandler>) => MoveChangeResult
 	/**
-	 * Called when drag will be applied. If dragEnd was called with apply false, it will not be called.
+	 * Called when drag will be applied. If moveEnd was called with apply false, it will not be called.
 	 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
 	 *
-	 * Do not use for resetting handler state, use onDragChange("end", ...) for that.
+	 * Do not use for resetting handler state, use onMoveChange("end", ...) for that.
 	 */
-	onDragApply: (
-		state: DragState,
+	onMoveApply: (
+		state: MoveState,
 		forceRecalculateEdges: () => void
 	) => ActionHandlerApplyResult
 	/**
@@ -652,9 +652,9 @@ export interface ActionHandler {
 }
 
 // drag start overloads for triggering dragsj
-export type DragStartFn = {
-	(e: PointerEvent, type: "edge", data: EdgeDragStartData): void
-	(e: PointerEvent, type: "frame", data: FrameDragStartData): void
+export type MoveStartFn = {
+	(e: PointerEvent, type: "edge", data: EdgeMoveStartData): void
+	(e: PointerEvent, type: "frame", data: FrameMoveStartData): void
 }
 
 export type * from "./vue.js"

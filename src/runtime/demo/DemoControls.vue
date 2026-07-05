@@ -25,7 +25,7 @@
 						<WButton class="flex-1" @click="copyState">Copy State</WButton>
 						<WCheckbox v-model="renameFrames">Easy Ids</WCheckbox>
 					</div>
-					<label class="flex flex-col gap-2 text-sm" v-if="dragActionHandler">
+					<label class="flex flex-col gap-2 text-sm" v-if="actionHandler">
 						<span>Plugin Debug Logs (true | debug path):</span>
 						<WSimpleInput v-model="debugKey" />
 					</label>
@@ -50,13 +50,13 @@ import { settings } from "../settings.js"
 import type { LayoutFrame, LayoutWindow } from "../types/index.js"
 import { throwIfError } from "@alanscodelog/utils/throwIfError";
 import { walk } from "@alanscodelog/utils/walk"
-import type { DragActionHandler } from "../drag/DragActionHandler.js"
+import type { ActionHandler } from "../move/ActionHandler.js"
 import { rotateLayout } from "../helpers/rotateFrames.js"
 
 const props = defineProps<{
 	win: LayoutWindow
 	frames: LayoutFrame[],
-	dragActionHandler?: DragActionHandler<any>
+	actionHandler?: ActionHandler<any>
 }>()
 
 const showDevActions = ref(false)
@@ -112,14 +112,14 @@ function copyState() {
 
 const debugKey = ref(import.meta.dev ? "state.win.frames" : "false")
 watch(debugKey, () => {
-	if (!props.dragActionHandler) return
+	if (!props.actionHandler) return
 	const value = debugKey.value === "true" 
 		? true 
 		: debugKey.value === "false" 
 		? false 
 		: debugKey.value
 
-	for (const plugin of Object.values(props.dragActionHandler.actions)) {
+	for (const plugin of Object.values(props.actionHandler.actions)) {
 			plugin.debug = value
 	}
 })

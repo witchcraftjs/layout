@@ -1,5 +1,5 @@
 import { settings } from "../settings.js"
-import type { DragZone } from "../types/index.js"
+import type { Zone } from "../types/index.js"
 
 /**
  * Returns frame drag zones (in **unrounded** scaled coordinate space).
@@ -10,12 +10,12 @@ import type { DragZone } from "../types/index.js"
  *
  * Unrounded because these are for display purposes only.
  */
-export function getFrameDragZones(
+export function getFrameZones(
 	frame: { x: number, y: number, width: number, height: number },
 	thresholdPx: number,
 	windowPxWidth: number,
 	windowPxHeight: number
-): DragZone[] {
+): Zone[] {
 // we do not round as we might undo this transform and drag along errors
 	// plugs this is is for display purposes only
 	const thX = thresholdPx / windowPxWidth * settings.maxInt
@@ -36,7 +36,7 @@ export function getFrameDragZones(
 		}]
 	}
 
-	const zones: DragZone[] = []
+	const zones: Zone[] = []
 
 	zones.push({
 		type: "frame",

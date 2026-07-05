@@ -6,12 +6,12 @@
 	<slot name="handle" v-bind="{
 		css: css.handle,
 		edge: visualEdges[i],
-		onPointerDown: dragCtx.dragStart
+		onPointerDown: dragCtx.moveStart
 	}">
 		<LayoutDragEdgeHandle
 			:css="css.handle"
 			:edge="visualEdges[i]"
-			:on-pointer-down="dragCtx.dragStart"
+			:on-pointer-down="dragCtx.moveStart"
 		/>
 	</slot>
 	<slot name="indicator" v-bind="{
@@ -37,7 +37,7 @@ import { isEdgeEqual } from "../helpers/isEdgeEqual.js"
 import { toRef } from "vue"
 import {cssToKey} from "../utils/cssToKey.js"
 import { type EdgeCss } from "../types/index.js"
-import { dragContextInjectionKey } from "../types/vue.js"
+import { moveContextInjectionKey } from "../types/vue.js"
 
 defineOptions({
 	inheritAttrs: false
@@ -46,13 +46,13 @@ defineOptions({
 const ctx = inject(layoutContextInjectionKey, undefined)
 if (!ctx) throw new Error("LayoutEdges must be used wivisible a LayoutWindow")
 
-const dragCtx = inject(dragContextInjectionKey, undefined)
+const dragCtx = inject(moveContextInjectionKey, undefined)
 if (!dragCtx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
 
 const visualEdges = toRef(dragCtx, "visualEdges")
 
-const draggingEdge = computed(() => dragCtx.draggingEdges.value.length === 1 ? dragCtx.draggingEdges.value[0] : undefined)
+const draggingEdge = computed(() => dragCtx.movingEdges.value.length === 1 ? dragCtx.movingEdges.value[0] : undefined)
 
 const cssDragEdges = computed(() => {
 	const handleEdges = getVisualEdgesCss(

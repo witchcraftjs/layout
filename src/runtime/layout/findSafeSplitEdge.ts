@@ -8,15 +8,15 @@ import type { Direction, Edge, LayoutFrame, Point, Size } from "../types/index.j
 export function findSafeSplitEdgeAndPosition(
 	frame: LayoutFrame,
 	dragDirection: Direction,
-	dragPointOrPosition: Point | number,
+	movePointOrPosition: Point | number,
 	snapAmount: Point = settings.snapPointScaled,
 	minSize: Size = settings.minSizeScaled
 ): { edge: Edge, position: number } {
 	const orientation = dirToOrientation(dragDirection)
 	const position
-		= typeof dragPointOrPosition === "number"
-			? dragPointOrPosition
-			: dragPointOrPosition[orientation === "horizontal" ? "x" : "y"]
+		= typeof movePointOrPosition === "number"
+			? movePointOrPosition
+			: movePointOrPosition[orientation === "horizontal" ? "x" : "y"]
 
 	const coordKey = orientation === "vertical" ? "y" : "x"
 	const sizeKey = orientation === "vertical" ? "height" : "width"

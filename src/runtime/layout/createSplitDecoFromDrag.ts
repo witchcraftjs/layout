@@ -8,7 +8,7 @@ export function createSplitDecoFromDrag(
 	frames: Record<string, LayoutFrame>,
 	frame: LayoutFrame,
 	dragDirection: Direction,
-	dragPoint: Point,
+	movePoint: Point,
 	snapAmount: Point = settings.snapPointScaled,
 	minSize: Size = settings.minSizeScaled,
 	classes: {
@@ -22,7 +22,7 @@ export function createSplitDecoFromDrag(
 	const deco: RawSplitDeco & Partial<SplitDeco> = {
 		type: "split",
 		id: frame.id,
-		position: dragPoint[orientation === "horizontal" ? "x" : "y"],
+		position: movePoint[orientation === "horizontal" ? "x" : "y"],
 		direction: dragDirection
 	}
 	deco.shapes = createSplitDecoShapes(frames, deco, snapAmount, minSize, classes)

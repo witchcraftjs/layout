@@ -7,7 +7,7 @@ import { findVisualEdge } from "./findVisualEdge.js"
 
 import { cloneFrame } from "../helpers/cloneFrame.js"
 import { dirToSide } from "../helpers/dirToSide.js"
-import { findFrameDraggableEdges } from "../helpers/findFrameDraggableEdges.js"
+import { findFrameMoveableEdges } from "../helpers/findFrameMoveableEdges.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
 import { settings } from "../settings.js"
@@ -119,9 +119,9 @@ export function getCloseFrameInfo<T extends "edge" | "dir">(
 		: closeDirOrSide as EdgeSide
 	const sideOpposite = oppositeSide(side)
 
-	const draggableEdges = findFrameDraggableEdges(frame, visualEdges, !force, [side])
-	if (!draggableEdges) return new KnownError(LAYOUT_ERROR.CANT_CLOSE_NO_DRAG_EDGE, `Could not find draggable edge for frame ${frame.id}`, { frame })
-	const { edge: frameEdge } = draggableEdges[0]
+	const moveableEdges = findFrameMoveableEdges(frame, visualEdges, !force, [side])
+	if (!moveableEdges) return new KnownError(LAYOUT_ERROR.CANT_CLOSE_NO_DRAG_EDGE, `Could not find draggable edge for frame ${frame.id}`, { frame })
+	const { edge: frameEdge } = moveableEdges[0]
 
 	const visualEdge = findVisualEdge(visualEdges, frameEdge)
 	if (visualEdge === undefined) unreachable()

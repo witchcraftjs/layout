@@ -1,4 +1,4 @@
-import { DragActionHandler } from "./DragActionHandler.js"
+import { ActionHandler } from "./ActionHandler.js"
 
 import { dirToOrientation } from "../helpers/dirToOrientation.js"
 import { getEdgeOrientation } from "../helpers/getEdgeOrientation.js"
@@ -6,12 +6,12 @@ import { oppositeSide } from "../helpers/oppositeSide.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { getCloseFrameInfo } from "../layout/getCloseFrameInfo.js"
-import type { ActionDragChangeResult, CloseDeco, DragState, IDragAction } from "../types/index.js"
+import type { ActionChangeResult, CloseDeco, IAction, MoveState } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 export type CloseInfo = Exclude<ReturnType<typeof getCloseFrameInfo>, KnownError>
 
-export class CloseAction implements IDragAction {
+export class CloseAction implements IAction {
 	name = "close" as const
 	minDragDistance = 5
 
@@ -20,13 +20,13 @@ export class CloseAction implements IDragAction {
 		force: boolean
 		res: CloseInfo
 		cacheKey: string | undefined
-		lastReturn: ActionDragChangeResult
+		lastReturn: ActionChangeResult
 	} | {
 		allowed: false
 		force: boolean
 		res: CloseInfo | undefined
 		cacheKey: string | undefined
-		lastReturn: ActionDragChangeResult | undefined
+		lastReturn: ActionChangeResult | undefined
 	} = {} as any // this is initialized by this.reset()
 
 	debug: boolean | string = false
@@ -40,7 +40,7 @@ export class CloseAction implements IDragAction {
 		transformError: e => e.message
 	}
 
-	handleEvent: (e: PointerEvent | KeyboardEvent, state: DragState) => boolean | "force" = (e: PointerEvent | KeyboardEvent) => {
+	handleEvent: (e: PointerEvent | KeyboardEvent, state: MoveState) => boolean | "force" = (e: PointerEvent | KeyboardEvent) => {
 		if (e.ctrlKey && e.shiftKey) {
 			return "force"
 		}
@@ -86,10 +86,10 @@ export class CloseAction implements IDragAction {
 		this.modifyDecos([])
 	}
 
-	private _getDecos(state: DragState): CloseDeco[] {
+	private _getDecos(state: MoveState): CloseDeco[] {
 		let decos: CloseDeco[] = []
-		const { isDragging } = state
-		if (isDragging && this.state.allowed && this.state.res) {
+		const { isMoving } = state
+		if (isMoving && this.state.allowed && this.state.res) {
 			const { force } = this.state
 			decos = this.state.res.deleted.map(_ => ({
 				id: _.id,
@@ -136,12 +136,12 @@ export class CloseAction implements IDragAction {
 	}
 
 
-	canHandleRequest(e: PointerEvent | KeyboardEvent, state: DragState): boolean {
-		const { draggingEdges } = state
-		if (draggingEdges.length !== 1) return false
+	canHandleRequest(e: PointerEvent | KeyboardEvent, state: MoveState): boolean {
+		const { movingEdges } = state
+		if (movingEdges.length !== 1) return false
 		const res = this.handleEvent(e, state)
 		this.state.force = res === "force"
-		this.setTextHints(state.isDragging === "edge" ? true : undefined)
+		this.setTextHints(state.isMoving === "edge" ? true : undefined)
 		if (res) {
 			this.hooks.onStart?.(true)
 			return true
@@ -150,51 +150,51 @@ export class CloseAction implements IDragAction {
 		return false
 	}
 
-	onDragChange(
+	onMoveChange(
 		type: "start" | "end" | "move",
 		_e: PointerEvent | undefined,
-		state: DragState
-	): ActionDragChangeResult {
+		state: MoveState
+	): ActionChangeResult {
 		if (type === "end") {
 			this.reset()
 			return { shapes: [] }
 		}
-		if (state.dragDistance <= this.minDragDistance) {
+		if (state.moveDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [] }
 		}
 		const {
 			touchingFramesArrays,
-			dragDirections,
-			isDragging,
-			draggingEdges,
+			moveDirections,
+			isMoving,
+			movingEdges,
 			visualEdges,
 			frames,
-			isDraggingFromWindowEdge,
-			dragPoint
+			isMovingFromWindowEdge,
+			movePoint
 		} = state
-		const oppositeOrientation = oppositeSide(getEdgeOrientation(draggingEdges[0]))
-		const cacheKey = `${dragPoint?.x}-${dragPoint?.y}-${dragDirections[oppositeOrientation]!}-${this.state.force}`
+		const oppositeOrientation = oppositeSide(getEdgeOrientation(movingEdges[0]))
+		const cacheKey = `${movePoint?.x}-${movePoint?.y}-${moveDirections[oppositeOrientation]!}-${this.state.force}`
 		if (this.state.allowed) {
 			if (this.state.cacheKey === cacheKey) {
 				return this.state.lastReturn
 			}
 		}
-		if (isDragging && draggingEdges.length === 1) {
+		if (isMoving && movingEdges.length === 1) {
 			const res = findFramesTouchingEdge(
-				draggingEdges[0],
+				movingEdges[0],
 				touchingFramesArrays[0],
 				{
-					// referencePoint: dragPoint.value, // if force pick smallest frame?
-					searchDirections: [dragDirections[oppositeOrientation]!]
+					// referencePoint: movePoint.value, // if force pick smallest frame?
+					searchDirections: [moveDirections[oppositeOrientation]!]
 				}
 			)
 			if (res.length > 0) {
-				const orientation = dirToOrientation(dragDirections[oppositeOrientation]!)
+				const orientation = dirToOrientation(moveDirections[oppositeOrientation]!)
 				const sizeKey = orientation === "horizontal" ? "width" : "height"
 				const smallestFrameSize = Math.min(...res.map(_ => _.frame[sizeKey]))
 				const frame = res.find(_ => _.frame[sizeKey] === smallestFrameSize)!.frame!
 
-				const closeInfo = getCloseFrameInfo(Object.values(frames), visualEdges, frame, dragDirections[oppositeOrientation]!, "dir", this.state.force)
+				const closeInfo = getCloseFrameInfo(Object.values(frames), visualEdges, frame, moveDirections[oppositeOrientation]!, "dir", this.state.force)
 				this.state.cacheKey = cacheKey
 				this.setTextHints(closeInfo)
 				if (!(closeInfo instanceof Error)) {
@@ -209,16 +209,16 @@ export class CloseAction implements IDragAction {
 			}
 		}
 		const decos = this._getDecos(state)
-		this.state.lastReturn = { updateEdges: !isDraggingFromWindowEdge, shapes: decos.flatMap(_ => _.shapes) }
+		this.state.lastReturn = { updateEdges: !isMovingFromWindowEdge, shapes: decos.flatMap(_ => _.shapes) }
 		return this.state.lastReturn
 	}
 
-	onDragApply(state: DragState): boolean {
+	onMoveApply(state: MoveState): boolean {
 		if (this.state.res) {
 			const win = state.win
-			if (this.debug) { DragActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
+			if (this.debug) { ActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
 			applyFrameChanges(win, this.state.res)
-			if (this.debug) { DragActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
+			if (this.debug) { ActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 			return true
 		}
 		return false

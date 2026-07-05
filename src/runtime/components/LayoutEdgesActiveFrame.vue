@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
+import { moveContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
 import { computed, inject, useAttrs } from "vue"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
 
@@ -34,7 +34,7 @@ defineOptions({
 const ctx = inject(layoutContextInjectionKey, undefined)
 if (!ctx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
-const dragCtx = inject(dragContextInjectionKey, undefined)
+const dragCtx = inject(moveContextInjectionKey, undefined)
 if (!dragCtx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
 

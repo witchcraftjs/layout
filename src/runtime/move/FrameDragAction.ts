@@ -1,17 +1,17 @@
-import { DragActionHandler } from "./DragActionHandler.js"
+import { ActionHandler } from "./ActionHandler.js"
 
 import { createZoneSideClipPath } from "../helpers/createZoneSideClipPath.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
-import { getDragZones } from "../layout/getDragZones.js"
 import { getFrameDockInfo } from "../layout/getFrameDockInfo.js"
 import { getFrameRearrangeInfo } from "../layout/getFrameRearrangeInfo.js"
 import { getFrameSwapInfo } from "../layout/getFrameSwapInfo.js"
+import { getZones } from "../layout/getZones.js"
 import { settings } from "../settings.js"
-import type { ActionDragChangeResult, DragState, DragZone, FrameDragDeco, IDragAction, LayoutChange } from "../types/index.js"
+import type { ActionChangeResult, FrameDeco, IAction, LayoutChange, MoveState, Zone } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 
-export class FrameDragAction implements IDragAction {
+export class FrameDragAction implements IAction {
 	name = "frameDrag" as const
 
 	minDragDistance = 5
@@ -25,8 +25,8 @@ export class FrameDragAction implements IDragAction {
 	debug: boolean | string = false
 	textHints: { actions: string[], errors: string[] } = { actions: [], errors: [] }
 
-	handleEvent: (e: PointerEvent | KeyboardEvent, state: DragState) => boolean
-		= (_e: PointerEvent | KeyboardEvent, state: DragState) => state.isDragging === "frame"
+	handleEvent: (e: PointerEvent | KeyboardEvent, state: MoveState) => boolean
+		= (_e: PointerEvent | KeyboardEvent, state: MoveState) => state.isMoving === "frame"
 
 	dragHints: {
 		actions: { split?: string, swap?: string, rearrange?: string, dock?: string } | ((state: { type: "split" | "swap" | "rearrange" | "dock" }) => string[])
@@ -41,7 +41,7 @@ export class FrameDragAction implements IDragAction {
 		transformError: e => e.message
 	}
 
-	modifyDecos: (shapes: FrameDragDeco[]) => void = () => { }
+	modifyDecos: (shapes: FrameDeco[]) => void = () => { }
 	hooks: {
 		onStart?: () => void
 		onCancel?: () => void
@@ -101,15 +101,15 @@ export class FrameDragAction implements IDragAction {
 
 
 	getDecos(
-		matchedZone: DragZone | undefined,
-		state: DragState,
+		matchedZone: Zone | undefined,
+		state: MoveState,
 		result: LayoutChange<"split" | "swap" | "rearrange" | "dock"> | KnownError | undefined
-	): FrameDragDeco[] {
+	): FrameDeco[] {
 		const isError = result instanceof Error
-		const frame = state.dragHoveredFrame
+		const frame = state.moveHoveredFrame
 
 		if (!matchedZone || !frame) {
-			const decos: FrameDragDeco[] = []
+			const decos: FrameDeco[] = []
 			this.modifyDecos(decos)
 			return decos
 		}
@@ -120,7 +120,7 @@ export class FrameDragAction implements IDragAction {
 			? `deco-frame-drag deco-frame-drag-error deco-frame-drag-${matchedZone.type}-${matchedZone.side} bg-red-500/50`
 			: `deco-frame-drag deco-frame-drag-${matchedZone.type}-${matchedZone.side} bg-blue-500/50`
 
-		const decos: FrameDragDeco[] = [{
+		const decos: FrameDeco[] = [{
 			id: frame.id,
 			type: "drop",
 			position: matchedZone.side ?? "center",
@@ -139,7 +139,7 @@ export class FrameDragAction implements IDragAction {
 		return decos
 	}
 
-	canHandleRequest(e: PointerEvent | KeyboardEvent, state: DragState): boolean {
+	canHandleRequest(e: PointerEvent | KeyboardEvent, state: MoveState): boolean {
 		const res = this.handleEvent(e, state)
 		this.setTextHints(undefined)
 		if (res) {
@@ -150,33 +150,33 @@ export class FrameDragAction implements IDragAction {
 		return false
 	}
 
-	onDragChange<T extends "start" | "move" | "end">(
+	onMoveChange<T extends "start" | "move" | "end">(
 		type: T,
 		_e: PointerEvent | undefined,
-		state: DragState
-	): ActionDragChangeResult {
+		state: MoveState
+	): ActionChangeResult {
 		if (type === "end") {
 			this.reset()
 			return { shapes: [] }
 		}
-		if (state.dragDistance <= this.minDragDistance) {
-			return { updateEdges: false, shapes: [], showDragging: false }
+		if (state.moveDistance <= this.minDragDistance) {
+			return { updateEdges: false, shapes: [], showMoving: false }
 		}
-		const { win, draggingFrameId, dragHoveredFrame } = state
-		const matchedZone = getDragZones(state, settings.zoneSizes)
+		const { win, movingFrameId, moveHoveredFrame } = state
+		const matchedZone = getZones(state, settings.zoneSizes)
 
 		if (!matchedZone) {
 			this.state.lastReturn = undefined
-		} else if (dragHoveredFrame && matchedZone.type === "frame" && matchedZone.side) {
+		} else if (moveHoveredFrame && matchedZone.type === "frame" && matchedZone.side) {
 			if (matchedZone.side !== "center") {
-				this.state.lastReturn = getFrameRearrangeInfo(win, draggingFrameId!, dragHoveredFrame.id!, matchedZone.side)
+				this.state.lastReturn = getFrameRearrangeInfo(win, movingFrameId!, moveHoveredFrame.id!, matchedZone.side)
 			} else {
-				this.state.lastReturn = getFrameSwapInfo(win, draggingFrameId!, dragHoveredFrame.id!)
+				this.state.lastReturn = getFrameSwapInfo(win, movingFrameId!, moveHoveredFrame.id!)
 				// for the hints
 				if (!(this.state.lastReturn instanceof Error)) this.state.lastReturn.info = "swap"
 			}
-		} else if (matchedZone.type === "window" && dragHoveredFrame && !dragHoveredFrame.docked) {
-			this.state.lastReturn = getFrameDockInfo(win, draggingFrameId!, matchedZone.side)
+		} else if (matchedZone.type === "window" && moveHoveredFrame && !moveHoveredFrame.docked) {
+			this.state.lastReturn = getFrameDockInfo(win, movingFrameId!, matchedZone.side)
 			// for the hints
 			if (!(this.state.lastReturn instanceof Error)) this.state.lastReturn.info = "dock"
 		}
@@ -187,22 +187,22 @@ export class FrameDragAction implements IDragAction {
 		return {
 			shapes: decos.flatMap(_ => _.shapes),
 			updateEdges: false,
-			showDragging: false
+			showMoving: false
 		}
 	}
 
-	onDragApply(state: DragState): boolean {
+	onMoveApply(state: MoveState): boolean {
 		const result = this.state.lastReturn
-		if (!result || !state.dragHoveredFrame || !state.draggingFrameId) {
+		if (!result || !state.moveHoveredFrame || !state.movingFrameId) {
 			return true
 		}
 
 		if (result instanceof Error) {
 			this.hooks.onError?.(result)
 		} else {
-			if (this.debug) { DragActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
+			if (this.debug) { ActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
 			applyFrameChanges(state.win, result)
-			if (this.debug) { DragActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
+			if (this.debug) { ActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 		}
 
 		return true

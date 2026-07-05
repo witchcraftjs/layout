@@ -4,7 +4,7 @@ import { isEdgeEqual } from "./isEdgeEqual.js"
 
 import type { Edge, Orientation } from "../types/index.js"
 
-export function findDraggableEdge(
+export function findMoveableEdge(
 	edge: Edge,
 	edges: Edge[],
 	/** Whether the edge must match exactly and does not "contain/touch" another frame. */

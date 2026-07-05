@@ -5,13 +5,13 @@
 >
 	<slot name="handler" v-bind="{
 		css: css.handle,
-		onPointerDown: dragCtx.dragStart,
+		onPointerDown: dragCtx.moveStart,
 		intersection: draggableIntersections[i]
 	}">
 		<LayoutIntersectionHandle
 			:css="css.handle"
 			:intersection="draggableIntersections[i]"
-			:on-pointer-down="dragCtx.dragStart"
+			:on-pointer-down="dragCtx.moveStart"
 		/>
 	</slot>
 	<slot name="indicator" v-bind="{ css: css.visible, intersection: draggableIntersections[i] }">
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dragContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
+import { moveContextInjectionKey, layoutContextInjectionKey } from "../types/vue.js"
 import { computed, inject } from "vue"
 
 
@@ -40,7 +40,7 @@ defineOptions({
 const ctx = inject(layoutContextInjectionKey, undefined)
 if (!ctx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
-const dragCtx = inject(dragContextInjectionKey, undefined)
+const dragCtx = inject(moveContextInjectionKey, undefined)
 if (!dragCtx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
 const draggableIntersections = computed(() => dragCtx.intersections.value

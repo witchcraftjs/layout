@@ -7,7 +7,7 @@ import { getSideTouching } from "../helpers/getSideTouching.js"
 import { isEdgeEqual } from "../helpers/isEdgeEqual.js"
 import { oppositeSide } from "../helpers/oppositeSide.js"
 import { sideToDirection } from "../helpers/sideToDirection.js"
-import type { DragZone, LayoutChange, LayoutWindow } from "../types/index.js"
+import type { LayoutChange, LayoutWindow, Zone } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
@@ -150,9 +150,9 @@ import { KnownError } from "../utils/KnownError.js"
 
 export function getFrameRearrangeInfo(
 	win: LayoutWindow,
-	draggingFrameId: string,
+	movingFrameId: string,
 	hoveredFrameId: string,
-	zoneSide: DragZone["side"]
+	zoneSide: Zone["side"]
 ): LayoutChange<"split" | "swap" | "rearrange">
 	| KnownError<typeof LAYOUT_ERROR.CANT_SWAP_WITH_SELF>
 	| KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_FRAME_TOO_SMALL>
@@ -161,10 +161,10 @@ export function getFrameRearrangeInfo(
 	| KnownError<typeof LAYOUT_ERROR.CANT_REARRANGE_DOCKED_WITH_NON_DOCKED>
 	| KnownError<typeof LAYOUT_ERROR.CANT_SPLIT_DOCKED_FRAME>
 	| KnownError<typeof LAYOUT_ERROR.NO_FILL_CANDIDATES> {
-	const draggingFrame = { ...win.frames[draggingFrameId] }
+	const draggingFrame = { ...win.frames[movingFrameId] }
 	const hoveredFrame = { ...win.frames[hoveredFrameId] }
 
-	if (draggingFrameId === hoveredFrameId) {
+	if (movingFrameId === hoveredFrameId) {
 		if (zoneSide === "center") return new KnownError(LAYOUT_ERROR.CANT_SWAP_WITH_SELF, `Can't swap frame with self.`, { frame: hoveredFrame, zoneSide })
 	}
 
@@ -180,12 +180,12 @@ export function getFrameRearrangeInfo(
 	}
 
 	if (draggingFrame.docked && !hoveredFrame.docked) { // center swapping IS allowed above
-		return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_DOCKED_WITH_NON_DOCKED, `Can't rearrange docked frame ${draggingFrameId} with non-docked frame ${hoveredFrameId}, can only swap.`, { draggingFrameId, hoveredFrameId, zoneSide })
+		return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_DOCKED_WITH_NON_DOCKED, `Can't rearrange docked frame ${movingFrameId} with non-docked frame ${hoveredFrameId}, can only swap.`, { movingFrameId, hoveredFrameId, zoneSide })
 	}
 
 	// block edge rearrange on docked frames
 	if (hoveredFrame.docked) { // again center swapping docked to undocked and vice versa is allowed
-		return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_WITH_DOCKED_EDGES, `Can't rearrange with docked frame ${hoveredFrameId} edge, can only swap.`, { draggingFrameId, hoveredFrameId, zoneSide })
+		return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_WITH_DOCKED_EDGES, `Can't rearrange with docked frame ${hoveredFrameId} edge, can only swap.`, { movingFrameId, hoveredFrameId, zoneSide })
 	}
 
 	const touchingSide = getSideTouching(draggingFrame, hoveredFrame)
@@ -206,7 +206,7 @@ export function getFrameRearrangeInfo(
 				}
 			}
 			if (hoverOppositeSide === zoneSide) {
-				return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_TO_SAME_RELATIVE_POSITION, `Frame ${draggingFrameId} is already on the ${zoneSide} of ${hoveredFrameId}`, { draggingFrameId, hoveredFrameId, zoneSide })
+				return new KnownError(LAYOUT_ERROR.CANT_REARRANGE_TO_SAME_RELATIVE_POSITION, `Frame ${movingFrameId} is already on the ${zoneSide} of ${hoveredFrameId}`, { movingFrameId, hoveredFrameId, zoneSide })
 			}
 		}
 	}
@@ -224,7 +224,7 @@ export function getFrameRearrangeInfo(
 	const splitFrame = splitResult.modified[0]
 	const newFrame = splitResult.created[0]
 
-	if (draggingFrameId === hoveredFrameId) {
+	if (movingFrameId === hoveredFrameId) {
 		return { ...splitResult, deleted: [], info: "split" }
 	}
 
@@ -249,7 +249,7 @@ export function getFrameRearrangeInfo(
 			[draggingFrame.id]: draggingFrame
 		}
 	}
-	const changes = getFillEmptySpaceInfo(winCopy, emptySpace, [hoveredFrameId, draggingFrameId])
+	const changes = getFillEmptySpaceInfo(winCopy, emptySpace, [hoveredFrameId, movingFrameId])
 	if (changes instanceof KnownError) return changes
 
 	// it will also be missing said changes unless it further moved the frames which is not alway

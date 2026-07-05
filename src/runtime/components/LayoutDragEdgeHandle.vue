@@ -26,8 +26,8 @@ import { twMerge } from "@witchcraft/ui/utils/twMerge"
 import { useAttrs, inject } from "vue"
 
 import LayoutShapeRect from "./LayoutShapeRect.vue"
-import { type EdgeDragStartData } from "../types/index.js"
-import { dragContextInjectionKey } from "../types/vue.js"
+import { type EdgeMoveStartData } from "../types/index.js"
+import { moveContextInjectionKey } from "../types/vue.js"
 import type { Edge, EdgeCss } from "../types/index.js"
 
 const $attrs = useAttrs()
@@ -39,13 +39,13 @@ defineOptions({
 const props = defineProps<{
 	edge: Edge
 	css: EdgeCss
-	onPointerDown?: (e: PointerEvent, type: "edge", data: EdgeDragStartData) => void
+	onPointerDown?: (e: PointerEvent, type: "edge", data: EdgeMoveStartData) => void
 }>()
 
 const ctx = inject(layoutContextInjectionKey, undefined)
 if (!ctx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
-const dragCtx = inject(dragContextInjectionKey, undefined)
+const dragCtx = inject(moveContextInjectionKey, undefined)
 if (!dragCtx) throw new Error("LayoutEdges must be used within a LayoutWindow")
 
 </script>

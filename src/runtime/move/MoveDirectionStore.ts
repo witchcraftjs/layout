@@ -1,19 +1,19 @@
 import type { Direction, Orientation, Point } from "../types/index.js"
 
-export class DragDirectionStore {
+export class MoveDirectionStore {
 	hooks: {
 		onUpdate: (directions: Record<Orientation, Direction | undefined>) => void
 	}
 
 	constructor(
-		hooks: DragDirectionStore["hooks"]
+		hooks: MoveDirectionStore["hooks"]
 	) {
 		this.hooks = hooks
 	}
 
 	lastPoint: Point | undefined
 
-	dragDirection: Record<Orientation, Direction | undefined> = {} as any
+	moveDirection: Record<Orientation, Direction | undefined> = {} as any
 
 	lesser: { x: Direction, y: Direction } = {
 		x: "left",
@@ -27,20 +27,20 @@ export class DragDirectionStore {
 
 	reset(): void {
 		this.lastPoint = undefined
-		this.dragDirection = {} as any
+		this.moveDirection = {} as any
 	}
 
 	update(point: Point): boolean {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const newXDirection = this.getDragDirection("x", point)
+		const newXDirection = this.getMoveDirection("x", point)
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const newYDirection = this.getDragDirection("y", point)
+		const newYDirection = this.getMoveDirection("y", point)
 		let changed = false
 		if (newXDirection) {
-			this.dragDirection.horizontal = newXDirection
+			this.moveDirection.horizontal = newXDirection
 		}
 		if (newYDirection) {
-			this.dragDirection.vertical = newYDirection
+			this.moveDirection.vertical = newYDirection
 		}
 
 		if (this.lastPoint?.x !== point.x || this.lastPoint?.y !== point.y) {
@@ -49,11 +49,11 @@ export class DragDirectionStore {
 		}
 
 		if (!changed) return false
-		this.hooks.onUpdate(this.dragDirection)
+		this.hooks.onUpdate(this.moveDirection)
 		return true
 	}
 
-	getDragDirection(coord: "x" | "y", point: Point): Direction | false {
+	getMoveDirection(coord: "x" | "y", point: Point): Direction | false {
 		if (!this.lastPoint) return false
 		const diff = point[coord] - this.lastPoint![coord]
 		if (diff > 0) return this.greater[coord]

@@ -1,7 +1,7 @@
 import type { ComputedRef, InjectionKey, Ref } from "vue"
 
 // eslint-disable-next-line no-restricted-imports
-import type { ActionHandler, ActionHandlerApplyResult, Direction, DragState, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, Orientation, Point } from "./index.js"
+import type { ActionHandler, ActionHandlerApplyResult, Direction, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, MoveState, Orientation, Point } from "./index.js"
 
 export type LayoutContext = ComputedRef<
 	& {
@@ -16,28 +16,28 @@ export const layoutContextInjectionKey = Symbol.for("@witchcraft/layout:context"
 
 export interface UseFramesContext {
 	actionHandler: ActionHandler
-	dragStart: {
+	moveStart: {
 		(e: PointerEvent, type: "edge", data: { edge?: Edge, intersection?: IntersectionEntry }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 		(e: PointerEvent, type: "frame", data: { frameId: FrameId }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 	}
-	dragMove: (e: PointerEvent) => void
-	dragEnd: (e?: PointerEvent, options?: Partial<Pick<ActionHandlerApplyResult, "apply">>) => void
+	onMove: (e: PointerEvent) => void
+	moveEnd: (e?: PointerEvent, options?: Partial<Pick<ActionHandlerApplyResult, "apply">>) => void
 	cancel: () => void
-	dragDirections: Ref<Record<Orientation, Direction | undefined>>
-	dragPoint: Ref<Point | undefined>
-	isDragging: Ref<false | "frame" | "edge">
-	draggingEdges: Ref<Edge[]>
-	draggingIntersection: Ref<IntersectionEntry | undefined>
+	moveDirections: Ref<Record<Orientation, Direction | undefined>>
+	movePoint: Ref<Point | undefined>
+	isMoving: Ref<false | "frame" | "edge">
+	movingEdges: Ref<Edge[]>
+	movingIntersection: Ref<IntersectionEntry | undefined>
 	visualEdges: Ref<Edge[]>
 	touchingFrames: Ref<Record<string, LayoutFrame>[]>
 	touchingFramesArrays: Ref<LayoutFrame[][]>
 	frames: ComputedRef<Record<string, LayoutFrame>>
-	dragHoveredFrame: ComputedRef<LayoutFrame | undefined>
+	moveHoveredFrame: ComputedRef<LayoutFrame | undefined>
 	intersections: ComputedRef<IntersectionEntry[]>
-	isDraggingFromWindowEdge: Ref<boolean>
+	isMovingFromWindowEdge: Ref<boolean>
 	forceRecalculateEdges: () => void
-	state: ComputedRef<DragState>
-	frameDragFrameId: Ref<FrameId | undefined>
+	state: ComputedRef<MoveState>
+	movingFrameId: Ref<FrameId | undefined>
 }
 
-export const dragContextInjectionKey = Symbol.for("@witchcraft/layout:dragContext") as InjectionKey<UseFramesContext>
+export const moveContextInjectionKey = Symbol.for("@witchcraft/layout:moveContext") as InjectionKey<UseFramesContext>

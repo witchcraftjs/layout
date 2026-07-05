@@ -10,7 +10,7 @@
 		v-if="win"
 		:frames="frames!"
 		:win="win"
-		:dragActionHandler="dragActionHandler"
+		:actionHandler="actionHandler"
 	/>
 
 	<LayoutWindow
@@ -33,8 +33,8 @@
 		:textHints="textHints"
 		textHintsTeleportTo="#status-bar"
 		v-model:win="win"
-		@is-showing-drag="isShowingDrag = $event"
-		@drag-state="dragState = $event"
+		@is-showing-move="isShowingMove = $event"
+		@move-state="moveState = $event"
 	>
 			<LayoutFrame class="
 				flex
@@ -163,7 +163,7 @@ import LayoutIntersections from "../components/LayoutIntersections.vue"
 import LayoutEdgesActiveFrame from "../components/LayoutEdgesActiveFrame.vue"
 import LayoutDragEdges from "../components/LayoutDragEdges.vue"
 import LayoutIntersectionHandle from "../components/LayoutIntersectionHandle.vue"
-import type { DragState } from "../types/index.js"
+import type { MoveState } from "../types/index.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { debugFrame } from "../layout/debugFrame.js"
 import { getFrameCollapseInfo } from "../layout/getFrameCollapseInfo.js"
@@ -179,7 +179,7 @@ import { settings } from "../settings.js"
 import type { EdgeSide, Layout, Pos, Size } from "../types/index.js"
 import { throwIfError } from "@alanscodelog/utils/throwIfError"
 import { useTemplateRef } from "vue"
-import { DragActionHandler } from "../drag/DragActionHandler.js"
+import { ActionHandler } from "../move/ActionHandler.js"
 import LayoutDragEdgeHandle from "../components/LayoutDragEdgeHandle.vue"
 import LayoutDragEdgeVisible from "../components/LayoutDragEdgeVisible.vue"
 import LayoutIntersectionVisible from "../components/LayoutIntersectionVisible.vue"
@@ -228,30 +228,30 @@ function layoutInitialize(layout: Layout, { defaultPos, defaultSize }: {
 }
 
 // whether layout window is showing the edge beneath the mouse
-// as determined by the DragActionHandler in LayoutWindow
-const isShowingDrag = ref(false)
+// as determined by the ActionHandler in LayoutWindow
+const isShowingMove = ref(false)
 // drag state as returned by useFrames in LayoutWindow
-const dragState = ref<DragState | undefined>(undefined)
+const moveState = ref<MoveState | undefined>(undefined)
 
 function handleUndock(frameId: string) {
 	const changes = throwIfError(getFrameUndockInfo(win.value!, frameId))
-	DragActionHandler.debugState("undock", "before", dragState.value!, {}, undefined)
+	ActionHandler.debugState("undock", "before", moveState.value!, {}, undefined)
 	applyFrameChanges(win.value!, changes)
-	DragActionHandler.debugState("undock", "after", dragState.value!, {}, undefined)
+	ActionHandler.debugState("undock", "after", moveState.value!, {}, undefined)
 }
 
 function handleCollapse(frameId: string) {
 	const changes = throwIfError(getFrameCollapseInfo(win.value!, frameId))
-	DragActionHandler.debugState("collapse", "before", dragState.value!, {}, undefined)
+	ActionHandler.debugState("collapse", "before", moveState.value!, {}, undefined)
 	applyFrameChanges(win.value!, changes)
-	DragActionHandler.debugState("collapse", "after", dragState.value!, {}, undefined)
+	ActionHandler.debugState("collapse", "after", moveState.value!, {}, undefined)
 }
 
 function handleUncollapse(frameId: string) {
 	const changes = throwIfError(getFrameUncollapseInfo(win.value!, frameId))
-	DragActionHandler.debugState("uncollapse", "before", dragState.value!, {}, undefined)
+	ActionHandler.debugState("uncollapse", "before", moveState.value!, {}, undefined)
 	applyFrameChanges(win.value!, changes)
-	DragActionHandler.debugState("uncollapse", "after", dragState.value!, {}, undefined)
+	ActionHandler.debugState("uncollapse", "after", moveState.value!, {}, undefined)
 }
 
 const collapsedDocks = computed(() => {
@@ -264,13 +264,13 @@ const collapsedDocks = computed(() => {
 	return sides
 })
 
-const dragActionHandler = computed(() => layoutComponent.value?.dragActionHandler)
+const actionHandler = computed(() => layoutComponent.value?.actionHandler)
 
 const textHints = computed(() => {
-	const isDragging = dragState.value?.isDragging
-	const textHints = dragActionHandler.value?.textHints ?? {actions:[], errors:[]}
+	const isMoving = moveState.value?.isMoving
+	const textHints = actionHandler.value?.textHints ?? {actions:[], errors:[]}
 	return [
-		...(!isDragging ? [{classes:"", text:"Drag from an edge to create a new frame."}] : []),
+		...(!isMoving ? [{classes:"", text:"Drag from an edge to create a new frame."}] : []),
 		...textHints.errors.map((_: string) => ({classes:"text-red-500", text:_})),
 		...textHints.actions.map((_: string) => ({ text:_})),
 	]

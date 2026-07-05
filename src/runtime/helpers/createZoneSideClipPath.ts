@@ -6,10 +6,10 @@
  * Accepts scaled coordinates.
  */
 
-import type { DragZone } from "../types/index.js"
+import type { Zone } from "../types/index.js"
 
 export function createZoneSideClipPath(
-	zone: DragZone,
+	zone: Zone,
 	{ frameEdgePx, windowEdgePx }: { frameEdgePx: number, windowEdgePx: number }
 ): string | undefined {
 	const side = zone.side

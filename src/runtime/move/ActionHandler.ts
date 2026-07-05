@@ -2,36 +2,36 @@ import { get, type RecordFromArray } from "@alanscodelog/utils"
 
 import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
-import type { ActionHandlerApplyResult, DragChangeHandler, DragChangeResult, DragState, Edge, IDragAction, LayoutFrame, LayoutShape } from "../types/index.js"
+import type { ActionHandlerApplyResult, Edge, IAction, LayoutFrame, LayoutShape, MoveChangeHandler, MoveChangeResult, MoveState } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
 /**
- * Handles the lifecycle of a drag actions {@link IDragAction} and provides additional hooks.
+ * Handles the lifecycle of a drag actions {@link IAction} and provides additional hooks.
  *
  * The first action instance that can handle the request is passed control of the event handlers until the request changes.
  */
-export class DragActionHandler<
-	TRawDragActions extends IDragAction[],
-	TDragActions extends RecordFromArray<TRawDragActions, "name"> = RecordFromArray<TRawDragActions, "name">
+export class ActionHandler<
+	TRawActions extends IAction[],
+	TActions extends RecordFromArray<TRawActions, "name"> = RecordFromArray<TRawActions, "name">
 > {
-	activeAction?: keyof TDragActions
+	activeAction?: keyof TActions
 
-	actions: TDragActions
+	actions: TActions
 
-	eventCanceller: ((e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void) | undefined = undefined
+	eventCanceller: ((e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void) | undefined = undefined
 
-	boundCancel: (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void
+	boundCancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void
 
-	defaultOnDragChange: DragChangeHandler = (type, _e, state, _forceRecalculateEdges, _cancel) => {
+	defaultOnMoveChange: MoveChangeHandler = (type, _e, state, _forceRecalculateEdges, _cancel) => {
 		const isTouchingCollapsedFrameEdge = type === "move"
-			&& state.isDragging === "edge"
+			&& state.isMoving === "edge"
 			&& state.touchingFramesArrays.some(frames =>
 				// we check with a falsy check on PURPOSE, frames collapsed to 0 aren't an issue, they are ignored anyways
 				Object.values(frames).some(f => f.collapsed)
 			)
 		return {
-			updateEdges: type === "move" ? !(state.isDraggingFromWindowEdge || isTouchingCollapsedFrameEdge) : true,
+			updateEdges: type === "move" ? !(state.isMovingFromWindowEdge || isTouchingCollapsedFrameEdge) : true,
 			shapes: []
 		}
 	}
@@ -46,7 +46,7 @@ export class DragActionHandler<
 		 */
 		onEvent?: (e: PointerEvent | KeyboardEvent | undefined, cancel: () => void) => void
 		/** Called when the action requested changes. */
-		onRequestChange?: (type: keyof TDragActions | undefined) => void
+		onRequestChange?: (type: keyof TActions | undefined) => void
 		/** Called when the drag action ends either because it was completed or cancelled. */
 		onEnd?: (context: { cancelled: boolean, applied: boolean }) => void
 	}
@@ -54,22 +54,22 @@ export class DragActionHandler<
 	/** All action shapes merged into a single array. If using vue you can set this to a reactive array for reactivity. */
 	shapes: LayoutShape[] = []
 
-	/** All hint/error text from all actions, updated on every onDragChange. If using vue you can set this to a reactive object for reactivity. */
+	/** All hint/error text from all actions, updated on every onMoveChange. If using vue you can set this to a reactive object for reactivity. */
 	textHints: { actions: string[], errors: string[] } = { actions: [], errors: [] }
 
 	constructor(
-		actions: TRawDragActions,
-		hooks: DragActionHandler<TRawDragActions, TDragActions>["hooks"] = {},
+		actions: TRawActions,
+		hooks: ActionHandler<TRawActions, TActions>["hooks"] = {},
 		/**
-		 * Default onDragChange handler for when no action can handle the request.
+		 * Default onMoveChange handler for when no action can handle the request.
 		 *
 		 * Should return true to allow the edges to be moved, or false to prevent it.
 		 *
 		 * The default prevents movement when the edge is a window edge and when the edge is touching a collapsed frame.
 		 */
-		defaultOnDragChange?: DragChangeHandler
+		defaultOnMoveChange?: MoveChangeHandler
 	) {
-		if (defaultOnDragChange) this.defaultOnDragChange = defaultOnDragChange
+		if (defaultOnMoveChange) this.defaultOnMoveChange = defaultOnMoveChange
 		this.hooks = hooks
 		this.actions = {} as any
 		for (const action of actions) {
@@ -80,10 +80,10 @@ export class DragActionHandler<
 
 	eventHandler(
 		e: KeyboardEvent | PointerEvent,
-		state: DragState,
+		state: MoveState,
 		forceRecalculateEdges: () => void
 	) {
-		if (state.isDragging) {
+		if (state.isMoving) {
 			e.preventDefault()
 		}
 		let cancelled = false
@@ -95,7 +95,7 @@ export class DragActionHandler<
 
 		let found = false
 		const oldActiveAction = this.activeAction
-		for (const action of Object.values<TRawDragActions[number]>(this.actions)) {
+		for (const action of Object.values<TRawActions[number]>(this.actions)) {
 			if (action.canHandleRequest(e, state, forceRecalculateEdges)) {
 				// if (this.activeAction !== action.name) {
 				// }
@@ -116,35 +116,35 @@ export class DragActionHandler<
 			this.hooks.onRequestChange?.(this.activeAction)
 		}
 
-		if (state.isDragging) {
+		if (state.isMoving) {
 			forceRecalculateEdges()
 			this.hooks.onRecalculate?.()
 		}
 		return undefined
 	}
 
-	onDragChange<T extends "start" | "move" | "end">(
+	onMoveChange<T extends "start" | "move" | "end">(
 		type: T,
 		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
-		state: DragState,
+		state: MoveState,
 		forceRecalculateEdges: () => void,
-		cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void,
+		cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
 		resolve: T extends "end" ? undefined : (opts: ActionHandlerApplyResult) => void
-	): DragChangeResult {
+	): MoveChangeResult {
 		if (type === "start") {
 			this.eventCanceller = cancel
 			this.eventHandler(e!, state, forceRecalculateEdges)
 		}
 
 		if (this.activeAction) {
-			const res = this.actions[this.activeAction]!.onDragChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
+			const res = this.actions[this.activeAction]!.onMoveChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
 			// in case it's a vue reactive array
 			this.shapes.splice(0, this.shapes.length, ...res.shapes)
 			this.setTextHints(type)
 			return res
 		}
 		this.setTextHints(type)
-		const res = this.defaultOnDragChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
+		const res = this.defaultOnMoveChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
 		this.shapes.splice(0, this.shapes.length, ...res.shapes)
 
 		if (type === "end") {
@@ -157,7 +157,7 @@ export class DragActionHandler<
 		// again in case it's a vue reactive object
 		this.textHints.actions = []
 		this.textHints.errors = []
-		for (const action of Object.values<IDragAction>(this.actions)) {
+		for (const action of Object.values<IAction>(this.actions)) {
 			const res = action.getTextHints?.(type)
 			this.textHints.actions.push(...(res?.actions ?? []))
 			this.textHints.errors.push(...(res?.errors ?? []))
@@ -168,7 +168,7 @@ export class DragActionHandler<
 		for (const edge of edges) {
 			// edge already has an error
 			if (edge.error) continue
-			for (const action of Object.values<IDragAction>(this.actions)) {
+			for (const action of Object.values<IAction>(this.actions)) {
 				action.annotateEdge?.(edge, frames)
 				if (edge.error) break
 			}
@@ -190,12 +190,12 @@ export class DragActionHandler<
 		}
 	}
 
-	onDragApply(
-		state: DragState,
+	onMoveApply(
+		state: MoveState,
 		forceRecalculateEdges: () => void
 	): ActionHandlerApplyResult {
 		if (this.activeAction) {
-			const res = this.actions[this.activeAction]!.onDragApply(state, forceRecalculateEdges)
+			const res = this.actions[this.activeAction]!.onMoveApply(state, forceRecalculateEdges)
 			this.hooks.onEnd?.({ cancelled: false, applied: res })
 			return { apply: res, result: undefined }
 		}
@@ -203,7 +203,7 @@ export class DragActionHandler<
 		return { apply: true, result: undefined }
 	}
 
-	cancel(e: PointerEvent | KeyboardEvent | undefined, state: DragState): void {
+	cancel(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): void {
 		if (this.activeAction) {
 			this.actions[this.activeAction].cancel(e, state)
 		}
@@ -215,7 +215,7 @@ export class DragActionHandler<
 	static debugState(
 		pluginName: string,
 		type: "before" | "after" | string,
-		state: DragState,
+		state: MoveState,
 		pluginState: Record<string, any> = {},
 		/** Object key to filter the state by, e.g. state.win.frames. If false is ignored. The idea is you pass this.debug and users can set this.debug to a string to filter. */
 		key?: string | boolean
