@@ -1,7 +1,7 @@
 import type { ComputedRef, InjectionKey, Ref } from "vue"
 
 // eslint-disable-next-line no-restricted-imports
-import type { ActionHandler, Direction, DragState, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, Orientation, Point } from "./index.js"
+import type { ActionHandler, ActionHandlerApplyResult, Direction, DragState, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, Orientation, Point } from "./index.js"
 
 export type LayoutContext = ComputedRef<
 	& {
@@ -21,7 +21,7 @@ export interface UseFramesContext {
 		(e: PointerEvent, type: "frame", data: { frameId: FrameId }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 	}
 	dragMove: (e: PointerEvent) => void
-	dragEnd: (e?: PointerEvent, options?: { apply?: boolean }) => void
+	dragEnd: (e?: PointerEvent, options?: Partial<Pick<ActionHandlerApplyResult, "apply">>) => void
 	cancel: () => void
 	dragDirections: Ref<Record<Orientation, Direction | undefined>>
 	dragPoint: Ref<Point | undefined>

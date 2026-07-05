@@ -12,7 +12,7 @@ import { moveEdge } from "../helpers/moveEdge.js"
 import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isPointInRect } from "../layout/isPointInRect.js"
-import type { ActionHandler, Direction, DragState, Edge, EdgeDragStartData, FrameDragStartData, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
+import type { ActionHandler, ActionHandlerApplyResult, Direction, DragState, Edge, EdgeDragStartData, FrameDragStartData, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
@@ -213,7 +213,7 @@ export function useFrames(
 			}
 		}
 
-		const res = handler.onDragChange("start", e, state.value, forceRecalculateEdges, cancel)
+		const res = handler.onDragChange("start", e, state.value, forceRecalculateEdges, cancel, resolve)
 		showDragging.value = res.showDragging ?? true
 		return promise
 	}
@@ -231,7 +231,7 @@ export function useFrames(
 			)
 		}
 		if (!didChange) return
-		const res = handler.onDragChange("move", e, state.value, forceRecalculateEdges, cancel)
+		const res = handler.onDragChange("move", e, state.value, forceRecalculateEdges, cancel, resolve)
 
 
 		showDragging.value = res.showDragging ?? true
@@ -250,7 +250,7 @@ export function useFrames(
 		}
 	}
 
-	function dragEnd(e?: PointerEvent, { apply = true }: { apply?: boolean } = {}): void {
+	function dragEnd(e?: PointerEvent, { apply = true }: Partial<Pick<ActionHandlerApplyResult, "apply">> = {}): void {
 		if (e) {
 			const point = toWindowCoord(win.value, e)
 			dragPoint.value = point
@@ -266,15 +266,21 @@ export function useFrames(
 			}
 		}
 
-		handler.onDragChange("end", e, state.value, forceRecalculateEdges, cancel)
+		handler.onDragChange("end", e, state.value, forceRecalculateEdges, undefined, undefined)
 
 		// this can get called from elsewhere
 		// also takes care of cleanup nd resolving promise
 		controller?.abort()
 	}
+
 	function cancel(): void {
 		dragEnd(undefined, { apply: false })
 	}
+	function resolve({ apply, result: value }: ActionHandlerApplyResult): void {
+		dragResult = value
+		dragEnd(undefined, { apply })
+	}
+
 	const keydownController = new AbortController()
 	const wrappedKeydownHandler = (e: KeyboardEvent): void => {
 		handler.eventHandler(e, state.value, forceRecalculateEdges)

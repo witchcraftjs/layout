@@ -151,10 +151,14 @@ export class CloseAction implements IDragAction {
 	}
 
 	onDragChange(
-		_type: "start" | "end" | "move",
+		type: "start" | "end" | "move",
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
+		if (type === "end") {
+			this.reset()
+			return { shapes: [] }
+		}
 		if (state.dragDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [] }
 		}
@@ -215,7 +219,6 @@ export class CloseAction implements IDragAction {
 			if (this.debug) { DragActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
 			applyFrameChanges(win, this.state.res)
 			if (this.debug) { DragActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
-			this.reset()
 			return true
 		}
 		return false

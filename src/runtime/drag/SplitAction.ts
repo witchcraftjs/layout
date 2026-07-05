@@ -174,10 +174,14 @@ export class SplitAction implements IDragAction {
 	}
 
 	onDragChange(
-		_type: "start" | "end" | "move",
+		type: "start" | "end" | "move",
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
+		if (type === "end") {
+			this.reset()
+			return { shapes: [] }
+		}
 		const { dragHoveredFrame, dragDistance } = state
 		if (dragDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [], showDragging: false }
@@ -222,7 +226,6 @@ export class SplitAction implements IDragAction {
 				if (this.debug) { DragActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 			}
 		}
-		this.reset()
 		return true
 	}
 

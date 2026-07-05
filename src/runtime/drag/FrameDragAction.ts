@@ -151,10 +151,14 @@ export class FrameDragAction implements IDragAction {
 	}
 
 	onDragChange<T extends "start" | "move" | "end">(
-		_type: T,
+		type: T,
 		_e: PointerEvent | undefined,
 		state: DragState
 	): ActionDragChangeResult {
+		if (type === "end") {
+			this.reset()
+			return { shapes: [] }
+		}
 		if (state.dragDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [], showDragging: false }
 		}
@@ -190,10 +194,8 @@ export class FrameDragAction implements IDragAction {
 	onDragApply(state: DragState): boolean {
 		const result = this.state.lastReturn
 		if (!result || !state.dragHoveredFrame || !state.draggingFrameId) {
-			this.reset()
 			return true
 		}
-
 
 		if (result instanceof Error) {
 			this.hooks.onError?.(result)
@@ -203,7 +205,6 @@ export class FrameDragAction implements IDragAction {
 			if (this.debug) { DragActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 		}
 
-		this.reset()
 		return true
 	}
 

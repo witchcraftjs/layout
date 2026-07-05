@@ -2,7 +2,7 @@ import { get, type RecordFromArray } from "@alanscodelog/utils"
 
 import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
-import type { DragChangeHandler, DragChangeResult, DragState, Edge, IDragAction, LayoutFrame, LayoutShape } from "../types/index.js"
+import type { ActionHandlerApplyResult, DragChangeHandler, DragChangeResult, DragState, Edge, IDragAction, LayoutFrame, LayoutShape } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
@@ -128,26 +128,28 @@ export class DragActionHandler<
 		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
 		state: DragState,
 		forceRecalculateEdges: () => void,
-		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void
+		cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void,
+		resolve: T extends "end" ? undefined : (opts: ActionHandlerApplyResult) => void
 	): DragChangeResult {
 		if (type === "start") {
 			this.eventCanceller = cancel
 			this.eventHandler(e!, state, forceRecalculateEdges)
 		}
-		if (type === "end") {
-			this.activeAction = undefined
-		}
 
 		if (this.activeAction) {
-			const res = this.actions[this.activeAction]!.onDragChange(type, e, state, forceRecalculateEdges, this.boundCancel)
+			const res = this.actions[this.activeAction]!.onDragChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
 			// in case it's a vue reactive array
 			this.shapes.splice(0, this.shapes.length, ...res.shapes)
 			this.setTextHints(type)
 			return res
 		}
 		this.setTextHints(type)
-		const res = this.defaultOnDragChange(type, e, state, forceRecalculateEdges, this.boundCancel)
+		const res = this.defaultOnDragChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
 		this.shapes.splice(0, this.shapes.length, ...res.shapes)
+
+		if (type === "end") {
+			this.activeAction = undefined
+		}
 		return res
 	}
 
@@ -191,7 +193,7 @@ export class DragActionHandler<
 	onDragApply(
 		state: DragState,
 		forceRecalculateEdges: () => void
-	): { apply: boolean, result: any } {
+	): ActionHandlerApplyResult {
 		if (this.activeAction) {
 			const res = this.actions[this.activeAction]!.onDragApply(state, forceRecalculateEdges)
 			this.hooks.onEnd?.({ cancelled: false, applied: res })

@@ -512,13 +512,20 @@ export type DragChangeResult = Omit<ActionDragChangeResult, "shapes">
  * Should return `{ allowed: true/false, shapes: LayoutShape[] }` to control whether the action is allowed and edges update and what deco shapes to render.
  *
  * Note that the allowed return type only affect the `move` event but is also typed as `boolean` for other events for ease of use.
+ *
+ * Use also to cleanup your action when type is "end".
+ *
+ * See also {@link ActionHandler.onDragChange} to understand it's lifecycle as it is the extended version of.
  */
 export type DragChangeHandler = <T extends "start" | "move" | "end">(
 	type: T,
 	e: T extends "end" ? PointerEvent | undefined : PointerEvent,
 	state: DragState,
 	forceRecalculateEdges: () => void,
-	cancel: (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void
+	/** Calls dragEnd with apply: false */
+	cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: DragState) => void,
+	/** Saves result to resolve dragStart promise with then calls dragEnd with given apply. */
+	resolve: T extends "end" ? undefined : ({ apply, result }: { apply: boolean, result: any }) => void
 ) => ActionDragChangeResult
 
 /**
@@ -535,11 +542,13 @@ export interface IDragAction {
 	onDragChange: DragChangeHandler
 	/**
 	 *
-	 * Is called after `onDragChange("end")` with the same event. Might not be called if the request was cancelled.
+	 * Is called before `onDragChange("end")` with the same event. Might not be called if the request was cancelled.
 	 *
 	 * You should apply your action if possible and return whether it was applied.
 	 *
-	 * This is also a good place to reset your state.
+	 * Do not reset state here, use onDragChange ("end").
+	 *
+	 * See also {@link ActionHandler.onDragApply} which this is the extended version of.
 	 */
 	onDragApply: (state: DragState, forceRecalculateEdges: () => void) => boolean
 	/**
@@ -554,12 +563,6 @@ export interface IDragAction {
 		state: DragState,
 		forceRecalculateEdges: () => void
 	): boolean
-	/**
-	 * Called when a user cancels the drag action.
-	 *
-	 * You should reset your state here.
-	 */
-	cancel(e: PointerEvent | KeyboardEvent | undefined, state: DragState): void
 	/**
 	 * Plugins should implement some basic debug logs by calling {@link DragActionHandler.debugState } at least before and after applying actions in onDragApply. Debug can be a string because it can be an object key to filter on (see the debugState function).
 	 *
@@ -608,32 +611,40 @@ export interface IDragAction {
 export type EdgeDragStartData = { edge?: Edge, intersection?: IntersectionEntry }
 export type FrameDragStartData = { frameId: FrameId }
 
+export type ActionHandlerApplyResult = {
+	/** Whether to apply the regular drag end changes. Return false to reset to the position before dragging. */
+	apply: boolean
+	/** Value to resolve the drag promise with. Ignored if `apply` is false. */
+	result: any
+}
+
 /**
  * Handler interface for drag actions.
  */
 export interface ActionHandler {
 	eventHandler: (e: KeyboardEvent, state: DragState, forceRecalculateEdges: () => void) => void
 	/**
-	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it.
-	 *
-	 * Can return anything for the end event as it's ignored.
+	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. Note that the return only affects the move event but it's typed like this for ease of use. See also {@link DragChangeHandler}.
 	 *
 	 * Can be used to save some context/info to later apply safely during onDragApply.
+	 *
+	 * The call order is:
+	 * - onDragChange("start", ...)
+	 * - onDragChange("move", ...)
+	 * - onDragApply(...) (IF dragEnd was called with apply: true, otherwise this is skipped)
+	 * - onDragChange("end", ...) // always called last, do cleanup here
 	 */
 	onDragChange: (...args: Parameters<DragChangeHandler>) => DragChangeResult
 	/**
 	 * Called when drag will be applied. If dragEnd was called with apply false, it will not be called.
 	 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
+	 *
+	 * Do not use for resetting handler state, use onDragChange("end", ...) for that.
 	 */
 	onDragApply: (
 		state: DragState,
 		forceRecalculateEdges: () => void
-	) => {
-		/** Whether to apply the regular drag end changes. Return false to reset to the position before dragging. */
-		apply: boolean
-		/** Value to resolve the drag promise with. Ignored if `apply` is false. */
-		result: any
-	}
+	) => ActionHandlerApplyResult
 	/**
 	 * Called after visual edges are recalculated. Action handlers can annotate edges with error info.
 	 */
