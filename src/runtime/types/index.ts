@@ -490,6 +490,8 @@ export type DragState = {
 	 * Whether the drag was initiated from a point along the window edge.
 	 */
 	isDraggingFromWindowEdge: boolean
+	/** Custom context passed to dragStart, available to action handlers via state.eventContext. */
+	eventContext?: Record<string, unknown>
 	win: LayoutWindow
 }
 
@@ -605,6 +607,38 @@ export interface IDragAction {
 }
 export type EdgeDragStartData = { edge?: Edge, intersection?: IntersectionEntry }
 export type FrameDragStartData = { frameId: FrameId }
+
+/**
+ * Handler interface for drag actions.
+ */
+export interface ActionHandler {
+	eventHandler: (e: KeyboardEvent, state: DragState, forceRecalculateEdges: () => void) => void
+	/**
+	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it.
+	 *
+	 * Can return anything for the end event as it's ignored.
+	 *
+	 * Can be used to save some context/info to later apply safely during onDragApply.
+	 */
+	onDragChange: (...args: Parameters<DragChangeHandler>) => DragChangeResult
+	/**
+	 * Called when drag will be applied. If dragEnd was called with apply false, it will not be called.
+	 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
+	 */
+	onDragApply: (
+		state: DragState,
+		forceRecalculateEdges: () => void
+	) => {
+		/** Whether to apply the regular drag end changes. Return false to reset to the position before dragging. */
+		apply: boolean
+		/** Value to resolve the drag promise with. Ignored if `apply` is false. */
+		result: any
+	}
+	/**
+	 * Called after visual edges are recalculated. Action handlers can annotate edges with error info.
+	 */
+	annotateEdges?: (edges: Edge[], frames: LayoutFrame[]) => void
+}
 
 // drag start overloads for triggering dragsj
 export type DragStartFn = {

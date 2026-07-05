@@ -7,7 +7,7 @@
 			flex
 			flex-col
 		`,
-		isDragging && `dragging cursor-pointer user-select-none`,
+		isDragging && `dragging cursor-pointer user-select-none pointer-events-none`,
 		requestType && `request-${requestType}`,
 		($attrs as any).class
 	)"
@@ -70,7 +70,7 @@
 <script lang="ts" setup>
 import { useGlobalResizeObserver } from "@witchcraft/ui/composables/useGlobalResizeObserver"
 import { twMerge } from "@witchcraft/ui/utils/twMerge"
-import { computed, provide, reactive, ref, useAttrs, watch } from "vue"
+import { computed, markRaw, provide, reactive, ref, useAttrs, watch } from "vue"
 
 
 import { useFrames } from "../composables/useFrames.js"
@@ -90,7 +90,7 @@ const $attrs = useAttrs()
 const win = defineModel<LayoutWindow>("win", { required: true })
 
 const props = withDefaults(defineProps<{
-	/** If you really need it, you can provide your own drag action handler, note the actionHandler's prop will no longer have any effect.*/
+	/** If you really need it, you can provide your own drag action handler (remember to markRaw it), note the actionHandler's prop will no longer have any effect.*/
 	dragActionHandler?: DragActionHandler<any, any>
 	/** Custom drag action handlers. Falls back to default split/close/frame handlers if not provided. */
 	actionHandlers?: IDragAction[]
@@ -122,7 +122,7 @@ const windowEl = ref<HTMLElement | null>(null)
 
 const requestType = ref<string | undefined | string>()
 
-const dragActionHandler = props.dragActionHandler ?? new DragActionHandler(
+const dragActionHandler = props.dragActionHandler ?? markRaw(new DragActionHandler(
 	[
 		...(props.actionHandlers ?? createDefaultHandlers())
 	],
@@ -141,7 +141,7 @@ const dragActionHandler = props.dragActionHandler ?? new DragActionHandler(
 			showDragging.value = true
 		},
 	}
-)
+))
 dragActionHandler.shapes = reactive([])
 dragActionHandler.textHints = reactive({ actions: [], errors: [] })
 const shapes = dragActionHandler.shapes

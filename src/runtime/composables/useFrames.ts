@@ -12,30 +12,11 @@ import { moveEdge } from "../helpers/moveEdge.js"
 import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isPointInRect } from "../layout/isPointInRect.js"
-import type { Direction, DragChangeHandler, DragChangeResult, DragState, Edge, EdgeDragStartData, FrameDragStartData, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
+import type { ActionHandler, Direction, DragState, Edge, EdgeDragStartData, FrameDragStartData, FrameId, IntersectionEntry, LayoutFrame, LayoutWindow, Orientation, Point } from "../types/index.js"
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
-	handler: {
-		eventHandler: (e: KeyboardEvent, state: DragState, forceRecalculateEdges: () => void) => void
-		/**
-			* Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it.
-			*
-			* Can return anything for the end event as it's ignored.
-			*
-			* Can be used to save some context/info to later apply safely during onDragApply.
-			*/
-		onDragChange: (...args: Parameters<DragChangeHandler>) => DragChangeResult
-		/**
-		 * Called when drag will be applied. If dragEnd was called with apply false, it will not be called.
-		 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
-		 */
-		onDragApply: ((state: DragState, forceRecalculateEdges: () => void) => boolean)
-		/**
-		 * Called after visual edges are recalculated. Action handlers can annotate edges with error info.
-		 */
-		annotateEdges?: (edges: Edge[], frames: LayoutFrame[]) => void
-	}
+	handler: ActionHandler
 ) {
 	const draggingEdges = ref<Edge[]>([])
 
@@ -66,6 +47,7 @@ export function useFrames(
 	const isDraggingFromWindowEdge = ref<boolean>(false)
 
 	const frameDragFrameId = ref<FrameId | undefined>()
+	const eventContext = ref<Record<string, unknown> | undefined>()
 
 	const frames = computed(() =>
 		isDragging.value && showDragging.value
@@ -126,13 +108,20 @@ export function useFrames(
 		dragHoveredFrame: dragHoveredFrame.value,
 		intersections: intersections.value,
 		isDraggingFromWindowEdge: isDraggingFromWindowEdge.value,
+		eventContext: eventContext.value,
 		win: win.value
 	} satisfies DragState))
 
 	let controller: AbortController
+	let dragResolve: ((result: any) => void) | undefined
+	let dragResult: any
 
 	function resetState(): void {
 		dragStartPoint = undefined
+
+		dragResolve?.(dragResult)
+		dragResolve = undefined
+		dragResult = undefined
 
 		draggingEdges.value = []
 		draggingIntersection.value = undefined
@@ -141,6 +130,7 @@ export function useFrames(
 		dragDistance.value = -1
 		touchingFrames.value = []
 		frameDragFrameId.value = undefined
+		eventContext.value = undefined
 		dragDirStore.reset()
 		showDragging.value = false
 		forceRecalculateEdges()
@@ -150,19 +140,38 @@ export function useFrames(
 		e: PointerEvent,
 		type: T,
 		// someday this will work
-		data: T extends "edge" ? EdgeDragStartData : FrameDragStartData
-	): void {
+		data: T extends "edge" ? EdgeDragStartData : FrameDragStartData,
+		{
+			moveEvent = "pointermove",
+			endEvent = "pointerup",
+			context
+		}: {
+			moveEvent?: string
+			endEvent?: string
+			context?: Record<string, unknown>
+		} = {}
+	): Promise<any> {
+		// if already dragging, abort previous (resetState resolves the old promise)
+		if (controller) {
+			controller.abort()
+		}
+
+		const promise = new Promise<any>(resolve => {
+			dragResolve = resolve
+		})
+
 		controller = new AbortController()
 		controller.signal.addEventListener("abort", () => resetState())
 
 		e.preventDefault()
-		window.addEventListener("pointermove", dragMove, { signal: controller.signal })
-		window.addEventListener("pointerup", dragEnd, { signal: controller.signal })
+		window.addEventListener(moveEvent, dragMove as EventListener, { signal: controller.signal })
+		window.addEventListener(endEvent, dragEnd as EventListener, { signal: controller.signal })
 
 		const point = toWindowCoord(win.value, e)
 		dragPoint.value = point
 		dragStartPoint = { ...point }
 		dragDirStore.update(point)
+		eventContext.value = context
 
 		isDragging.value = type
 		showDragging.value = true
@@ -174,7 +183,7 @@ export function useFrames(
 			draggingIntersection.value = intersection
 
 			draggingEdges.value = edge
-				? [edge]
+				? [edge!]
 				: [
 						...(draggingIntersection.value?.sharedEdges.horizontal ?? []),
 						...(draggingIntersection.value?.sharedEdges.vertical ?? [])
@@ -206,6 +215,7 @@ export function useFrames(
 
 		const res = handler.onDragChange("start", e, state.value, forceRecalculateEdges, cancel)
 		showDragging.value = res.showDragging ?? true
+		return promise
 	}
 
 	function dragMove(e: PointerEvent): void {
@@ -246,17 +256,20 @@ export function useFrames(
 			dragPoint.value = point
 		}
 
-		const doApply = apply && handler.onDragApply(state.value, forceRecalculateEdges)
-		if (doApply) {
-			for (const frame of touchingFramesArrays.value.flat()) {
-				win!.value.frames[frame.id] = frame
+		if (apply) {
+			const applyResult = handler.onDragApply(state.value, forceRecalculateEdges)
+			dragResult = applyResult.result
+			if (applyResult.apply) {
+				for (const frame of touchingFramesArrays.value.flat()) {
+					win!.value.frames[frame.id] = frame
+				}
 			}
 		}
 
 		handler.onDragChange("end", e, state.value, forceRecalculateEdges, cancel)
 
 		// this can get called from elsewhere
-		// also takes care of cleanup
+		// also takes care of cleanup nd resolving promise
 		controller?.abort()
 	}
 	function cancel(): void {
@@ -296,6 +309,7 @@ export function useFrames(
 		forceRecalculateEdges,
 		state,
 		showDragging,
-		frameDragFrameId
+		frameDragFrameId,
+		actionHandler: handler
 	}
 }

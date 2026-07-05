@@ -191,14 +191,14 @@ export class DragActionHandler<
 	onDragApply(
 		state: DragState,
 		forceRecalculateEdges: () => void
-	): boolean {
+	): { apply: boolean, result: any } {
 		if (this.activeAction) {
 			const res = this.actions[this.activeAction]!.onDragApply(state, forceRecalculateEdges)
 			this.hooks.onEnd?.({ cancelled: false, applied: res })
-			return false
+			return { apply: res, result: undefined }
 		}
 		this.hooks.onEnd?.({ cancelled: false, applied: false })
-		return true
+		return { apply: true, result: undefined }
 	}
 
 	cancel(e: PointerEvent | KeyboardEvent | undefined, state: DragState): void {

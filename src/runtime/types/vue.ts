@@ -1,10 +1,11 @@
 import type { ComputedRef, InjectionKey, Ref } from "vue"
 
 // eslint-disable-next-line no-restricted-imports
-import type { Direction, DragState, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, Orientation, Point } from "./index.js"
+import type { ActionHandler, Direction, DragState, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, Orientation, Point } from "./index.js"
 
 export type LayoutContext = ComputedRef<
 	& {
+
 		/** The owning window, needed so we can correctly scale coordinates. */
 		win: LayoutWindow
 		onFocus: (frameId: string) => void
@@ -14,9 +15,10 @@ export type LayoutContext = ComputedRef<
 export const layoutContextInjectionKey = Symbol.for("@witchcraft/layout:context") as InjectionKey<LayoutContext>
 
 export interface UseFramesContext {
+	actionHandler: ActionHandler
 	dragStart: {
-		(e: PointerEvent, type: "edge", data: { edge?: Edge, intersection?: IntersectionEntry }): void
-		(e: PointerEvent, type: "frame", data: { frameId: FrameId }): void
+		(e: PointerEvent, type: "edge", data: { edge?: Edge, intersection?: IntersectionEntry }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
+		(e: PointerEvent, type: "frame", data: { frameId: FrameId }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 	}
 	dragMove: (e: PointerEvent) => void
 	dragEnd: (e?: PointerEvent, options?: { apply?: boolean }) => void
