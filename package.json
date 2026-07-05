@@ -1,7 +1,7 @@
 {
 	"name": "@witchcraft/layout",
 	"description": "Headless layout manager.",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"main": "./dist/runtime/index.js",
 	"type": "module",
 	"sideEffects": false,
@@ -72,12 +72,12 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/runtime": "catalog:",
 		"@alanscodelog/commitlint-config": "catalog:",
 		"@alanscodelog/eslint-config": "catalog:",
 		"@alanscodelog/semantic-release-config": "catalog:",
 		"@alanscodelog/tsconfigs": "catalog:",
 		"@alanscodelog/vite-config": "catalog:",
+		"@babel/runtime": "catalog:",
 		"@commitlint/cli": "catalog:",
 		"@nuxt/eslint-config": "catalog:",
 		"@nuxt/kit": "catalog:",
