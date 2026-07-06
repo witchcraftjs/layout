@@ -197,7 +197,7 @@ export class ActionHandler<
 		if (this.activeAction) {
 			const res = this.actions[this.activeAction]!.onMoveApply(state, forceRecalculateEdges)
 			this.hooks.onEnd?.({ cancelled: false, applied: res })
-			return { apply: res, result: undefined }
+			return { apply: !res, result: undefined }
 		}
 		this.hooks.onEnd?.({ cancelled: false, applied: false })
 		return { apply: true, result: undefined }
