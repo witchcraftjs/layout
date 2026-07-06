@@ -281,10 +281,15 @@ export function useFrames(
 	function cancel(): void {
 		moveEnd(undefined, { apply: false })
 	}
-	// we use apply not updateEdges, updateEdges needs to be returned by onMoveApply
-	function resolve({ apply, result: value }: ActionResolve): void {
+	function resolve({ updateEdges, result: value }: ActionResolve): void {
 		moveResult = value
-		moveEnd(undefined, { apply })
+
+		if (updateEdges) {
+			for (const frame of touchingFramesArrays.value.flat()) {
+				win!.value.frames[frame.id] = frame
+			}
+		}
+		controller?.abort()
 	}
 
 	const keydownController = new AbortController()

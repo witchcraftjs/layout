@@ -536,7 +536,7 @@ export interface IAction {
 		forceRecalculateEdges: () => void,
 		/** Calls moveEnd with updateEdges: false. This can technically be called from "end", it should still work. */
 		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
-		/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
+		/** Saves result to resolve moveStart promise, updates edges if you passed updateEdges then aborts the handler (only onMoveEnded will fire after) . Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
 		resolve: T extends "end" ? undefined : ((opts: ActionResolve) => void)
 	) => ActionChangeResult
 	/**
@@ -621,7 +621,7 @@ export type ActionHandlerApplyResult = {
 
 export type ActionApplyResult = ActionHandlerApplyResult & { wasApplied: boolean }
 
-export type ActionResolve = { apply: boolean, result?: any }
+export type ActionResolve = ActionHandlerApplyResult
 
 /**
  * Handler interface for drag actions.
@@ -640,10 +640,7 @@ export interface IActionHandler {
 	 * - onMoveChange("move", ...)
 	 * - onMoveChange("end", ...)
 	 * - onMoveApply(...) (IF moveEnd was called with apply: true, otherwise this is skipped)
-	 * 	- If anything calls cancel or resolve they call onMoveApply (cancel with apply: false, resolve with whatever apply value you gave it).
-	 * - onMoveEnded() // do cleanup here
-	 *
-	 * Note also that resolve just resolves the promise value (after onMoveApply("end") and before onMoveEnded()). Depending on what you're doing you might still have to apply the result, remember onMoveApply will still be called if you do `resolve({ apply:true })`.
+	 * - onMoveEnded() // do cleanup here, always called at the very end
 	 */
 	onMoveChange<T extends "start" | "move" | "end">(
 		type: T,
@@ -652,7 +649,7 @@ export interface IActionHandler {
 		forceRecalculateEdges: () => void,
 		/** Calls moveEnd with apply: false. This can technically be called from "end", it should still work. */
 		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
-		/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
+		/** Saves result to resolve moveStart promise, updates edges if you passed updateEdges then aborts the handler (only onMoveEnded will fire after) . Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
 		resolve: T extends "end" ? undefined : ((opts: ActionResolve) => void)
 	): MoveChangeResult
 	/**
