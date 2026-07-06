@@ -2,7 +2,7 @@ import { get, type RecordFromArray } from "@alanscodelog/utils"
 
 import { isWindowEdge } from "../helpers/isWindowEdge.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
-import type { ActionHandlerApplyResult, Edge, IAction, LayoutFrame, LayoutShape, MoveChangeHandler, MoveChangeResult, MoveState } from "../types/index.js"
+import type { ActionHandlerApplyResult, ActionResolve, Edge, IAction, IActionHandler, LayoutFrame, LayoutShape, MoveChangeResult, MoveState } from "../types/index.js"
 import { LAYOUT_ERROR } from "../types/index.js"
 import { KnownError } from "../utils/KnownError.js"
 
@@ -14,7 +14,7 @@ import { KnownError } from "../utils/KnownError.js"
 export class ActionHandler<
 	TRawActions extends IAction[],
 	TActions extends RecordFromArray<TRawActions, "name"> = RecordFromArray<TRawActions, "name">
-> {
+> implements IActionHandler {
 	activeAction?: keyof TActions
 
 	actions: TActions
@@ -23,7 +23,7 @@ export class ActionHandler<
 
 	boundCancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void
 
-	defaultOnMoveChange: MoveChangeHandler = (type, _e, state, _forceRecalculateEdges, _cancel) => {
+	defaultOnMoveChange: IAction["onMoveChange"] = (type, _e, state, _forceRecalculateEdges, _cancel) => {
 		const isTouchingCollapsedFrameEdge = type === "move"
 			&& state.isMoving === "edge"
 			&& state.touchingFramesArrays.some(frames =>
@@ -48,7 +48,7 @@ export class ActionHandler<
 		/** Called when the action requested changes. */
 		onRequestChange?: (type: keyof TActions | undefined) => void
 		/** Called when the drag action ends either because it was completed or cancelled. */
-		onEnd?: (context: { cancelled: boolean, applied: boolean }) => void
+		onEnd?: (context: { cancelled: boolean, wasApplied: boolean, result?: any }) => void
 	}
 
 	/** All action shapes merged into a single array. If using vue you can set this to a reactive array for reactivity. */
@@ -61,13 +61,11 @@ export class ActionHandler<
 		actions: TRawActions,
 		hooks: ActionHandler<TRawActions, TActions>["hooks"] = {},
 		/**
-		 * Default onMoveChange handler for when no action can handle the request.
-		 *
-		 * Should return true to allow the edges to be moved, or false to prevent it.
+		 * Default onMoveChange handler for when no action can handle the request. See {@link IAction.onMoveChange}.
 		 *
 		 * The default prevents movement when the edge is a window edge and when the edge is touching a collapsed frame.
 		 */
-		defaultOnMoveChange?: MoveChangeHandler
+		defaultOnMoveChange?: IAction["onMoveChange"]
 	) {
 		if (defaultOnMoveChange) this.defaultOnMoveChange = defaultOnMoveChange
 		this.hooks = hooks
@@ -129,7 +127,7 @@ export class ActionHandler<
 		state: MoveState,
 		forceRecalculateEdges: () => void,
 		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
-		resolve: T extends "end" ? undefined : (opts: ActionHandlerApplyResult) => void
+		resolve: T extends "end" ? undefined : ((opts: ActionResolve) => void)
 	): MoveChangeResult {
 		if (type === "start") {
 			this.eventCanceller = cancel
@@ -150,6 +148,19 @@ export class ActionHandler<
 		return res
 	}
 
+	onMoveApply(
+		state: MoveState,
+		forceRecalculateEdges: () => void
+	): ActionHandlerApplyResult {
+		if (this.activeAction) {
+			const res = this.actions[this.activeAction]!.onMoveApply(state, forceRecalculateEdges)
+			this.hooks.onEnd?.({ cancelled: false, wasApplied: res.wasApplied, result: res.result })
+			return res
+		}
+		this.hooks.onEnd?.({ cancelled: false, wasApplied: false })
+		return { updateEdges: true, result: undefined }
+	}
+
 	onMoveEnded() {
 		if (this.activeAction) {
 			this.actions[this.activeAction]!.onMoveEnded()
@@ -157,6 +168,16 @@ export class ActionHandler<
 
 		this.activeAction = undefined
 	}
+
+	cancel(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): void {
+		if (this.activeAction) {
+			this.actions[this.activeAction].cancel(e, state)
+		}
+		this.activeAction = undefined
+		this.eventCanceller?.(e, state)
+		this.hooks.onEnd?.({ cancelled: true, wasApplied: false })
+	}
+
 
 	setTextHints(type: "start" | "move" | "end") {
 		// again in case it's a vue reactive object
@@ -193,28 +214,6 @@ export class ActionHandler<
 				}
 			}
 		}
-	}
-
-	onMoveApply(
-		state: MoveState,
-		forceRecalculateEdges: () => void
-	): ActionHandlerApplyResult {
-		if (this.activeAction) {
-			const res = this.actions[this.activeAction]!.onMoveApply(state, forceRecalculateEdges)
-			this.hooks.onEnd?.({ cancelled: false, applied: res })
-			return { apply: !res, result: undefined }
-		}
-		this.hooks.onEnd?.({ cancelled: false, applied: false })
-		return { apply: true, result: undefined }
-	}
-
-	cancel(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): void {
-		if (this.activeAction) {
-			this.actions[this.activeAction].cancel(e, state)
-		}
-		this.activeAction = undefined
-		this.eventCanceller?.(e, state)
-		this.hooks.onEnd?.({ cancelled: true, applied: false })
 	}
 
 	static debugState(

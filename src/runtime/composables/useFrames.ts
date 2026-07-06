@@ -12,11 +12,11 @@ import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isPointInRect } from "../layout/isPointInRect.js"
 import { MoveDirectionStore } from "../move/MoveDirectionStore.js"
-import type { ActionHandler, ActionHandlerApplyResult, Direction, Edge, EdgeMoveStartData, FrameId, FrameMoveStartData, IntersectionEntry, LayoutFrame, LayoutWindow, MoveState, Orientation, Point } from "../types/index.js"
+import type { ActionResolve, Direction, Edge, EdgeMoveStartData, FrameId, FrameMoveStartData, IActionHandler, IntersectionEntry, LayoutFrame, LayoutWindow, MoveState, Orientation, Point } from "../types/index.js"
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
-	handler: ActionHandler
+	handler: IActionHandler
 ) {
 	const movingEdges = ref<Edge[]>([])
 
@@ -255,7 +255,7 @@ export function useFrames(
 		}
 	}
 
-	function moveEnd(e?: PointerEvent, { apply = true }: Partial<Pick<ActionHandlerApplyResult, "apply">> = {}): void {
+	function moveEnd(e?: PointerEvent, { apply = true }: { apply?: boolean } = {}) {
 		if (e) {
 			const point = toWindowCoord(win.value, e)
 			movePoint.value = point
@@ -266,7 +266,7 @@ export function useFrames(
 		if (apply) {
 			const applyResult = handler.onMoveApply(state.value, forceRecalculateEdges)
 			moveResult = applyResult.result
-			if (applyResult.apply) {
+			if (applyResult.updateEdges) {
 				for (const frame of touchingFramesArrays.value.flat()) {
 					win!.value.frames[frame.id] = frame
 				}
@@ -281,7 +281,8 @@ export function useFrames(
 	function cancel(): void {
 		moveEnd(undefined, { apply: false })
 	}
-	function resolve({ apply, result: value }: ActionHandlerApplyResult): void {
+	// we use apply not updateEdges, updateEdges needs to be returned by onMoveApply
+	function resolve({ apply, result: value }: ActionResolve): void {
 		moveResult = value
 		moveEnd(undefined, { apply })
 	}

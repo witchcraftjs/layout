@@ -487,7 +487,7 @@ export type MoveState = {
 	 */
 	intersections: IntersectionEntry[]
 	/**
-	 * Whether the drag was initiated from a point along the window edge.
+	 * Whether the move was initiated from a point along the window edge.
 	 */
 	isMovingFromWindowEdge: boolean
 	/** Custom context passed to moveStart, available to action handlers via state.eventContext. */
@@ -497,7 +497,7 @@ export type MoveState = {
 
 
 export interface ActionChangeResult {
-	/** Whether the drag should update the edges. Defaults to false. */
+	/** Whether the move should update the edges. Defaults to false. */
 	updateEdges?: boolean
 	/** Deco shapes produced by this action during this drag step. */
 	shapes: LayoutShape[]
@@ -506,27 +506,6 @@ export interface ActionChangeResult {
 }
 export type MoveChangeResult = Omit<ActionChangeResult, "shapes">
 
-/**
- * Called when the drag coordinates change (during any event).
- *
- * Should return `{ allowed: true/false, shapes: LayoutShape[] }` to control whether the action is allowed and edges update and what deco shapes to render.
- *
- * Note that the allowed return type only affect the `move` event but is also typed as `boolean` for other events for ease of use.
- *
- * Use also to cleanup your action when type is "end".
- *
- * See also {@link ActionHandler.onMoveChange} to understand it's lifecycle as it is the extended version of.
- */
-export type MoveChangeHandler = <T extends "start" | "move" | "end">(
-	type: T,
-	e: T extends "end" ? PointerEvent | undefined : PointerEvent,
-	state: MoveState,
-	forceRecalculateEdges: () => void,
-	/** Calls moveEnd with apply: false. This can technically be called from "end", it should still work. */
-	cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
-	/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
-	resolve: T extends "end" ? undefined : ({ apply, result }: { apply: boolean, result: any }) => void
-) => ActionChangeResult
 
 /**
  * A drag action describes when and how to handle a drag event.
@@ -539,18 +518,35 @@ export type MoveChangeHandler = <T extends "start" | "move" | "end">(
 export interface IAction {
 	/** A unique name for your action. */
 	name: string
-	onMoveChange: MoveChangeHandler
 	/**
+	 * Called when the drag coordinates change (during any event).
 	 *
-	 * Is called before `onMoveChange("end")` with the same event. Might not be called if the request was cancelled.
+	 * Should return `{ allowed: true/false, shapes: LayoutShape[] }` to control whether the action is allowed and edges update and what deco shapes to render.
 	 *
-	 * You should apply your action if possible and return whether it was applied.
+	 * Note that the allowed return type only affect the `move` event but is also typed as `boolean` for other events for ease of use.
+	 *
+	 * Use also to cleanup your action when type is "end".
+	 *
+	 * See also {@link ActionHandler.onMoveChange} to understand it's lifecycle as it is the extended version of.
+	 */
+	onMoveChange: <T extends "start" | "move" | "end">(
+		type: T,
+		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
+		state: MoveState,
+		forceRecalculateEdges: () => void,
+		/** Calls moveEnd with updateEdges: false. This can technically be called from "end", it should still work. */
+		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
+		/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
+		resolve: T extends "end" ? undefined : ((opts: ActionResolve) => void)
+	) => ActionChangeResult
+	/**
+	 * Is called after `onMoveChange("end")` with the same event. Will not be called if the request was cancelled.
+	 *
+	 * You should apply your action if possible and return whether it was applied `wasApplied` as well as `updateEdges` and `result` (optional), see {@link ActionHandler.onMoveApply}, which this is the extended version of.
 	 *
 	 * Do not reset state here, use onMoveChange ("end").
-	 *
-	 * See also {@link ActionHandler.onMoveApply} which this is the extended version of.
 	 */
-	onMoveApply: (state: MoveState, forceRecalculateEdges: () => void) => boolean
+	onMoveApply: (state: MoveState, forceRecalculateEdges: () => void) => ActionApplyResult
 	/**
 	 * Should return true if it should handle the "request"/event (e.g. some modifier is being pressed => user is requesting x action).
 	 *
@@ -617,19 +613,25 @@ export type EdgeMoveStartData = { edge?: Edge, intersection?: IntersectionEntry 
 export type FrameMoveStartData = { frameId: FrameId }
 
 export type ActionHandlerApplyResult = {
-	/** Whether to apply the regular drag end changes. Return false to reset to the position before dragging. */
-	apply: boolean
-	/** Value to resolve the drag promise with. Ignored if `apply` is false. */
-	result: any
+	// /** Whether the move should update the edges. Defaults to false which resets to the position before moving started.*/
+	updateEdges: boolean
+	/** Value to resolve the drag promise with. Ignored if `updateEdges` is false. */
+	result?: any
 }
+
+export type ActionApplyResult = ActionHandlerApplyResult & { wasApplied: boolean }
+
+export type ActionResolve = { apply: boolean, result?: any }
 
 /**
  * Handler interface for drag actions.
  */
-export interface ActionHandler {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export interface IActionHandler {
 	eventHandler: (e: KeyboardEvent, state: MoveState, forceRecalculateEdges: () => void) => void
+
 	/**
-	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. See also {@link MoveChangeHandler} for the built in action handler.
+	 * Called when the drag coordinates change (during any event). Should return updateEdges true to allow the edges to be updated/moved, or false to prevent it. See also {@link MoveChangeHandler} for the built in action handler.
 	 *
 	 * Can be used to save some context/info to later apply safely during onMoveApply.
 	 *
@@ -638,12 +640,24 @@ export interface ActionHandler {
 	 * - onMoveChange("move", ...)
 	 * - onMoveChange("end", ...)
 	 * - onMoveApply(...) (IF moveEnd was called with apply: true, otherwise this is skipped)
+	 * 	- If anything calls cancel or resolve they call onMoveApply (cancel with apply: false, resolve with whatever apply value you gave it).
 	 * - onMoveEnded() // do cleanup here
+	 *
+	 * Note also that resolve just resolves the promise value (after onMoveApply("end") and before onMoveEnded()). Depending on what you're doing you might still have to apply the result, remember onMoveApply will still be called if you do `resolve({ apply:true })`.
 	 */
-	onMoveChange: (...args: Parameters<MoveChangeHandler>) => MoveChangeResult
+	onMoveChange<T extends "start" | "move" | "end">(
+		type: T,
+		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
+		state: MoveState,
+		forceRecalculateEdges: () => void,
+		/** Calls moveEnd with apply: false. This can technically be called from "end", it should still work. */
+		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
+		/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
+		resolve: T extends "end" ? undefined : ((opts: ActionResolve) => void)
+	): MoveChangeResult
 	/**
 	 * Called when drag will be applied. If moveEnd was called with apply false, it will not be called.
-	 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
+	 * Return `{updateEdges: false`} to not apply the regular drag end changes (i.e. return false to reset to the position before dragging). Optionally return a `result` value to resolve the promise with.
 	 *
 	 * Do not use for resetting handler state, use onMoveEnded for that.
 	 */

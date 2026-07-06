@@ -1,7 +1,7 @@
 import type { ComputedRef, InjectionKey, Ref } from "vue"
 
 // eslint-disable-next-line no-restricted-imports
-import type { ActionHandler, ActionHandlerApplyResult, Direction, Edge, FrameId, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, MoveState, Orientation, Point } from "./index.js"
+import type { Direction, Edge, FrameId, IActionHandler, IntersectionEntry, LayoutFrame, LayoutShape, LayoutWindow, MoveState, Orientation, Point } from "./index.js"
 
 export type LayoutContext = ComputedRef<
 	& {
@@ -15,13 +15,13 @@ export type LayoutContext = ComputedRef<
 export const layoutContextInjectionKey = Symbol.for("@witchcraft/layout:context") as InjectionKey<LayoutContext>
 
 export interface UseFramesContext {
-	actionHandler: ActionHandler
+	actionHandler: IActionHandler
 	moveStart: {
 		(e: PointerEvent, type: "edge", data: { edge?: Edge, intersection?: IntersectionEntry }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 		(e: PointerEvent, type: "frame", data: { frameId: FrameId }, opts?: { moveEvent?: string, endEvent?: string, context?: Record<string, unknown> }): Promise<any>
 	}
 	onMove: (e: PointerEvent) => void
-	moveEnd: (e?: PointerEvent, options?: Partial<Pick<ActionHandlerApplyResult, "apply">>) => void
+	moveEnd: (e?: PointerEvent, options?: { apply?: boolean }) => void
 	cancel: () => void
 	moveDirections: Ref<Record<Orientation, Direction | undefined>>
 	movePoint: Ref<Point | undefined>

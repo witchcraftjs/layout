@@ -7,7 +7,7 @@ import { getFrameRearrangeInfo } from "../layout/getFrameRearrangeInfo.js"
 import { getFrameSwapInfo } from "../layout/getFrameSwapInfo.js"
 import { getZones } from "../layout/getZones.js"
 import { settings } from "../settings.js"
-import type { ActionChangeResult, FrameDeco, IAction, LayoutChange, MoveState, Zone } from "../types/index.js"
+import type { ActionApplyResult, ActionChangeResult, FrameDeco, IAction, LayoutChange, MoveState, Zone } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 
@@ -187,10 +187,10 @@ export class FrameDragAction implements IAction {
 		}
 	}
 
-	onMoveApply(state: MoveState): boolean {
+	onMoveApply(state: MoveState): ActionApplyResult {
 		const result = this.state.lastReturn
 		if (!result || !state.moveHoveredFrame || !state.movingFrameId) {
-			return true
+			return { updateEdges: false, wasApplied: false }
 		}
 
 		if (result instanceof Error) {
@@ -201,7 +201,7 @@ export class FrameDragAction implements IAction {
 			if (this.debug) { ActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 		}
 
-		return true
+		return { updateEdges: false, wasApplied: true }
 	}
 
 	onMoveEnded() {

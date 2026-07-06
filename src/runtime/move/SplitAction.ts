@@ -5,7 +5,7 @@ import { oppositeSide } from "../helpers/oppositeSide.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { createSplitDecoFromDrag } from "../layout/createSplitDecoFromDrag.js"
 import { getFrameSplitInfo } from "../layout/getFrameSplitInfo.js"
-import type { ActionChangeResult, IAction, LayoutShape, MoveState, Point, SplitDeco } from "../types/index.js"
+import type { ActionApplyResult, ActionChangeResult, IAction, LayoutShape, MoveState, Point, SplitDeco } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 export type SplitInfo = Exclude<ReturnType<typeof getFrameSplitInfo>, KnownError>
@@ -219,7 +219,7 @@ export class SplitAction implements IAction {
 		return this.state.lastReturn
 	}
 
-	onMoveApply(state: MoveState): boolean {
+	onMoveApply(state: MoveState): ActionApplyResult {
 		if (this.state.res && state.moveHoveredFrame) {
 			// this only caches once per frame hovered over
 			// so the drag position is outdated, we must recalculate
@@ -230,7 +230,7 @@ export class SplitAction implements IAction {
 				if (this.debug) { ActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
 			}
 		}
-		return true
+		return { updateEdges: false, wasApplied: true }
 	}
 
 	onMoveEnded() {

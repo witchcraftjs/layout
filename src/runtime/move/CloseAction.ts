@@ -6,7 +6,7 @@ import { oppositeSide } from "../helpers/oppositeSide.js"
 import { applyFrameChanges } from "../layout/applyFrameChanges.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { getCloseFrameInfo } from "../layout/getCloseFrameInfo.js"
-import type { ActionChangeResult, CloseDeco, IAction, MoveState } from "../types/index.js"
+import type { ActionApplyResult, ActionChangeResult, CloseDeco, IAction, MoveState } from "../types/index.js"
 import type { KnownError } from "../utils/KnownError.js"
 
 export type CloseInfo = Exclude<ReturnType<typeof getCloseFrameInfo>, KnownError>
@@ -212,15 +212,15 @@ export class CloseAction implements IAction {
 		return this.state.lastReturn
 	}
 
-	onMoveApply(state: MoveState): boolean {
+	onMoveApply(state: MoveState): ActionApplyResult {
 		if (this.state.res) {
 			const win = state.win
 			if (this.debug) { ActionHandler.debugState(this.name, "before", state, this.state, this.debug) }
 			applyFrameChanges(win, this.state.res)
 			if (this.debug) { ActionHandler.debugState(this.name, "after", state, this.state, this.debug) }
-			return true
+			return { updateEdges: false, wasApplied: true }
 		}
-		return false
+		return { updateEdges: true, wasApplied: false }
 	}
 
 	cancel(): void {
