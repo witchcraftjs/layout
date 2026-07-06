@@ -155,10 +155,6 @@ export class FrameDragAction implements IAction {
 		_e: PointerEvent | undefined,
 		state: MoveState
 	): ActionChangeResult {
-		if (type === "end") {
-			this.reset()
-			return { shapes: [] }
-		}
 		if (state.moveDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [], showMoving: false }
 		}
@@ -185,7 +181,7 @@ export class FrameDragAction implements IAction {
 		const decos = this.getDecos(matchedZone, state, this.state.lastReturn)
 
 		return {
-			shapes: decos.flatMap(_ => _.shapes),
+			shapes: type === "end" ? [] : decos.flatMap(_ => _.shapes),
 			updateEdges: false,
 			showMoving: false
 		}
@@ -206,6 +202,10 @@ export class FrameDragAction implements IAction {
 		}
 
 		return true
+	}
+
+	onMoveEnded() {
+		this.reset()
 	}
 
 	cancel(): void {

@@ -522,9 +522,9 @@ export type MoveChangeHandler = <T extends "start" | "move" | "end">(
 	e: T extends "end" ? PointerEvent | undefined : PointerEvent,
 	state: MoveState,
 	forceRecalculateEdges: () => void,
-	/** Calls moveEnd with apply: false */
-	cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
-	/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. */
+	/** Calls moveEnd with apply: false. This can technically be called from "end", it should still work. */
+	cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
+	/** Saves result to resolve moveStart promise with then calls moveEnd with given apply. Not available during "end" event. It's designed for resolving from other external evente (e.g. key events). */
 	resolve: T extends "end" ? undefined : ({ apply, result }: { apply: boolean, result: any }) => void
 ) => ActionChangeResult
 
@@ -588,6 +588,11 @@ export interface IAction {
 		errors?: string[]
 	}
 	/**
+	 * Called when an action is cancelled. Call action specific onCancel hooks here.
+	 */
+	// note: internally this is done by the actionhandler wrapping the given cancel function for an event
+	cancel(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): void
+	/**
 	 * Called after visual edges are recalculated, once per edge. Action handlers can annotate edges with error info here ({@link Edge.error}).
 	 *
 	 * When `LayoutEdges` sees an error it adds the message as the title and the following classes:
@@ -624,27 +629,32 @@ export type ActionHandlerApplyResult = {
 export interface ActionHandler {
 	eventHandler: (e: KeyboardEvent, state: MoveState, forceRecalculateEdges: () => void) => void
 	/**
-	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. Note that the return only affects the move event but it's typed like this for ease of use. See also {@link MoveChangeHandler}.
+	 * Called when the drag coordinates change (during any event). Should return true to allow the edges to be updated/moved, or false to prevent it. See also {@link MoveChangeHandler} for the built in action handler.
 	 *
 	 * Can be used to save some context/info to later apply safely during onMoveApply.
 	 *
 	 * The call order is:
 	 * - onMoveChange("start", ...)
 	 * - onMoveChange("move", ...)
+	 * - onMoveChange("end", ...)
 	 * - onMoveApply(...) (IF moveEnd was called with apply: true, otherwise this is skipped)
-	 * - onMoveChange("end", ...) // always called last, do cleanup here
+	 * - onMoveEnded() // do cleanup here
 	 */
 	onMoveChange: (...args: Parameters<MoveChangeHandler>) => MoveChangeResult
 	/**
 	 * Called when drag will be applied. If moveEnd was called with apply false, it will not be called.
 	 * Return false to not apply the regular drag end changes (i.e. return false to reset to the position before dragging).
 	 *
-	 * Do not use for resetting handler state, use onMoveChange("end", ...) for that.
+	 * Do not use for resetting handler state, use onMoveEnded for that.
 	 */
 	onMoveApply: (
 		state: MoveState,
 		forceRecalculateEdges: () => void
 	) => ActionHandlerApplyResult
+
+	/** For doing cleanup */
+	onMoveEnded: () => void
+
 	/**
 	 * Called after visual edges are recalculated. Action handlers can annotate edges with error info.
 	 */

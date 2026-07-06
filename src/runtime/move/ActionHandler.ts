@@ -128,7 +128,7 @@ export class ActionHandler<
 		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
 		state: MoveState,
 		forceRecalculateEdges: () => void,
-		cancel: T extends "end" ? undefined : (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
+		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
 		resolve: T extends "end" ? undefined : (opts: ActionHandlerApplyResult) => void
 	): MoveChangeResult {
 		if (type === "start") {
@@ -137,7 +137,7 @@ export class ActionHandler<
 		}
 
 		if (this.activeAction) {
-			const res = this.actions[this.activeAction]!.onMoveChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
+			const res = this.actions[this.activeAction]!.onMoveChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve)
 			// in case it's a vue reactive array
 			this.shapes.splice(0, this.shapes.length, ...res.shapes)
 			this.setTextHints(type)
@@ -147,10 +147,15 @@ export class ActionHandler<
 		const res = this.defaultOnMoveChange(type, e, state, forceRecalculateEdges, this.boundCancel as any, resolve as any)
 		this.shapes.splice(0, this.shapes.length, ...res.shapes)
 
-		if (type === "end") {
-			this.activeAction = undefined
-		}
 		return res
+	}
+
+	onMoveEnded() {
+		if (this.activeAction) {
+			this.actions[this.activeAction]!.onMoveEnded()
+		}
+
+		this.activeAction = undefined
 	}
 
 	setTextHints(type: "start" | "move" | "end") {

@@ -134,6 +134,7 @@ export function useFrames(
 		moveDirStore.reset()
 		showMoving.value = false
 		forceRecalculateEdges()
+		handler.onMoveEnded()
 	}
 
 	function moveStart<T extends "edge" | "frame">(
@@ -231,13 +232,17 @@ export function useFrames(
 			)
 		}
 		if (!didChange) return
-		const res = handler.onMoveChange("move", e, state.value, forceRecalculateEdges, cancel, resolve)
+		onMoveChange(e, "move", point)
+	}
+
+	function onMoveChange(e: PointerEvent | undefined, type: "move" | "end", point: Point | undefined) {
+		const res = handler.onMoveChange(type, e, state.value, forceRecalculateEdges, cancel, type === "end" ? undefined : resolve)
 
 
 		showMoving.value = res.showMoving ?? true
 		if (!res.updateEdges) return
 
-		if (isMoving.value === "edge") {
+		if (isMoving.value === "edge" && point) {
 			requestAnimationFrame(() => {
 				for (let i = 0; i < movingEdges.value.length; i++) {
 					const movingEdge = movingEdges.value[i]
@@ -256,6 +261,8 @@ export function useFrames(
 			movePoint.value = point
 		}
 
+		onMoveChange(e, "end", movePoint.value)
+
 		if (apply) {
 			const applyResult = handler.onMoveApply(state.value, forceRecalculateEdges)
 			moveResult = applyResult.result
@@ -266,10 +273,8 @@ export function useFrames(
 			}
 		}
 
-		handler.onMoveChange("end", e, state.value, forceRecalculateEdges, undefined, undefined)
-
 		// this can get called from elsewhere
-		// also takes care of cleanup nd resolving promise
+		// also takes care of cleanup, resolving promise, and calling onMoveEnded
 		controller?.abort()
 	}
 
