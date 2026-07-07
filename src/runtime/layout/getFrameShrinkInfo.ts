@@ -32,7 +32,8 @@ export function getFrameShrinkInfo(
 	} = {}
 ): LayoutChange
 	| KnownError<typeof LAYOUT_ERROR.REDISTRIBUTE_WOULD_RESULT_IN_INVALID_FRAMES>
-	| KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME> {
+	| KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME>
+	| KnownError<typeof LAYOUT_ERROR.NO_SPACE_TO_REDISTRIBUTE> {
 	win = walk(win, undefined, { save: true }) as typeof win
 	const frame = win.frames[frameId]
 	if (!frame) throw new Error(`Unknown frame ${frameId}`)
@@ -65,7 +66,7 @@ export function getFrameShrinkInfo(
 
 	if (changes instanceof KnownError) {
 		// we should never get out of bounds and because this is a shrink there should always be space
-		if (changes.code === LAYOUT_ERROR.REDISTRIBUTE_OUT_OF_BOUNDS || changes.code === LAYOUT_ERROR.NO_SPACE_TO_REDISTRIBUTE) {
+		if (changes.code === LAYOUT_ERROR.REDISTRIBUTE_OUT_OF_BOUNDS) {
 			changes.message = `This error should never happen, please file a bug report: ${changes.message}`
 			throw changes
 		}

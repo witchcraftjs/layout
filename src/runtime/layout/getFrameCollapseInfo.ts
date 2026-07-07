@@ -30,7 +30,8 @@ export function getFrameCollapseInfo(
 ): LayoutChange
 	| KnownError<typeof LAYOUT_ERROR.CANT_COLLAPSE_NOT_DOCKED>
 	| KnownError<typeof LAYOUT_ERROR.REDISTRIBUTE_WOULD_RESULT_IN_INVALID_FRAMES>
-	| KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME> {
+	| KnownError<typeof LAYOUT_ERROR.CANT_RESIZE_SINGLE_FRAME>
+	| KnownError<typeof LAYOUT_ERROR.NO_SPACE_TO_REDISTRIBUTE> {
 	collapseSizeScaled = collapseSizeScaled ?? settings.getCollapseSizeScaled(win)
 	win = walk(win, undefined, { save: true }) as typeof win
 	const frame = win.frames[frameId]
