@@ -146,7 +146,7 @@ actionHandler.shapes = reactive([])
 actionHandler.textHints = reactive({ actions: [], errors: [] })
 const shapes = actionHandler.shapes
 
-const dragContext  = useFrames(
+const moveContext  = useFrames(
 	win,
 	actionHandler
 )
@@ -158,9 +158,9 @@ const {
 	state,
 	movingFrameId,
 	showMoving,
-} = dragContext
+} = moveContext
 
-provide(moveContextInjectionKey, dragContext)
+provide(moveContextInjectionKey, moveContext)
 
 function getWindowOffset() {
 	const windowElRect = windowEl.value!.getBoundingClientRect()
@@ -209,6 +209,7 @@ defineExpose({
 	win,
 	getUpdateWindowSizeInfo,
 	actionHandler: actionHandler as ActionHandler<any, any>,
+	moveContext
 })
 </script>
 
