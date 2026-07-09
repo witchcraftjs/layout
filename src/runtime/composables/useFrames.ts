@@ -12,7 +12,23 @@ import { toWindowCoord } from "../helpers/toWindowCoord.js"
 import { findFramesTouchingEdge } from "../layout/findFramesTouchingEdge.js"
 import { isPointInRect } from "../layout/isPointInRect.js"
 import { MoveDirectionStore } from "../move/MoveDirectionStore.js"
-import type { ActionResolve, Direction, Edge, EdgeMoveStartData, FrameId, FrameMoveStartData, IActionHandler, IntersectionEntry, LayoutFrame, LayoutWindow, MoveState, Orientation, Point } from "../types/index.js"
+import type {
+	ActionResolve,
+	Direction,
+	Edge,
+	EdgeMoveStartData,
+	ExtendedMoveTypes,
+	FrameId,
+	FrameMoveStartData,
+	IActionHandler,
+	IntersectionEntry,
+	LayoutFrame,
+	LayoutWindow,
+	MoveState,
+	Orientation,
+	Point
+} from "../types/index.js"
+
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
@@ -34,7 +50,7 @@ export function useFrames(
 
 	const touchingFramesArrays = computed(() => touchingFrames.value.map(entry => Object.values(entry)))
 
-	const isMoving = ref<false | "frame" | "edge">(false)
+	const isMoving = ref<false | "frame" | "edge" | "other">(false)
 	const showMoving = ref(false)
 	const movePoint = ref<Point | undefined>()
 
@@ -137,11 +153,18 @@ export function useFrames(
 		handler.onMoveEnded()
 	}
 
-	function moveStart<T extends "edge" | "frame">(
+	function moveStart<
+		T extends "edge" | "frame" | "other",
+		TContextType extends keyof ExtendedMoveTypes,
+		TContext extends ExtendedMoveTypes[TContextType],
+		TContextReturn extends TContext extends { resolve: infer R } ? R : never,
+		TContextMoveType extends TContext extends { moveType: infer M } ? M : never,
+		TContextContext extends TContext extends { context: infer C } ? C : never
+	>(
 		e: PointerEvent,
-		type: T,
+		type: TContextMoveType extends never ? T : TContextMoveType,
 		// someday this will work
-		data: T extends "edge" ? EdgeMoveStartData : FrameMoveStartData,
+		data: T extends "edge" ? EdgeMoveStartData : T extends "frame" ? FrameMoveStartData : undefined,
 		{
 			moveEvent = "pointermove",
 			endEvent = "pointerup",
@@ -149,9 +172,11 @@ export function useFrames(
 		}: {
 			moveEvent?: string
 			endEvent?: string
-			context?: Record<string, unknown>
+			context?: { type: TContextType } & TContextContext
 		} = {}
-	): Promise<any> {
+	): TContext extends never
+		? Promise<void>
+		: Promise<TContextReturn> {
 		// if already dragging, abort previous (resetState resolves the old promise)
 		if (controller) {
 			controller.abort()
@@ -174,12 +199,12 @@ export function useFrames(
 		moveDirStore.update(point)
 		eventContext.value = context
 
-		isMoving.value = type
+		isMoving.value = type as any
 		showMoving.value = true
 
 		if (type === "frame") {
 			movingFrameId.value = (data as FrameMoveStartData).frameId
-		} else {
+		} else if (type === "edge") {
 			const { edge, intersection } = data as EdgeMoveStartData
 			movingIntersection.value = intersection
 
@@ -216,7 +241,7 @@ export function useFrames(
 
 		const res = handler.onMoveChange("start", e, state.value, forceRecalculateEdges, cancel, resolve)
 		showMoving.value = res.showMoving ?? true
-		return promise
+		return promise as any
 	}
 
 	function onMove(e: PointerEvent): void {

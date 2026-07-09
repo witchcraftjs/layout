@@ -1,5 +1,6 @@
 import type { EnumLike } from "@alanscodelog/utils"
 import { enumFromArray } from "@alanscodelog/utils/enumFromArray"
+import type { Flatten, OrToAnd } from "@alanscodelog/utils/types"
 import { z } from "zod"
 
 import { KnownError } from "../utils/KnownError.js"
@@ -441,6 +442,22 @@ export type LayoutChange<TInfo = never> = {
 	window?: Partial<LayoutWindow>
 	info?: TInfo
 }
+
+
+// #todo we also need to change how the normal types are extended to this pattern
+export type ExtendedMoveTypes = Flatten<OrToAnd<keyof Register extends `LayoutMove${infer T}`
+	? Register extends Record<`LayoutMove${T}`, infer U>
+		? U extends {
+			type: string
+			context: any
+			resolve: any
+			moveType: "edge" | "frame" | "other"
+		}
+			? Record<U["type"], U>
+			: never
+		: never
+	: never>>
+
 export type MoveState = {
 	/** The current directions in the corresponding orientations that the user is dragging in. */
 	moveDirections: Record<Orientation, Direction | undefined>
@@ -448,8 +465,12 @@ export type MoveState = {
 	movePoint?: Point
 	/** Cumulative pixel distance the user has dragged from the initial click point. 0 on start, increases on each move. */
 	moveDistance: number
-	/** Whether the user is currently dragging and what type of drag. Is truthy string during all drag events. */
-	isMoving: boolean | "frame" | "edge"
+	/**
+	 * Whether the user is currently moving and what type of move. Is truthy string during all move events. The actions decide what they need to set it to as "frame" and "edge" have custom behavior.
+	 *
+	 * Other is for actions that do things other than drag frames/edges which include built in behavior (e.g. frames get a frame dragging indicator at the cursor)
+	 */
+	isMoving: boolean | "frame" | "edge" | "other"
 	/** Whether to show the moved frames while dragging. */
 	showMoving: boolean
 	/** The frame being dragged during a frame drag. Only set when isMoving is "frame". */

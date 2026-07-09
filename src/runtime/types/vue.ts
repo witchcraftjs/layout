@@ -25,7 +25,7 @@ export interface UseFramesContext {
 	cancel: () => void
 	moveDirections: Ref<Record<Orientation, Direction | undefined>>
 	movePoint: Ref<Point | undefined>
-	isMoving: Ref<false | "frame" | "edge">
+	isMoving: Ref<false | "frame" | "edge" | "other">
 	movingEdges: Ref<Edge[]>
 	movingIntersection: Ref<IntersectionEntry | undefined>
 	visualEdges: Ref<Edge[]>
@@ -41,3 +41,4 @@ export interface UseFramesContext {
 }
 
 export const moveContextInjectionKey = Symbol.for("@witchcraft/layout:moveContext") as InjectionKey<UseFramesContext>
+

@@ -79,6 +79,36 @@ declare module "@witchcraft/layout" {
 ```
 Note that `zFrameId` and `zWinId` are different as they also support constants (`zFrameIdConstants` and `zWindowIdConstants`).
 
+#### Extending Move Types
+
+You can also extend the move types. This is usually needed for creating custom actions.
+
+Unlike frame types, this uses a pattern where you can extend as many times as you want so long as the key is prefixed with `LayoutMove` and the type satisfies `{ type: string, context: any, resolve: any, moveType: "edge" | "frame" | "other" }`.
+
+
+```ts
+
+declare module "@witchcraft/layout" {
+	interface Register {
+		LayoutMovePicker: {
+			// used to discriminate the type
+			type: "picker",
+			// any other props to add to the context parameter of moveStart
+			// context ends up typed as { type: "picker", someState: string }
+			context: {
+				someState: string
+			}
+			// promise resolve value, for typing the return value of moveStart
+			resolve: string
+			// for typing the type parameter of moveStart so user picks supported types
+			moveType: "other",
+		}
+	}
+}
+```
+
+`moveStart`'s context parameter will now be type checked as `{someState: string, type: "picker"}` and the return value will be `Promise<string>`.
+
 ## Basics
 
 A layout is very simple, and looks like this:
