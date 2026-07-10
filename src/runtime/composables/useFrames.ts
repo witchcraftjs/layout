@@ -72,9 +72,9 @@ export function useFrames(
 	)
 
 	const moveHoveredFrame = computed(() => {
-		if (isMoving.value) {
+		if (isMoving.value && movePoint.value) {
 			for (const id of keys(frames.value)) {
-				if (isPointInRect(frames.value[id], movePoint.value!)) {
+				if (isPointInRect(frames.value[id], movePoint.value)) {
 					return frames.value[id]
 				}
 			}
