@@ -35,6 +35,7 @@ export default defineNuxtModule<ModuleOptions>({
 		addTemplate({
 			filename: "witchcraft-layout.css",
 			write: true,
+			// keep in sync with demo tailwind.css's relevant section
 			getContents: () => [
 				`@source "${resolve("runtime/components")}";`,
 				// the drag actions handlers and utils they use add some styles

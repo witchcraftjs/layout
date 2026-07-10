@@ -5,6 +5,10 @@
 
 /* Only needed for the dev playground: the demo App.vue lives outside the Vite project root, so Tailwind's auto-scan doesn't find the [&.deco-...] classes it defines. */
 @source "../../../src/runtime/demo";
+/* Only needed for the non-nuxt demo, makes sure classes are added even if .nuxt/witchcraft-layout.css is not generated or is outdated. Keep in sync with nuxt module list. */
+@source "../../../src/runtime/move";
+@source "../../../src/runtime/components";
+@source "../../../src/runtime/utils/createSplitDecoShapes";
 
 button {
 	cursor: pointer;
