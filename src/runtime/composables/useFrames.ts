@@ -161,7 +161,7 @@ export function useFrames(
 		TContextMoveType extends TContext extends { moveType: infer M } ? M : never,
 		TContextContext extends TContext extends { context: infer C } ? C : never
 	>(
-		e: PointerEvent,
+		e: PointerEvent | undefined,
 		type: TContextMoveType extends never ? T : TContextMoveType,
 		// someday this will work
 		data: T extends "edge" ? EdgeMoveStartData : T extends "frame" ? FrameMoveStartData : undefined,
@@ -189,14 +189,16 @@ export function useFrames(
 		controller = new AbortController()
 		controller.signal.addEventListener("abort", () => resetState())
 
-		e.preventDefault()
+		e?.preventDefault()
 		window.addEventListener(moveEvent, onMove as EventListener, { signal: controller.signal })
 		window.addEventListener(endEvent, moveEnd as EventListener, { signal: controller.signal })
 
-		const point = toWindowCoord(win.value, e)
-		movePoint.value = point
-		moveStartPoint = { ...point }
-		moveDirStore.update(point)
+		if (e) {
+			const point = toWindowCoord(win.value, e)
+			movePoint.value = point
+			moveStartPoint = { ...point }
+			moveDirStore.update(point)
+		}
 		eventContext.value = context
 
 		isMoving.value = type as any

@@ -552,7 +552,7 @@ export interface IAction {
 	 */
 	onMoveChange: <T extends "start" | "move" | "end">(
 		type: T,
-		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
+		e: T extends "end" | "start" ? PointerEvent | undefined : PointerEvent,
 		state: MoveState,
 		forceRecalculateEdges: () => void,
 		/** Calls moveEnd with updateEdges: false. This can technically be called from "end", it should still work. */
@@ -665,7 +665,7 @@ export interface IActionHandler {
 	 */
 	onMoveChange<T extends "start" | "move" | "end">(
 		type: T,
-		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
+		e: T extends "end" | "start" ? PointerEvent | undefined : PointerEvent,
 		state: MoveState,
 		forceRecalculateEdges: () => void,
 		/** Calls moveEnd with apply: false. This can technically be called from "end", it should still work. */

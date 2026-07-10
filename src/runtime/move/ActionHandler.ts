@@ -123,7 +123,7 @@ export class ActionHandler<
 
 	onMoveChange<T extends "start" | "move" | "end">(
 		type: T,
-		e: T extends "end" ? PointerEvent | undefined : PointerEvent,
+		e: T extends "end" | "start" ? PointerEvent | undefined : PointerEvent,
 		state: MoveState,
 		forceRecalculateEdges: () => void,
 		cancel: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => void,
