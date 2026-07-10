@@ -155,7 +155,7 @@ export class FrameDragAction implements IAction {
 		_e: PointerEvent | undefined,
 		state: MoveState
 	): ActionChangeResult {
-		if (state.moveDistance <= this.minDragDistance) {
+		if (type === "start" || state.moveDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [], showMoving: false }
 		}
 		const { win, movingFrameId, moveHoveredFrame } = state

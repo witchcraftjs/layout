@@ -179,7 +179,7 @@ export class SplitAction implements IAction {
 		state: MoveState
 	): ActionChangeResult {
 		const { moveHoveredFrame, moveDistance } = state
-		if (moveDistance <= this.minDragDistance) {
+		if (type === "end" || moveDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [], showMoving: false }
 		}
 		let ok = false
@@ -205,7 +205,7 @@ export class SplitAction implements IAction {
 				}
 				this.state.lastReturn = {
 					updateEdges: true,
-					shapes: type === "end" ? [] : [errorDeco],
+					shapes: [errorDeco],
 					showMoving: false
 				}
 				return this.state.lastReturn
@@ -213,7 +213,7 @@ export class SplitAction implements IAction {
 		}
 		this.state.lastReturn = {
 			updateEdges: false,
-			shapes: type === "end" ? [] : decos.flatMap(_ => _.shapes),
+			shapes: decos.flatMap(_ => _.shapes),
 			showMoving: false
 		}
 		return this.state.lastReturn

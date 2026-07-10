@@ -155,7 +155,7 @@ export class CloseAction implements IAction {
 		_e: PointerEvent | undefined,
 		state: MoveState
 	): ActionChangeResult {
-		if (state.moveDistance <= this.minDragDistance) {
+		if (type === "end" || state.moveDistance <= this.minDragDistance) {
 			return { updateEdges: false, shapes: [] }
 		}
 		const {
@@ -207,7 +207,7 @@ export class CloseAction implements IAction {
 		const decos = this._getDecos(state)
 		this.state.lastReturn = {
 			updateEdges: !isMovingFromWindowEdge,
-			shapes: type === "end" ? [] : decos.flatMap(_ => _.shapes)
+			shapes: decos.flatMap(_ => _.shapes)
 		}
 		return this.state.lastReturn
 	}
