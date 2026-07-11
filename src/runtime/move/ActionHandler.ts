@@ -77,12 +77,12 @@ export class ActionHandler<
 	}
 
 	eventHandler(
-		e: KeyboardEvent | PointerEvent,
+		e: KeyboardEvent | PointerEvent | undefined,
 		state: MoveState,
 		forceRecalculateEdges: () => void
 	) {
 		if (state.isMoving) {
-			e.preventDefault()
+			e?.preventDefault()
 		}
 		let cancelled = false
 		this.hooks.onEvent?.(e, () => {
@@ -131,7 +131,7 @@ export class ActionHandler<
 	): MoveChangeResult {
 		if (type === "start") {
 			this.eventCanceller = cancel
-			this.eventHandler(e!, state, forceRecalculateEdges)
+			this.eventHandler(e, state, forceRecalculateEdges)
 		}
 
 		if (this.activeAction) {

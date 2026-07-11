@@ -574,9 +574,11 @@ export interface IAction {
 	 * The user is not necessarily dragging at this point, though they might also change actions mid drag. So it does not necessarily mean the event is allowed.
 	 *
 	 * Here is where you should initiate your state. Don't allow the action by default unless it can always be allowed.
+	 *
+	 * Event might be undefined if it was initiated manually via moveStart without an event.
 	 */
 	canHandleRequest(
-		e: KeyboardEvent | PointerEvent,
+		e: KeyboardEvent | PointerEvent | undefined,
 		state: MoveState,
 		forceRecalculateEdges: () => void
 	): boolean

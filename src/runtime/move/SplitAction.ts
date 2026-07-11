@@ -40,8 +40,8 @@ export class SplitAction implements IAction {
 		transformError: e => e.message
 	}
 
-	handleEvent: (e: PointerEvent | KeyboardEvent, state: MoveState) => boolean
-		= (e: PointerEvent | KeyboardEvent, state: MoveState) => e.altKey || state.isMovingFromWindowEdge
+	handleEvent: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => boolean
+		= (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => e?.altKey || state.isMovingFromWindowEdge
 
 	modifyDecos: (shapes: SplitDeco[]) => void = () => { }
 	hooks: {
@@ -107,7 +107,7 @@ export class SplitAction implements IAction {
 		return decos
 	}
 
-	canHandleRequest(e: PointerEvent | KeyboardEvent, state: MoveState): boolean {
+	canHandleRequest(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): boolean {
 		const { movingEdges } = state
 		if (movingEdges.length !== 1) return false
 		// hint should not be shown when dragging from window edge but we should still handle the event

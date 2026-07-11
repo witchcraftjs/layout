@@ -128,7 +128,6 @@ const actionHandler = props.actionHandler ?? markRaw(new ActionHandler(
 	],
 	{
 		onEvent: (e, cancel) => {
-			showMoving.value = true
 			if (e instanceof KeyboardEvent && e.key === "Escape") {
 				cancel()
 			}
@@ -138,7 +137,6 @@ const actionHandler = props.actionHandler ?? markRaw(new ActionHandler(
 		},
 		onEnd: () => {
 			requestType.value = undefined
-			showMoving.value = true
 		},
 	}
 ))

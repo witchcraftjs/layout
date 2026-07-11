@@ -25,8 +25,8 @@ export class FrameDragAction implements IAction {
 	debug: boolean | string = false
 	textHints: { actions: string[], errors: string[] } = { actions: [], errors: [] }
 
-	handleEvent: (e: PointerEvent | KeyboardEvent, state: MoveState) => boolean
-		= (_e: PointerEvent | KeyboardEvent, state: MoveState) => state.isMoving === "frame"
+	handleEvent: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => boolean
+		= (_e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => state.isMoving === "frame"
 
 	dragHints: {
 		actions: { split?: string, swap?: string, rearrange?: string, dock?: string } | ((state: { type: "split" | "swap" | "rearrange" | "dock" }) => string[])
@@ -139,7 +139,7 @@ export class FrameDragAction implements IAction {
 		return decos
 	}
 
-	canHandleRequest(e: PointerEvent | KeyboardEvent, state: MoveState): boolean {
+	canHandleRequest(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): boolean {
 		const res = this.handleEvent(e, state)
 		this.setTextHints(undefined)
 		if (res) {

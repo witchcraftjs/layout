@@ -40,11 +40,11 @@ export class CloseAction implements IAction {
 		transformError: e => e.message
 	}
 
-	handleEvent: (e: PointerEvent | KeyboardEvent, state: MoveState) => boolean | "force" = (e: PointerEvent | KeyboardEvent) => {
-		if (e.ctrlKey && e.shiftKey) {
+	handleEvent: (e: PointerEvent | KeyboardEvent | undefined, state: MoveState) => boolean | "force" = (e: PointerEvent | KeyboardEvent | undefined) => {
+		if (e?.ctrlKey && e?.shiftKey) {
 			return "force"
 		}
-		if (e.shiftKey) return true
+		if (e?.shiftKey) return true
 		return false
 	}
 
@@ -136,7 +136,7 @@ export class CloseAction implements IAction {
 	}
 
 
-	canHandleRequest(e: PointerEvent | KeyboardEvent, state: MoveState): boolean {
+	canHandleRequest(e: PointerEvent | KeyboardEvent | undefined, state: MoveState): boolean {
 		const { movingEdges } = state
 		if (movingEdges.length !== 1) return false
 		const res = this.handleEvent(e, state)
