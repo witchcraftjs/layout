@@ -28,7 +28,7 @@ import { useAttrs, inject } from "vue"
 import LayoutShapeRect from "./LayoutShapeRect.vue"
 import { type EdgeMoveStartData } from "../types/index.js"
 import { moveContextInjectionKey } from "../types/vue.js"
-import type { Edge, EdgeCss } from "../types/index.js"
+import type { Edge, EdgeCss, UseFramesContext } from "../types/index.js"
 
 const $attrs = useAttrs()
 
@@ -39,7 +39,7 @@ defineOptions({
 const props = defineProps<{
 	edge: Edge
 	css: EdgeCss
-	onPointerDown?: (e: PointerEvent, type: "edge", data: EdgeMoveStartData) => void
+	onPointerDown?: UseFramesContext["moveStart"]
 }>()
 
 const ctx = inject(layoutContextInjectionKey, undefined)

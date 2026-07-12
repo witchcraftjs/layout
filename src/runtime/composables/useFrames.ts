@@ -26,14 +26,15 @@ import type {
 	LayoutWindow,
 	MoveState,
 	Orientation,
-	Point
+	Point,
+	UseFramesContext
 } from "../types/index.js"
 
 
 export function useFrames(
 	win: Ref<LayoutWindow>,
 	handler: IActionHandler
-) {
+): UseFramesContext {
 	const movingEdges = ref<Edge[]>([])
 
 	// each entry corresponds to the frames touching the corresponding dragging edge
@@ -153,16 +154,19 @@ export function useFrames(
 		handler.onMoveEnded()
 	}
 
+
 	function moveStart<
 		T extends "edge" | "frame" | "other",
 		TContextType extends keyof ExtendedMoveTypes,
 		TContext extends ExtendedMoveTypes[TContextType],
 		TContextReturn extends TContext extends { resolve: infer R } ? R : never,
 		TContextMoveType extends TContext extends { moveType: infer M } ? M : never,
-		TContextContext extends TContext extends { context: infer C } ? C : never
+		TContextContext extends TContext extends { context: infer C } ? C : never,
+		// cursed https://github.com/microsoft/TypeScript/issues/23182
+		TType extends [TContextMoveType] extends [never] ? T : TContextMoveType
 	>(
 		e: PointerEvent | undefined,
-		type: TContextMoveType extends never ? T : TContextMoveType,
+		type: TType,
 		// someday this will work
 		data: T extends "edge" ? EdgeMoveStartData : T extends "frame" ? FrameMoveStartData : undefined,
 		{

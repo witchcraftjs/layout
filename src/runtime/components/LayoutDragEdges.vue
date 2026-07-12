@@ -19,7 +19,7 @@
 		edge: visualEdges[i],
 	}">
 		<LayoutDragEdgeVisible
-				:edge="visualEdges[i]"
+			:edge="visualEdges[i]"
 			:css="css.visible"
 		/>
 	</slot>
