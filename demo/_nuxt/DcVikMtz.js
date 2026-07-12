@@ -1,0 +1,1 @@
+import{Y as e,I as s,i as n,b8 as t}from"./DqUrqeTS.js";const a={name:"WDevOnly"},l=Object.assign(a,{props:{show:{type:Boolean,required:!1,default:!1}},setup(o){return e(),s(t,n(!1)),(r,_)=>null}}),f=Object.assign(l,{__name:"WDevOnly"});export{f as default};
