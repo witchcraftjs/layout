@@ -157,13 +157,13 @@ export function useFrames(
 
 	function moveStart<
 		T extends "edge" | "frame" | "other",
-		TContextType extends keyof ExtendedMoveTypes,
-		TContext extends ExtendedMoveTypes[TContextType],
-		TContextReturn extends TContext extends { resolve: infer R } ? R : never,
-		TContextMoveType extends TContext extends { moveType: infer M } ? M : never,
-		TContextContext extends TContext extends { context: infer C } ? C : never,
+		TContextType extends keyof ExtendedMoveTypes = keyof ExtendedMoveTypes,
+		TContext extends ExtendedMoveTypes[TContextType] = ExtendedMoveTypes[TContextType],
+		TContextReturn extends TContext extends { resolve: infer R } ? R : never = TContext extends { resolve: infer R } ? R : never,
+		TContextMoveType extends TContext extends { moveType: infer M } ? M : never = TContext extends { moveType: infer M } ? M : never,
+		TContextContext extends TContext extends { context: infer C } ? C : never = TContext extends { context: infer C } ? C : never,
 		// cursed https://github.com/microsoft/TypeScript/issues/23182
-		TType extends [TContextMoveType] extends [never] ? T : TContextMoveType
+		TType extends [TContextMoveType] extends [never] ? T : TContextMoveType = [TContextMoveType] extends [never] ? T : TContextMoveType
 	>(
 		e: PointerEvent | undefined,
 		type: TType,
@@ -176,7 +176,7 @@ export function useFrames(
 		}: {
 			moveEvent?: string
 			endEvent?: string
-			context?: { type: TContextType } & TContextContext
+			context?: TContextContext
 		} = {}
 	): TContext extends never
 		? Promise<void>
@@ -203,7 +203,7 @@ export function useFrames(
 			moveStartPoint = { ...point }
 			moveDirStore.update(point)
 		}
-		eventContext.value = context
+		eventContext.value = context as any
 
 		isMoving.value = type as any
 		showMoving.value = true
