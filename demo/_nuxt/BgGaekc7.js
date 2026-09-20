@@ -1,0 +1,1 @@
+import{Pt as e}from"./Car86Ubo.js";function t(t){return t.id??e()}export{t};

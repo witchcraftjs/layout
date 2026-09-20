@@ -1,0 +1,1 @@
+import{g as e,vn as t}from"./Car86Ubo.js";import{t as n}from"./Td7TBy3i.js";function r(r){let i=n({locale:t(`en`)});return e(()=>r?.value||i.locale?.value||`en`)}export{r as t};

@@ -1,0 +1,1 @@
+import{J as e,Nt as t,g as n,vn as r}from"./Car86Ubo.js";import{a as i}from"./Jmiqf8oI.js";var a=Object.assign(Object.assign({name:`WDevOnly`},{props:{show:{type:Boolean,required:!1,default:!1}},setup(a){t();let o=a,s=e(i,r(!1));return n(()=>o.show||s.value),(e,t)=>null}}),{__name:`WDevOnly`});export{a as default};

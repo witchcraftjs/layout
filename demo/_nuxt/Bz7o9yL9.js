@@ -1,0 +1,20 @@
+import{$n as e,D as t,E as n,Ht as r,Nt as i,On as a,b as o,bt as s,ct as c,et as l,g as u,it as d,mt as f,o as p,qt as m,tr as h,v as g,vn as _,y as v,z as y}from"./Car86Ubo.js";import{n as b}from"./BuJ-z5Um.js";import{C as x,D as S,E as C,S as w,T,w as E}from"#entry";import{t as D}from"./JCXPeO0D.js";import{t as O}from"./C-qUXxC5.js";import{n as k,r as A}from"./Ca7viAGz.js";import{n as j}from"./DyxNur3h.js";function M(e,t){return e.timeout===void 0?0:100-(e.isPaused?e._timer.elapsedBeforePause:e._timer.elapsedBeforePause+(t-e.startTime))/e.timeout*100}function N(e,{refreshInterval:t=50}={}){let n=_(void 0),i;function a(r=e.value){if(r===!0||Array.isArray(r)&&r.length>0){if(i!==void 0)return;n.value=Date.now(),i=setInterval(()=>{requestAnimationFrame(()=>{n.value=Date.now()})},t)}else{if(i===void 0)return;clearInterval(i),i=void 0}}return r(e,e=>{a(e)}),a(),{time:n,refresh:a}}var P=Object.assign({name:`WNotifications`,inheritAttrs:!1},{__name:`WNotifications`,props:{handler:{type:Object,required:!1},progressUpdateInterval:{type:Number,required:!1}},setup(r){let _=i(),P=r,F=P.handler??O(),I=u(()=>F.queue.filter(e=>e.requiresAction).reverse()),L=u(()=>F.queue.filter(e=>!e.requiresAction)),{time:R}=N(u(()=>L.value.filter(e=>e.timeout!==void 0&&!e.isPaused).length>0),{refreshInterval:P.progressUpdateInterval});function z(e){let t=e.target.closest(`.notification`)?.dataset.id,n=t?Number.parseInt(t,10):null;if(n!==null){let e=F.queue.find(e=>e.id===n);e&&e.timeout&&!e.isPaused&&F.pause(e)}else F.queue.forEach(e=>{e.timeout&&e.isPaused&&F.resume(e)})}return c(()=>{window.addEventListener(`pointerdown`,z)}),d(()=>{window.removeEventListener(`pointerdown`,z)}),(r,i)=>(f(),o(p,null,[t(b,l({name:`list`,tag:`div`,class:a(D)(`
+		notifications
+		[--_notification-width:calc(100dvw-var(--spacing)*4)]
+		[--notification-width:calc(100dvw-var(--spacing)*4)]
+		sm:[--notification-width:300px]
+		fixed
+		top-0
+		z-50
+		right-[calc(var(--notification-width,var(--_notification-width))*-1)]
+		w-[calc(var(--spacing)*2+var(--notification-width,var(--_notification-width))*2)]
+		max-h-[100dvh]
+		flex
+		flex-col
+		gap-1
+		list-none
+		outline-none
+		overflow-y-auto
+		overflow-x-clip
+		scrollbar-hidden
+	`,a(_).class)},{...a(_),class:void 0}),{default:m(()=>[(f(!0),o(p,null,s(L.value,e=>(f(),g(k,{handler:a(F),tabindex:`0`,notification:e,class:`overflow-hidden my-2 max-h-[300px] w-[var(--notification-width,var(--_notification-width))] shrink-0 max-sm:[&_.notification--button]:p-2 max-sm:[&_.notification--button]:py-1 max-sm:[&_.notification--header]:text-lg`,key:e.id},{top:m(()=>[e.timeout===void 0?v(``,!0):(f(),g(j,{key:0,class:`w-full h-1 before:duration-[10ms] -mt-1 -mx-[calc(var(--spacing)*2+2px)] rounded-none`,progress:a(M)(e,a(R))},null,8,[`progress`]))]),_:2},1032,[`handler`,`notification`]))),128))]),_:1},16,[`class`]),t(a(x),{open:I.value.length>0&&I.value[0]!==void 0,"onUpdate:open":i[1]||=e=>I.value[0]&&a(A).dismiss(I.value[0])},{default:m(()=>[t(a(E),{to:`#root`},{default:m(()=>[t(a(T),{class:`fixed inset-0 z-90 bg-neutral-950/20 data-[state=open]:animate-overlayShow`}),t(a(S),{class:`data-[state=open]:animate-contentShow max-sm:data-[state=open]:animate-slideInUp fixed flex justify-center top-1/2 left-1/2 w-full sm:translate-x-[-50%] sm:translate-y-[-50%] p-2 max-sm:bottom-0 max-sm:top-[unset] max-sm:left-0 z-100`,onInteractOutside:i[0]||=e=>I.value[0]&&a(A).dismiss(I.value[0])},{default:m(()=>[t(k,{class:`w-full sm:max-w-[700px] max-h-[80dvh] top-notification text-md gap-2 p-2 [&_.notification--button]:p-2 [&_.notification--button]:py-1 [&_.notification--header]:text-lg [&_.notification--message]:py-3`,handler:a(F),notification:I.value[0],ref:`topNotificationComp`},{title:m(r=>[t(a(w),e(y(r)),{default:m(()=>[n(h(r.title),1)]),_:2},1040)]),message:m(r=>[t(a(C),e(y(r)),{default:m(()=>[n(h(r.message),1)]),_:2},1040)]),_:1},8,[`handler`,`notification`])]),_:1})]),_:1})]),_:1},8,[`open`])],64))}});export{P as default};

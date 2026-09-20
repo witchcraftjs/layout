@@ -1,0 +1,1 @@
+import{C as e}from"./bvfhAA2m.js";function t(e){return e==null}var[n,r]=e(`ConfigProvider`);export{t as n,n as t};

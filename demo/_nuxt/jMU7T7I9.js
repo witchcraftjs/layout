@@ -1,0 +1,1 @@
+import{ct as e,rt as t}from"./Car86Ubo.js";function n(n,r,i=e=>e){let a=``;t(()=>{let e=document.getElementById(n);e?.value&&(a=e.value)}),e(()=>{a&&(r.value=i(a))})}export{n as t};
