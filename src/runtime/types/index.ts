@@ -445,18 +445,21 @@ export type LayoutChange<TInfo = never> = {
 
 
 // #todo we also need to change how the normal types are extended to this pattern
-export type ExtendedMoveTypes = Flatten<OrToAnd<keyof Register extends `LayoutMove${infer T}`
-	? Register extends Record<`LayoutMove${T}`, infer U>
-		? U extends {
-			type: string
-			context: any
-			resolve: any
-			moveType: "edge" | "frame" | "other"
-		}
-			? Record<U["type"], U>
+export type ExtendedMoveTypes = Flatten<OrToAnd<
+	{
+		[K in keyof Register]: K extends `LayoutMove${string}`
+			? Register[K] extends {
+				type: string
+				context: any
+				resolve: any
+				moveType: "edge" | "frame" | "other"
+			}
+				? Record<Register[K]["type"], Register[K]>
+				: never
 			: never
-		: never
-	: never>>
+	}[keyof Register]
+>>
+
 
 export type MoveState = {
 	/** The current directions in the corresponding orientations that the user is dragging in. */
